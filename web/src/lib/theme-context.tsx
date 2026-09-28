@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 type Theme = "dark" | "light";
 
@@ -17,21 +18,11 @@ const ThemeContext = createContext<ThemeContextType>({
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("light");
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    // Check local storage or default to clean light mode
-    const savedTheme = localStorage.getItem("agentic_theme") as Theme | null;
-    if (savedTheme === "dark" || savedTheme === "light") {
-      setThemeState(savedTheme);
-      applyTheme(savedTheme);
-    } else {
-      setThemeState("light");
-      applyTheme("light");
-    }
-    setMounted(true);
-  }, []);
+  const pathname = usePathname();
+  // Landing page ('/') is always light. Lesson workspace ('/learn' and sub-routes) is dark.
+  const isLearnRoute = pathname?.startsWith("/learn");
+  const defaultTheme: Theme = isLearnRoute ? "dark" : "light";
+  const [theme, setThemeState] = useState<Theme>(defaultTheme);
 
   const applyTheme = (t: Theme) => {
     const root = document.documentElement;
@@ -46,9 +37,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  useEffect(() => {
+    const targetTheme: Theme = pathname?.startsWith("/learn") ? "dark" : "light";
+    setThemeState(targetTheme);
+    applyTheme(targetTheme);
+  }, [pathname]);
+
   const setTheme = (t: Theme) => {
     setThemeState(t);
-    localStorage.setItem("agentic_theme", t);
     applyTheme(t);
   };
 

@@ -41,24 +41,24 @@ export default function LearnSidebar({
   const sidebarContent = (isMobile: boolean) => (
     <div className="flex flex-col h-full overflow-hidden">
       {/* Top back link & course title */}
-      <div className="p-4 border-b border-slate-800/80 flex items-center justify-between shrink-0">
+      <div className="p-4 border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between shrink-0">
         <Link
           href="/#curriculum"
           onClick={() => isMobile && setMobileDrawerOpen(false)}
-          className="text-xs font-mono text-slate-400 hover:text-white flex items-center gap-1.5 transition"
+          className="text-xs font-mono text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1.5 transition"
         >
           <ChevronLeft className="w-4 h-4" />
           <span>Curriculum Hub</span>
         </Link>
 
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-mono text-teal-400 px-2 py-0.5 rounded bg-teal-500/10 border border-teal-500/20">
+          <span className="text-[11px] font-mono text-teal-700 dark:text-teal-400 px-2 py-0.5 rounded bg-teal-50 dark:bg-teal-500/10 border border-teal-300 dark:border-teal-500/20 font-semibold">
             59 Modules
           </span>
           {isMobile && (
             <button
               onClick={() => setMobileDrawerOpen(false)}
-              className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+              className="p-1 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
               aria-label="Close curriculum drawer"
             >
               <X className="w-5 h-5" />
@@ -78,39 +78,39 @@ export default function LearnSidebar({
           return (
             <div
               key={lvl.id}
-              className="rounded-xl border border-slate-850 bg-slate-900/40 overflow-hidden"
+              className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/40 overflow-hidden shadow-xs"
             >
               {/* Level Accordion Header */}
               <button
                 onClick={() =>
                   setActiveLevelAccordion(isOpen ? "" : lvl.id)
                 }
-                className="w-full p-3 flex items-center justify-between text-left hover:bg-slate-850/60 transition"
+                className="w-full p-3 flex items-center justify-between text-left hover:bg-slate-50 dark:hover:bg-slate-800/60 transition"
               >
                 <div className="flex items-center gap-2.5">
                   <span
                     className={`w-2 h-2 rounded-full ${
                       lvl.levelNumber === 1
-                        ? "bg-emerald-400"
+                        ? "bg-emerald-500"
                         : lvl.levelNumber === 2
-                        ? "bg-sky-400"
+                        ? "bg-sky-500"
                         : lvl.levelNumber === 3
-                        ? "bg-violet-400"
-                        : "bg-amber-400"
+                        ? "bg-violet-500"
+                        : "bg-amber-500"
                     }`}
                   />
                   <div>
-                    <span className="text-xs font-bold text-white block">
+                    <span className="text-xs font-bold text-slate-900 dark:text-white block">
                       Level {lvl.levelNumber}: {lvl.subtitle}
                     </span>
-                    <span className="text-[10px] font-mono text-slate-500">
+                    <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
                       {levelCompletedCount}/{lvl.modulesCount} completed
                     </span>
                   </div>
                 </div>
 
                 <ChevronDown
-                  className={`w-4 h-4 text-slate-400 transition-transform ${
+                  className={`w-4 h-4 text-slate-400 dark:text-slate-500 transition-transform ${
                     isOpen ? "rotate-180" : ""
                   }`}
                 />
@@ -118,7 +118,7 @@ export default function LearnSidebar({
 
               {/* Modules list under this level */}
               {isOpen && (
-                <div className="p-1 space-y-0.5 border-t border-slate-850/80 bg-slate-950/60">
+                <div className="p-1 space-y-0.5 border-t border-slate-200 dark:border-slate-800/80 bg-slate-50/70 dark:bg-slate-950/60">
                   {lvl.modules.map((mod) => {
                     const isCurrent = mod.id === currentModuleId;
                     const done = isCompleted(mod.id);
@@ -130,8 +130,8 @@ export default function LearnSidebar({
                         onClick={() => isMobile && setMobileDrawerOpen(false)}
                         className={`flex items-center justify-between px-2.5 py-2 rounded-lg text-xs transition ${
                           isCurrent
-                            ? "bg-teal-500/15 text-teal-300 font-semibold border border-teal-500/30"
-                            : "text-slate-300 hover:bg-slate-800/60 hover:text-white"
+                            ? "bg-teal-50 dark:bg-teal-500/15 text-teal-800 dark:text-teal-300 font-semibold border border-teal-300 dark:border-teal-500/30"
+                            : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white"
                         }`}
                       >
                         <div className="flex items-center gap-2 truncate pr-2">
@@ -141,22 +141,22 @@ export default function LearnSidebar({
                               e.stopPropagation();
                               toggleComplete(mod.id);
                             }}
-                            className="shrink-0 text-slate-500 hover:text-emerald-400 p-0.5"
+                            className="shrink-0 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 p-0.5"
                             title={done ? "Mark Incomplete" : "Mark Complete"}
                           >
                             {done ? (
-                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                             ) : (
                               <Circle className="w-3.5 h-3.5" />
                             )}
                           </button>
-                          <span className="font-mono text-[11px] text-slate-500 shrink-0">
+                          <span className="font-mono text-[11px] text-slate-500 dark:text-slate-400 shrink-0">
                             {mod.number}
                           </span>
                           <span className="truncate">{mod.title}</span>
                         </div>
 
-                        <span className="text-[10px] font-mono text-slate-600 shrink-0">
+                        <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500 shrink-0">
                           {mod.estimatedMinutes}m
                         </span>
                       </Link>
@@ -174,26 +174,26 @@ export default function LearnSidebar({
   return (
     <>
       {/* ── 1. Desktop Persistent Sidebar (>= lg) ── */}
-      <aside className="hidden lg:flex w-80 shrink-0 border-r border-slate-800/80 bg-slate-950/95 flex-col h-[calc(100vh-4rem)] sticky top-16 overflow-hidden">
+      <aside className="hidden lg:flex w-80 shrink-0 border-r border-slate-200 dark:border-slate-800/80 bg-white/95 dark:bg-slate-950/95 flex-col h-[calc(100vh-4rem)] sticky top-16 overflow-hidden">
         {sidebarContent(false)}
       </aside>
 
       {/* ── 2. Mobile/Tablet Navigation Bar (< lg) ── */}
-      <div className="lg:hidden w-full sticky top-16 z-40 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80 px-4 py-2.5 flex items-center justify-between gap-3 shadow-md">
+      <div className="lg:hidden w-full sticky top-16 z-40 bg-white/90 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 px-4 py-2.5 flex items-center justify-between gap-3 shadow-xs">
         <button
           onClick={() => setMobileDrawerOpen(true)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-xs font-mono text-slate-200 transition active:scale-95"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-xs font-mono text-slate-700 dark:text-slate-200 transition active:scale-95"
         >
-          <BookOpen className="w-3.5 h-3.5 text-teal-400" />
+          <BookOpen className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
           <span>Curriculum (59)</span>
           <ChevronDown className="w-3 h-3 text-slate-400" />
         </button>
 
         <div className="flex items-center gap-2 truncate text-right">
-          <span className="text-xs font-mono font-bold text-teal-400 shrink-0">
+          <span className="text-xs font-mono font-bold text-teal-700 dark:text-teal-400 shrink-0">
             Mod {currentModule?.number}
           </span>
-          <span className="text-xs text-slate-400 truncate max-w-[140px] sm:max-w-[240px]">
+          <span className="text-xs text-slate-600 dark:text-slate-400 truncate max-w-[140px] sm:max-w-[240px]">
             {currentModule?.title}
           </span>
         </div>
@@ -204,12 +204,12 @@ export default function LearnSidebar({
         <div className="lg:hidden fixed inset-0 z-50 flex">
           {/* Backdrop blur overlay */}
           <div
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm transition-opacity"
             onClick={() => setMobileDrawerOpen(false)}
           />
 
           {/* Drawer Panel */}
-          <div className="relative w-full max-w-xs sm:max-w-sm bg-slate-950 border-r border-slate-850 h-full flex flex-col z-10 shadow-2xl">
+          <div className="relative w-full max-w-xs sm:max-w-sm bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-slate-800 h-full flex flex-col z-10 shadow-2xl">
             {sidebarContent(true)}
           </div>
         </div>

@@ -65,7 +65,7 @@ export default async function ModulePage({
   return (
     <div className="min-h-screen flex flex-col bg-[var(--background)] transition-colors duration-200">
       <Header />
-      <div className="flex-1 flex flex-col lg:flex-row max-w-7xl w-full mx-auto">
+      <div className="learn-workspace flex-1 flex flex-col lg:flex-row max-w-7xl w-full mx-auto">
         <LearnSidebar currentModuleId={mod.id} currentLevelId={lvl.id} />
         <main className="flex-1 min-w-0 p-3 sm:p-6 md:p-10 overflow-y-auto">
           <ModuleReaderView

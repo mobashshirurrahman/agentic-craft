@@ -164,13 +164,13 @@ export default function Module1_1Quiz() {
   const score = calculateScore();
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-950 p-6 md:p-8 space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-850">
+    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 md:p-8 space-y-6 shadow-xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-200 dark:border-slate-850">
         <div>
-          <span className="text-xs font-mono font-bold uppercase tracking-wider text-teal-400">
+          <span className="text-xs font-mono font-bold uppercase tracking-wider text-teal-700 dark:text-teal-400">
             Interactive Concept Check
           </span>
-          <h3 className="text-xl font-bold text-white mt-1">
+          <h3 className="text-xl font-bold text-slate-900 dark:text-white mt-1">
             Test Your Understanding
           </h3>
         </div>
@@ -180,15 +180,15 @@ export default function Module1_1Quiz() {
             <span
               className={`font-mono text-xs font-bold px-3 py-1 rounded-full border ${
                 score === QUESTIONS.length
-                  ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
-                  : "bg-amber-500/20 text-amber-300 border-amber-500/40"
+                  ? "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/40"
+                  : "bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-500/40"
               }`}
             >
               Score: {score}/{QUESTIONS.length}
             </span>
             <button
               onClick={handleReset}
-              className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition"
+              className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition"
               title="Retake Quiz"
             >
               <RefreshCw className="w-4 h-4" />
@@ -208,14 +208,14 @@ export default function Module1_1Quiz() {
           return (
             <div
               key={q.id}
-              className="p-4 rounded-xl bg-slate-900/40 border border-slate-855 space-y-3"
+              className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-855 space-y-3"
             >
               <div className="flex items-center justify-between text-xs font-mono text-slate-500">
                 <span>Question {idx + 1} of {QUESTIONS.length}</span>
-                <span className="text-slate-400">{q.category}</span>
+                <span className="text-slate-600 dark:text-slate-400">{q.category}</span>
               </div>
 
-              <h4 className="text-sm md:text-base font-semibold text-white">
+              <h4 className="text-sm md:text-base font-semibold text-slate-900 dark:text-white">
                 {q.question}
               </h4>
 
@@ -224,19 +224,19 @@ export default function Module1_1Quiz() {
                 {q.options.map((opt) => {
                   const isSelected = userAnswer === opt.label;
                   let optionClass =
-                    "bg-slate-950 border-slate-800 text-slate-300 hover:bg-slate-900 hover:border-slate-700";
+                    "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100/60 dark:hover:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700";
 
                   if (showResults) {
                     if (opt.isCorrect) {
                       optionClass =
-                        "bg-emerald-500/15 border-emerald-500/50 text-emerald-200 font-medium";
+                        "bg-emerald-50 dark:bg-emerald-500/15 border-emerald-500 text-emerald-950 dark:text-emerald-200 font-medium";
                     } else if (isSelected && !opt.isCorrect) {
                       optionClass =
-                        "bg-red-500/15 border-red-500/50 text-red-300";
+                        "bg-red-50 dark:bg-red-500/15 border-red-500 text-red-950 dark:text-red-300";
                     }
                   } else if (isSelected) {
                     optionClass =
-                      "bg-teal-500/20 border-teal-500/50 text-teal-200 font-medium";
+                      "bg-teal-50 dark:bg-teal-500/20 border-teal-500 text-teal-950 dark:text-teal-200 font-medium";
                   }
 
                   return (
@@ -246,7 +246,7 @@ export default function Module1_1Quiz() {
                       onClick={() => handleSelect(q.id, opt.label)}
                       className={`w-full text-left p-3 rounded-xl border text-xs md:text-sm flex items-start gap-3 transition-all ${optionClass}`}
                     >
-                      <span className="w-5 h-5 rounded-md bg-slate-900 border border-slate-800 flex items-center justify-center font-mono text-xs shrink-0 font-bold">
+                      <span className="w-5 h-5 rounded-md bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center font-mono text-xs shrink-0 font-bold text-slate-700 dark:text-slate-300">
                         {opt.label}
                       </span>
                       <span className="leading-snug">{opt.text}</span>
@@ -260,8 +260,8 @@ export default function Module1_1Quiz() {
                 <div
                   className={`p-3 rounded-xl border text-xs leading-relaxed mt-2 ${
                     isCorrect
-                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-200"
-                      : "bg-amber-500/10 border-amber-500/30 text-amber-200"
+                      ? "bg-emerald-50 dark:bg-emerald-500/10 border-emerald-300 dark:border-emerald-500/30 text-emerald-900 dark:text-emerald-200"
+                      : "bg-amber-50 dark:bg-amber-500/10 border-amber-300 dark:border-amber-500/30 text-amber-900 dark:text-amber-200"
                   }`}
                 >
                   <strong className="block font-mono uppercase text-[11px] mb-1">
@@ -283,8 +283,8 @@ export default function Module1_1Quiz() {
             onClick={handleCheckAnswers}
             className={`w-full py-3 rounded-xl font-bold text-sm tracking-wide transition flex items-center justify-center gap-2 ${
               isAllAnswered
-                ? "bg-gradient-to-r from-teal-500 to-emerald-500 text-slate-950 hover:from-teal-400 hover:to-emerald-400 shadow-lg shadow-teal-500/20 cursor-pointer"
-                : "bg-slate-800 text-slate-500 cursor-not-allowed"
+                ? "bg-teal-600 hover:bg-teal-500 text-white shadow-md shadow-teal-600/20 cursor-pointer"
+                : "bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed"
             }`}
           >
             <Sparkles className="w-4 h-4" />

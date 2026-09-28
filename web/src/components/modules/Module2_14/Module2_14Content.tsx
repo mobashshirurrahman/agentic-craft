@@ -42,26 +42,26 @@ export default function Module2_14Content() {
           1. Why Raw String Interpolation Fails
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="p-4 rounded-xl border border-red-200 dark:border-red-900/40 bg-red-50/50 dark:bg-red-950/20 space-y-2">
+          <div className="p-4 rounded-xl border border-red-200 dark:border-red-900/40 bg-red-50/60 dark:bg-red-950/20 space-y-2">
             <span className="text-xs font-mono font-bold text-red-700 dark:text-red-400 uppercase flex items-center gap-1.5">
               ⚠️ The Fragile Anti-Pattern (Raw f-strings)
             </span>
-            <p className="text-xs text-slate-600 dark:text-slate-400">
+            <p className="text-xs text-slate-700 dark:text-slate-400 leading-relaxed">
               Embedding user input directly inside f-strings collapses roles into one blob, breaks on unescaped brackets or quotes, and prevents testing prompts without executing code.
             </p>
-            <div className="p-2.5 rounded bg-slate-900 text-red-300 font-mono text-[11px] overflow-x-auto">
+            <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800 text-rose-300 font-mono text-[11px] overflow-x-auto shadow-inner">
               {'prompt = f"System: {role}\\nUser: {query}"'}
             </div>
           </div>
 
-          <div className="p-4 rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/50 dark:bg-emerald-950/20 space-y-2">
+          <div className="p-4 rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/60 dark:bg-emerald-950/20 space-y-2">
             <span className="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-400 uppercase flex items-center gap-1.5">
               ✅ Production Pattern (ChatPromptTemplate)
             </span>
-            <p className="text-xs text-slate-600 dark:text-slate-400">
+            <p className="text-xs text-slate-700 dark:text-slate-400 leading-relaxed">
               Encapsulates role boundaries (System, Human, AI), escapes input variables safely, accepts dynamic history streams, and allows runtime partial variable binding.
             </p>
-            <div className="p-2.5 rounded bg-slate-900 text-emerald-300 font-mono text-[11px] overflow-x-auto">
+            <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800 text-emerald-300 font-mono text-[11px] overflow-x-auto shadow-inner">
               template = ChatPromptTemplate.from_messages(...)
             </div>
           </div>

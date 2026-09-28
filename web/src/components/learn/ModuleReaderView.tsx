@@ -171,22 +171,22 @@ export default function ModuleReaderView({
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-16">
       {/* Breadcrumb Navigation */}
-      <nav className="flex items-center gap-2 text-xs font-mono text-slate-400 overflow-x-auto whitespace-nowrap pb-1 scrollbar-none">
-        <Link href="/" className="hover:text-slate-200 transition shrink-0">
+      <nav className="flex items-center gap-2 text-xs font-mono text-slate-500 dark:text-slate-400 overflow-x-auto whitespace-nowrap pb-1 scrollbar-none">
+        <Link href="/" className="hover:text-slate-900 dark:hover:text-slate-200 transition shrink-0">
           Home
         </Link>
         <span className="shrink-0">/</span>
-        <Link href="/#curriculum" className="hover:text-slate-200 transition shrink-0">
+        <Link href="/#curriculum" className="hover:text-slate-900 dark:hover:text-slate-200 transition shrink-0">
           Curriculum
         </Link>
         <span className="shrink-0">/</span>
-        <span className="text-slate-300 shrink-0">Level {level.levelNumber}</span>
+        <span className="text-slate-700 dark:text-slate-300 shrink-0">Level {level.levelNumber}</span>
         <span className="shrink-0">/</span>
-        <span className="text-teal-400 font-semibold shrink-0">Module {module.number}</span>
+        <span className="text-teal-700 dark:text-teal-400 font-bold shrink-0">Module {module.number}</span>
       </nav>
 
       {/* Module Title Header Card */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4 sm:p-6 md:p-8 backdrop-blur-xl relative overflow-hidden">
+      <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4 sm:p-6 md:p-8 backdrop-blur-xl relative overflow-hidden shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <div className="flex items-center gap-2">
             <span
@@ -194,7 +194,7 @@ export default function ModuleReaderView({
             >
               Level {level.levelNumber}: {level.subtitle}
             </span>
-            <span className="text-xs font-mono text-slate-400">
+            <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
               Module {module.number}
             </span>
           </div>
@@ -205,8 +205,8 @@ export default function ModuleReaderView({
               onClick={() => toggleBookmark(module.id)}
               className={`p-2 rounded-xl border transition flex items-center gap-1.5 text-xs font-mono ${
                 bookmarked
-                  ? "bg-amber-500/20 border-amber-500/40 text-amber-300"
-                  : "bg-slate-950 border-slate-800 text-slate-400 hover:text-white"
+                  ? "bg-amber-500/20 border-amber-500/40 text-amber-700 dark:text-amber-300"
+                  : "bg-slate-100 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-900"
               }`}
             >
               <Bookmark className="w-3.5 h-3.5 fill-current" />
@@ -217,8 +217,8 @@ export default function ModuleReaderView({
               onClick={handleCompleteClick}
               className={`px-3 py-2 rounded-xl border transition flex items-center gap-1.5 text-xs font-mono font-bold ${
                 completed
-                  ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-300"
-                  : "bg-teal-500/10 border-teal-500/30 text-teal-300 hover:bg-teal-500/20"
+                  ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-700 dark:text-emerald-300"
+                  : "bg-teal-50 dark:bg-teal-500/10 border-teal-300 dark:border-teal-500/30 text-teal-800 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-500/20"
               }`}
             >
               {completed ? (
@@ -236,36 +236,37 @@ export default function ModuleReaderView({
           </div>
         </div>
 
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
           {module.title}
         </h1>
 
-        <p className="text-sm md:text-base text-slate-300 mt-3 leading-relaxed">
+        <p className="text-sm md:text-base text-slate-600 dark:text-slate-300 mt-3 leading-relaxed">
           {module.summary}
         </p>
 
         {/* Metadata Strip */}
-        <div className="flex flex-wrap items-center gap-4 mt-6 pt-5 border-t border-slate-800/80 text-xs font-mono text-slate-400">
-          <div className="flex items-center gap-1.5 text-teal-400">
+        <div className="flex flex-wrap items-center gap-4 mt-6 pt-5 border-t border-slate-200 dark:border-slate-800/80 text-xs font-mono text-slate-500 dark:text-slate-400">
+          <div className="flex items-center gap-1.5 text-teal-700 dark:text-teal-400">
             <Layers className="w-4 h-4" />
             <span>
-              Level {level.levelNumber} • <strong className="text-slate-200">{level.subtitle}</strong>
+              Level {level.levelNumber} • <strong className="text-slate-800 dark:text-slate-200">{level.subtitle}</strong>
             </span>
           </div>
 
           <div className="flex items-center gap-1.5">
-            <Clock className="w-4 h-4 text-slate-500" />
+            <Clock className="w-4 h-4 text-slate-400 dark:text-slate-500" />
             <span>Est. ~{module.estimatedMinutes} mins</span>
           </div>
 
           <div className="flex items-center gap-1.5">
-            <FileText className="w-4 h-4 text-slate-500" />
+            <FileText className="w-4 h-4 text-slate-400 dark:text-slate-500" />
             <span>{module.keyTopics.length || 5} Key Topics</span>
           </div>
         </div>
       </div>
 
       {/* Render Module Content if Generated, else Syllabus Outline */}
+      <div className="lesson-content-body pt-2 space-y-10">
       {isModule1_1 ? (
         <Module1_1Content />
       ) : isModule1_2 ? (
@@ -387,39 +388,39 @@ export default function ModuleReaderView({
       ) : (
         <>
           {/* Module Ready / Next Instruction Callout */}
-          <div className="rounded-2xl border border-teal-500/30 bg-gradient-to-r from-teal-500/10 via-slate-900/80 to-transparent p-6 relative overflow-hidden">
+          <div className="rounded-2xl border border-teal-200 dark:border-teal-500/30 bg-teal-50/70 dark:bg-slate-900/90 p-6 relative overflow-hidden shadow-xs">
             <div className="flex items-start gap-4">
-              <div className="p-2.5 rounded-xl bg-teal-500/20 text-teal-300 shrink-0">
+              <div className="p-2.5 rounded-xl bg-teal-100 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 shrink-0">
                 <Sparkles className="w-5 h-5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-teal-400">
+                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-teal-700 dark:text-teal-400">
                     Curriculum Mapped
                   </span>
-                  <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-slate-900 text-slate-400 border border-slate-800">
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-teal-100/80 dark:bg-slate-900 text-teal-800 dark:text-slate-400 border border-teal-200 dark:border-slate-800">
                     Ready to Generate
                   </span>
                 </div>
-                <h3 className="text-lg font-bold text-white mt-1">
-                  Ready for: <code className="text-teal-300 font-mono">Create Module {module.number}</code>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-1">
+                  Ready for: <code className="text-teal-700 dark:text-teal-300 font-mono">Create Module {module.number}</code>
                 </h3>
-                <p className="text-xs md:text-sm text-slate-300 mt-2 leading-relaxed">
-                  As per our course roadmap, say <strong className="text-teal-300">"Create Module {module.number}"</strong> when you are ready to generate this specific module. It will be built with interactive animated diagrams, hands-on code, and knowledge checks!
+                <p className="text-xs md:text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
+                  As per our course roadmap, say <strong className="text-teal-700 dark:text-teal-300">"Create Module {module.number}"</strong> when you are ready to generate this specific module. It will be built with interactive animated diagrams, hands-on code, and knowledge checks!
                 </p>
               </div>
             </div>
           </div>
 
           {/* Core Topics & Curriculum Preview */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-950 p-6">
-            <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-850">
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 shadow-xs">
+            <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100 dark:border-slate-850">
               <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-teal-400" />
+                <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-teal-600 dark:text-teal-400" />
                   Lesson Curriculum & Key Concepts
                 </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   Core architectural concepts and practical milestones covered in this lesson
                 </p>
               </div>
@@ -432,17 +433,17 @@ export default function ModuleReaderView({
               {module.slides.map((s, idx) => (
                 <div
                   key={s.page}
-                  className="p-3.5 rounded-xl border border-slate-850 bg-slate-900/40 hover:bg-slate-900/70 transition"
+                  className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-850 bg-slate-50/70 dark:bg-slate-900/40 hover:bg-slate-100 dark:hover:bg-slate-900/70 transition"
                 >
                   <div className="flex items-center justify-between text-[11px] font-mono text-slate-500 mb-1">
                     <span>Part {idx + 1}</span>
-                    <span className="text-teal-400/80">Topic #{idx + 1}</span>
+                    <span className="text-teal-600 dark:text-teal-400/80">Topic #{idx + 1}</span>
                   </div>
-                  <h4 className="text-xs font-semibold text-slate-200 line-clamp-1">
+                  <h4 className="text-xs font-semibold text-slate-800 dark:text-slate-200 line-clamp-1">
                     {s.heading || `Topic ${idx + 1}`}
                   </h4>
                   {s.bullets.length > 0 && (
-                    <p className="text-[11px] text-slate-400 mt-1 line-clamp-2">
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
                       {s.bullets[0]}
                     </p>
                   )}
@@ -452,17 +453,18 @@ export default function ModuleReaderView({
           </div>
         </>
       )}
+      </div>
 
       {/* Bottom Previous / Next Navigation */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-6 border-t border-slate-800">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-6 border-t border-slate-200 dark:border-slate-800">
         {prevModule ? (
           <Link
             href={`/learn/${prevModule.levelId}/${prevModule.id}`}
-            className="flex items-center justify-center sm:justify-start gap-2 px-4 py-3 sm:py-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-xs font-mono text-slate-300 hover:text-white transition group w-full sm:w-auto"
+            className="flex items-center justify-center sm:justify-start gap-2 px-4 py-3 sm:py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-xs font-mono text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition group w-full sm:w-auto shadow-xs"
           >
-            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white" />
             <div className="text-left">
-              <span className="block text-[10px] text-slate-500">Previous</span>
+              <span className="block text-[10px] text-slate-500 dark:text-slate-400">Previous</span>
               <span className="font-bold">Module {prevModule.number}</span>
             </div>
           </Link>
@@ -473,13 +475,13 @@ export default function ModuleReaderView({
         {nextModule ? (
           <Link
             href={`/learn/${nextModule.levelId}/${nextModule.id}`}
-            className="flex items-center justify-center sm:justify-end gap-2 px-4 py-3 sm:py-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-xs font-mono text-slate-300 hover:text-white transition group w-full sm:w-auto"
+            className="flex items-center justify-center sm:justify-end gap-2 px-4 py-3 sm:py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-xs font-mono text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition group w-full sm:w-auto shadow-xs"
           >
             <div className="text-right">
-              <span className="block text-[10px] text-slate-500">Next</span>
+              <span className="block text-[10px] text-slate-500 dark:text-slate-400">Next</span>
               <span className="font-bold">Module {nextModule.number}</span>
             </div>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white" />
           </Link>
         ) : (
           <div className="hidden sm:block" />

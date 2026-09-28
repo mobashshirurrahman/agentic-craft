@@ -9,9 +9,17 @@ export default function ThemeToggle({ className = "" }: { className?: string }) 
   const { theme, toggleTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
+  // Hidden for now as requested by user until further testing
+  // Set to true in future to re-enable the toggle option
+  const ENABLE_THEME_TOGGLE = false;
+
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  if (!ENABLE_THEME_TOGGLE) {
+    return null;
+  }
 
   if (!mounted) {
     return (

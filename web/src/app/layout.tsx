@@ -63,9 +63,8 @@ export default function RootLayout({
         <Script id="theme-boot" strategy="beforeInteractive">
           {`
             try {
-              var saved = localStorage.getItem('agentic_theme');
-              var t = saved ? saved : 'light';
-              if (t === 'dark') {
+              var p = window.location.pathname;
+              if (p.startsWith('/learn')) {
                 document.documentElement.classList.add('dark');
                 document.documentElement.classList.remove('light');
                 document.documentElement.setAttribute('data-theme', 'dark');

@@ -110,6 +110,174 @@ html:not(.dark) [class*="shadow-lg"] {
   box-shadow: 0 10px 25px -3px rgba(15, 23, 42, 0.06), 0 4px 6px -2px rgba(15, 23, 42, 0.03);
 }
 
+/* =========================================================================
+   LESSON READER & LEARN WORKSPACE - LIGHT MODE ADAPTATIONS
+   Guarantees deep, crystal-clear contrast and crisp white cards across all
+   59 curriculum modules in light mode, preserving rich dark mode styling.
+   ========================================================================= */
+html:not(.dark) .learn-workspace {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+/* Headings in lesson reader */
+html:not(.dark) .lesson-content-body :is(h1, h2, h3, h4, h5, h6).text-white,
+html:not(.dark) .lesson-content-body :is(h1, h2, h3, h4, h5, h6):not([class*="text-teal"]):not([class*="text-sky"]):not([class*="text-emerald"]):not([class*="text-violet"]):not([class*="text-amber"]):not([class*="text-orange"]):not([class*="text-rose"]):not([class*="text-red"]) {
+  color: #0f172a !important;
+}
+
+/* Base text, paragraphs and list items */
+html:not(.dark) .lesson-content-body article.text-slate-200,
+html:not(.dark) .lesson-content-body .text-slate-100:not(pre *):not(code *) {
+  color: #0f172a !important;
+}
+
+html:not(.dark) .lesson-content-body .text-slate-200:not(pre *):not(code *) {
+  color: #1e293b !important;
+}
+
+html:not(.dark) .lesson-content-body .text-slate-300:not(pre *):not(code *),
+html:not(.dark) .lesson-content-body p.text-slate-300:not(pre *):not(code *),
+html:not(.dark) .lesson-content-body li.text-slate-300:not(pre *):not(code *) {
+  color: #334155 !important;
+}
+
+html:not(.dark) .lesson-content-body .text-slate-400:not(pre *):not(code *),
+html:not(.dark) .lesson-content-body p.text-slate-400:not(pre *):not(code *) {
+  color: #475569 !important;
+}
+
+/* 1. CODE BLOCKS & TERMINALS - Keep dark console appearance */
+html:not(.dark) .lesson-content-body pre {
+  background-color: #0b1120 !important;
+  border-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+html:not(.dark) .lesson-content-body div:has(> pre),
+html:not(.dark) .lesson-content-body div:has(> div > pre) {
+  background-color: #0b1120 !important;
+  border-color: #1e293b !important;
+}
+
+/* Inline code tags outside pre */
+html:not(.dark) .lesson-content-body :not(pre) > code:not(.block) {
+  background-color: #f1f5f9 !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  padding: 0.15rem 0.375rem !important;
+  border-radius: 0.375rem !important;
+}
+
+/* 2. CARD SURFACES - Non-code cards convert to crisp elevated white cards */
+html:not(.dark) .lesson-content-body div[class*="bg-slate-900"]:not(pre):not(:has(> pre)):not(:has(> div > pre)),
+html:not(.dark) .lesson-content-body div[class*="bg-slate-950"]:not(pre):not(:has(> pre)):not(:has(> div > pre)) {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+html:not(.dark) .lesson-content-body div[class*="bg-slate-850"]:not(pre):not(:has(> pre)):not(:has(> div > pre)) {
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Card borders */
+html:not(.dark) .lesson-content-body div[class*="border-slate-800"]:not(pre):not(:has(> pre)):not(:has(> div > pre)),
+html:not(.dark) .lesson-content-body div[class*="border-slate-850"]:not(pre):not(:has(> pre)):not(:has(> div > pre)) {
+  border-color: #e2e8f0 !important;
+}
+
+/* 3. VIBRANT, HIGH-CONTRAST ACCENTS IN LIGHT MODE */
+/* Amber / Yellow (Gotchas, Warnings, Notes) */
+html:not(.dark) .lesson-content-body [class*="text-amber-100"]:not(pre *):not(code *),
+html:not(.dark) .lesson-content-body [class*="text-amber-200"]:not(pre *):not(code *) {
+  color: #78350f !important;
+}
+html:not(.dark) .lesson-content-body [class*="text-amber-300"]:not(pre *):not(code *),
+html:not(.dark) .lesson-content-body [class*="text-amber-400"]:not(pre *):not(code *) {
+  color: #92400e !important;
+}
+html:not(.dark) .lesson-content-body [class*="text-yellow-100"]:not(pre *):not(code *),
+html:not(.dark) .lesson-content-body [class*="text-yellow-200"]:not(pre *):not(code *) {
+  color: #713f12 !important;
+}
+html:not(.dark) .lesson-content-body [class*="text-yellow-300"]:not(pre *):not(code *),
+html:not(.dark) .lesson-content-body [class*="text-yellow-400"]:not(pre *):not(code *) {
+  color: #854d0e !important;
+}
+
+/* Teal & Emerald (Tools, Success, Milestones) */
+html:not(.dark) .lesson-content-body [class*="text-teal-100"]:not(pre *):not(code *),
+html:not(.dark) .lesson-content-body [class*="text-teal-200"]:not(pre *):not(code *) {
+  color: #134e4a !important;
+}
+html:not(.dark) .lesson-content-body [class*="text-teal-300"]:not(pre *):not(code *),
+html:not(.dark) .lesson-content-body [class*="text-teal-400"]:not(pre *):not(code *) {
+  color: #0f766e !important;
+}
+html:not(.dark) .lesson-content-body [class*="text-emerald-100"]:not(pre *):not(code *),
+html:not(.dark) .lesson-content-body [class*="text-emerald-200"]:not(pre *):not(code *) {
+  color: #064e3b !important;
+}
+html:not(.dark) .lesson-content-body [class*="text-emerald-300"]:not(pre *):not(code *),
+html:not(.dark) .lesson-content-body [class*="text-emerald-400"]:not(pre *):not(code *) {
+  color: #047857 !important;
+}
+
+/* Sky & Blue (Info, Perception, Sensors) */
+html:not(.dark) .lesson-content-body [class*="text-sky-100"]:not(pre *):not(code *),
+html:not(.dark) .lesson-content-body [class*="text-sky-200"]:not(pre *):not(code *) {
+  color: #0c4a6e !important;
+}
+html:not(.dark) .lesson-content-body [class*="text-sky-300"]:not(pre *):not(code *),
+html:not(.dark) .lesson-content-body [class*="text-sky-400"]:not(pre *):not(code *) {
+  color: #0369a1 !important;
+}
+html:not(.dark) .lesson-content-body [class*="text-blue-100"]:not(pre *):not(code *),
+html:not(.dark) .lesson-content-body [class*="text-blue-200"]:not(pre *):not(code *) {
+  color: #1e3a8a !important;
+}
+html:not(.dark) .lesson-content-body [class*="text-blue-300"]:not(pre *):not(code *),
+html:not(.dark) .lesson-content-body [class*="text-blue-400"]:not(pre *):not(code *) {
+  color: #1d4ed8 !important;
+}
+
+/* Violet & Purple (Reasoning, LLM, Brain) */
+html:not(.dark) .lesson-content-body [class*="text-violet-100"]:not(pre *):not(code *),
+html:not(.dark) .lesson-content-body [class*="text-violet-200"]:not(pre *):not(code *) {
+  color: #4c1d95 !important;
+}
+html:not(.dark) .lesson-content-body [class*="text-violet-300"]:not(pre *):not(code *),
+html:not(.dark) .lesson-content-body [class*="text-violet-400"]:not(pre *):not(code *) {
+  color: #6d28d9 !important;
+}
+html:not(.dark) .lesson-content-body [class*="text-purple-100"]:not(pre *):not(code *),
+html:not(.dark) .lesson-content-body [class*="text-purple-200"]:not(pre *):not(code *) {
+  color: #581c87 !important;
+}
+html:not(.dark) .lesson-content-body [class*="text-purple-300"]:not(pre *):not(code *),
+html:not(.dark) .lesson-content-body [class*="text-purple-400"]:not(pre *):not(code *) {
+  color: #7e22ce !important;
+}
+
+/* Rose & Red (Alerts, Errors) */
+html:not(.dark) .lesson-content-body [class*="text-rose-100"]:not(pre *):not(code *),
+html:not(.dark) .lesson-content-body [class*="text-rose-200"]:not(pre *):not(code *) {
+  color: #881337 !important;
+}
+html:not(.dark) .lesson-content-body [class*="text-rose-300"]:not(pre *):not(code *),
+html:not(.dark) .lesson-content-body [class*="text-rose-400"]:not(pre *):not(code *) {
+  color: #be123c !important;
+}
+html:not(.dark) .lesson-content-body [class*="text-red-100"]:not(pre *):not(code *),
+html:not(.dark) .lesson-content-body [class*="text-red-200"]:not(pre *):not(code *) {
+  color: #7f1d1d !important;
+}
+html:not(.dark) .lesson-content-body [class*="text-red-300"]:not(pre *):not(code *),
+html:not(.dark) .lesson-content-body [class*="text-red-400"]:not(pre *):not(code *) {
+  color: #b91c1c !important;
+}
+
 /* Custom modern scrollbar */
 ::-webkit-scrollbar {
   width: 7px;
