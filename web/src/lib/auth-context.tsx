@@ -205,21 +205,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       if (error) {
         if (error.message?.includes("provider is not enabled") || error.message?.includes("Unsupported provider")) {
-          throw new Error("Google login is not enabled in your Supabase project yet. Go to Supabase Dashboard → Authentication → Providers → Google to enable it, or use Email / Instant Access below!");
+          throw new Error("Google login is not enabled in your Supabase project yet. Go to Supabase Dashboard → Authentication → Providers → Google to enable it!");
         }
         throw error;
       }
     } else {
-      // Local demo login fallback
-      const demoUser: UserProfile = {
-        id: "demo-user-1",
-        email: "engineer@agenticcraft.dev",
-        name: "Agentic Engineer",
-        avatarUrl: "",
-      };
-      setUser(demoUser);
-      localStorage.setItem("agentic_local_user", JSON.stringify(demoUser));
-      setAuthModalOpen(false);
+      throw new Error(
+        "Supabase is not configured on this deployment. Please add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your Vercel Dashboard → Settings → Environment Variables, then Redeploy!"
+      );
     }
   };
 
@@ -233,23 +226,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       if (error) {
         if (error.message?.includes("provider is not enabled") || error.message?.includes("Unsupported provider")) {
-          throw new Error("GitHub login is not enabled in your Supabase project yet. Go to Supabase Dashboard → Authentication → Providers → GitHub to enable it, or use Email / Instant Access below!");
+          throw new Error("GitHub login is not enabled in your Supabase project yet. Go to Supabase Dashboard → Authentication → Providers → GitHub to enable it!");
         }
         throw error;
       }
     } else {
-      // Local demo login fallback
-      const demoUser: UserProfile = {
-        id: "demo-github-user",
-        email: "github-developer@agenticcraft.dev",
-        name: "Autonomous Developer",
-        avatarUrl: "",
-      };
-      setUser(demoUser);
-      localStorage.setItem("agentic_local_user", JSON.stringify(demoUser));
-      setAuthModalOpen(false);
+      throw new Error(
+        "Supabase is not configured on this deployment. Please add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your Vercel Dashboard → Settings → Environment Variables, then Redeploy!"
+      );
     }
   };
+
 
 
   const loginWithEmail = async (email: string, name?: string) => {
@@ -262,16 +249,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
       if (error) throw error;
     } else {
-      const demoUser: UserProfile = {
-        id: `user-${Date.now()}`,
-        email,
-        name: name || email.split("@")[0] || "Learner",
-      };
-      setUser(demoUser);
-      localStorage.setItem("agentic_local_user", JSON.stringify(demoUser));
-      setAuthModalOpen(false);
+      throw new Error(
+        "Supabase is not configured on this deployment. Please add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your Vercel Dashboard → Settings → Environment Variables, then Redeploy!"
+      );
     }
   };
+
 
   const loginWithDemo = (name?: string, email?: string) => {
     const demoUser: UserProfile = {
