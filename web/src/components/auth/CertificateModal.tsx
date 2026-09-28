@@ -82,14 +82,15 @@ export default function CertificateModal() {
               </span>
               <div>
                 <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-                  <span>{isMaster ? "Grand Master Credential" : "Level Specialist Credential"}</span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                    <ShieldCheck className="w-3 h-3" /> Verified
+                  <span>{isMaster ? "Master Completion Certificate" : "Level Completion Certificate"}</span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/30 flex items-center gap-1">
+                    <ShieldCheck className="w-3 h-3" /> Informational Badge
                   </span>
                 </h3>
                 <p className="text-[11px] text-slate-400 font-mono">
-                  Code: {certificateModalData.verificationCode}
+                  ID: {certificateModalData.verificationCode}
                 </p>
+
               </div>
             </div>
 
@@ -184,14 +185,14 @@ export default function CertificateModal() {
                 <span className={`text-[11px] font-mono uppercase tracking-[0.25em] font-bold ${
                   isMaster ? "text-amber-400" : "text-teal-400"
                 }`}>
-                  AgenticCraft Academy • Global Credential
+                  AgenticCraft Academy • Informational Recognition
                 </span>
               </div>
 
               <h4 className="text-xs sm:text-sm font-mono tracking-widest text-slate-400 uppercase pt-1">
                 {isMaster
-                  ? "HONORARY DIPLOMA OF DISTINCTION"
-                  : "SPECIALIST CERTIFICATE OF ENGINEERING MASTERY"}
+                  ? "INFORMATIONAL CERTIFICATE OF COMPLETION (DISTINCTION)"
+                  : "INFORMATIONAL LEVEL COMPLETION CERTIFICATE"}
               </h4>
             </div>
 
@@ -212,8 +213,9 @@ export default function CertificateModal() {
 
             {/* "This is to certify that" */}
             <p className="text-xs font-serif italic text-slate-400 tracking-wider">
-              This official credential is proudly awarded to
+              This informal certificate of study completion is awarded to
             </p>
+
 
             {/* Recipient Name */}
             <h2 className="text-2xl sm:text-4xl font-serif font-bold text-white tracking-wide py-2 capitalize border-b border-slate-800 max-w-lg mx-auto">
@@ -266,8 +268,8 @@ export default function CertificateModal() {
 
               {/* Center Seal */}
               <div className="space-y-1">
-                <div className="text-[10px] font-mono text-emerald-400 font-bold flex items-center justify-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5" /> VERIFIED ON-CHAIN & WEB
+                <div className="text-[10px] font-mono text-teal-400 font-bold flex items-center justify-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5" /> INFORMATIONAL STUDY TOKEN
                 </div>
                 <span className="text-[10px] font-mono text-slate-500 block">
                   Issued: {certificateModalData.issuedAt}
@@ -280,17 +282,18 @@ export default function CertificateModal() {
                   Autonomous Systems Lab
                 </div>
                 <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider block">
-                  Credential Authority
+                  Study Review Lead
                 </span>
               </div>
             </div>
 
             {/* Verification Footer */}
             <div className="pt-4 mt-4 border-t border-slate-850/60 flex flex-col sm:flex-row items-center justify-between text-[10px] font-mono text-slate-500 gap-2">
-              <span>Verification ID: <strong className="text-slate-300">{certificateModalData.verificationCode}</strong></span>
-              <span>Verify at: <strong className="text-teal-400">agenticcraft.vercel.app</strong></span>
+              <span>Tracking ID: <strong className="text-slate-300">{certificateModalData.verificationCode}</strong></span>
+              <span className="text-[9px] text-slate-500">Informational recognition only • Not an accredited degree or license</span>
             </div>
           </div>
+
 
           {/* Action Footer (Hidden on Print) */}
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3 text-xs font-mono print:hidden">

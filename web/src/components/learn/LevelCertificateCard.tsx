@@ -89,26 +89,27 @@ export default function LevelCertificateCard({
                 <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/40">
                   🎉 Level {levelNumber} Milestone Completed
                 </span>
-                <span className="text-[11px] font-mono text-emerald-400 flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5" /> Official Free Credential
+                <span className="text-[11px] font-mono text-teal-300 flex items-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5" /> Informational Completion Certificate
                 </span>
               </div>
 
               <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">
-                Level {levelNumber} Specialist: {levelTitle}
+                Level {levelNumber}: {levelTitle}
               </h3>
 
               <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl">
                 {levelCert ? (
                   <>
-                    Congratulations! Your official Level {levelNumber} certificate has been issued and verified. You can view, customize your name, and export it as a high-resolution PDF for LinkedIn.
+                    Congratulations on completing Level {levelNumber}! Your informational completion certificate is available for study tracking and personal portfolio reference.
                   </>
                 ) : (
                   <>
-                    You have reached the final milestone of Level {levelNumber}. Claim your verified Specialist Certificate now to prove your mastery of modern autonomous agent engineering!
+                    You have reached the final milestone of Level {levelNumber}. Generate your informal completion certificate now for study tracking and personal reference.
                   </>
                 )}
               </p>
+
 
               {levelCert && (
                 <div className="pt-2 flex items-center gap-3 text-xs font-mono text-teal-400">
@@ -159,28 +160,29 @@ export default function LevelCertificateCard({
               <div className="space-y-1.5">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                    🏆 Grand Finale • Full Course Completion
+                    🏆 Curriculum Complete • Informational Recognition
                   </span>
                   <span className="text-[11px] font-mono text-amber-300 flex items-center gap-1 font-bold">
-                    Master of Agentic AI Engineering
+                    Course Completion Badge
                   </span>
                 </div>
 
                 <h3 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
-                  Master of Agentic AI Engineering (Distinction)
+                  Master of Agentic AI Engineering (Completion Badge)
                 </h3>
 
                 <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl">
                   {masterCert ? (
                     <>
-                      You have graduated from the AgenticCraft Academy! Your honorary Master Diploma has been verified and registered. Showcase your distinction on LinkedIn or print it for your portfolio.
+                      Congratulations on completing all 59 modules! Your informal completion recognition is available for personal reference and study tracking. (Note: This is an informal completion token and not an accredited degree).
                     </>
                   ) : (
                     <>
-                      You have reached the pinnacle of the 59-module curriculum! Claim your honorary Master Diploma with distinction, verifying your autonomous agent architecture skills worldwide.
+                      You have reached the pinnacle of the 59-module curriculum! Generate your informal course completion badge for study tracking and personal reference.
                     </>
                   )}
                 </p>
+
 
                 {masterCert && (
                   <div className="pt-2 flex items-center gap-3 text-xs font-mono text-amber-400">

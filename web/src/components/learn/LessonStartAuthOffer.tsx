@@ -75,7 +75,7 @@ export default function LessonStartAuthOffer({ moduleTitle }: LessonStartAuthOff
               </h4>
 
               <p className="text-xs text-slate-300 leading-relaxed max-w-2xl">
-                Ready to master <strong className="text-teal-300">{moduleTitle}</strong>? Enable cloud sync to record your daily streak 🔥 and earn your official <strong>Agentic AI Engineer Certificate</strong> to showcase on LinkedIn.
+                Ready to master <strong className="text-teal-300">{moduleTitle}</strong>? Enable cloud sync to record your daily streak 🔥 and earn your <strong>Informational Completion Badge</strong> for your study milestones.
               </p>
 
               {/* Feature Pills */}
@@ -86,13 +86,14 @@ export default function LessonStartAuthOffer({ moduleTitle }: LessonStartAuthOff
                 </span>
                 <span className="flex items-center gap-1 text-teal-300">
                   <ShieldCheck className="w-3.5 h-3.5 text-teal-400" />
-                  Free Verifiable Certificate
+                  Free Completion Badge
                 </span>
                 <span className="flex items-center gap-1 text-sky-300">
                   <Laptop className="w-3.5 h-3.5 text-sky-400" />
                   Sync Laptop & Phone
                 </span>
               </div>
+
             </div>
           </div>
 
@@ -200,15 +201,16 @@ export default function LessonStartAuthOffer({ moduleTitle }: LessonStartAuthOff
                   {/* Visual Certificate Card */}
                   <div className="relative rounded-2xl border-2 border-amber-500/40 bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900 p-6 sm:p-8 text-center space-y-3 shadow-xl overflow-hidden">
                     <div className="absolute top-2 left-2 text-[10px] font-mono text-amber-400/60 uppercase tracking-widest">
-                      AgenticCraft Academy • Credential #AC-2026-X
+                      AgenticCraft Academy • Informational Badge
                     </div>
+
 
                     <div className="w-12 h-12 mx-auto rounded-full bg-amber-500/20 border border-amber-500/50 flex items-center justify-center text-amber-300 shadow-md">
                       <Award className="w-6 h-6" />
                     </div>
 
                     <h5 className="text-xs font-mono tracking-widest text-amber-300/90 uppercase">
-                      Certificate of Mastery
+                      Informational Certificate of Completion
                     </h5>
 
                     <h4 className="text-xl sm:text-2xl font-serif font-bold text-white tracking-wide">
@@ -216,16 +218,17 @@ export default function LessonStartAuthOffer({ moduleTitle }: LessonStartAuthOff
                     </h4>
 
                     <p className="text-[11px] text-slate-400 max-w-md mx-auto leading-relaxed">
-                      Has demonstrated verified engineering competency in <strong>Agentic AI Architecture</strong>, <strong>Autonomous ReAct Loops</strong>, <strong>LangGraph Multi-Agent Workflows</strong>, and <strong>Model Context Protocol (MCP)</strong>.
+                      Completed all foundational lessons in <strong>Agentic AI Architecture</strong>, <strong>Autonomous ReAct Loops</strong>, <strong>LangGraph Multi-Agent Workflows</strong>, and <strong>Model Context Protocol (MCP)</strong>.
                     </p>
 
                     <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-[10px] font-mono text-slate-500">
-                      <span>Verified: Level 1–4 Complete</span>
-                      <span className="text-emerald-400 font-bold flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Blockchain / Web Verifiable
+                      <span>Curriculum Modules Completed</span>
+                      <span className="text-teal-400 font-bold flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Informational Study Token
                       </span>
                     </div>
                   </div>
+
                 </div>
               )}
 

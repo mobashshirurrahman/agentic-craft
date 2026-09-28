@@ -77,21 +77,28 @@ export default function TermsOfServicePage() {
             </p>
           </section>
 
-          {/* Section 3 */}
+          {/* Section 3: Informational Certificates Only */}
           <section className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 space-y-3">
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-teal-400" />
-              3. User Accounts & Verified Credentials
+              3. Informational Certificates Only (No Degree / Zero Authenticity Responsibility)
             </h2>
             <p>
-              When creating an account to track your daily streak and claim certificates:
+              Certificates and badges provided on AgenticCraft are strictly <strong>informational tokens of course participation and personal motivation</strong>:
             </p>
             <ul className="list-disc list-inside space-y-1.5 text-slate-300 text-xs sm:text-sm pl-2">
-              <li>You agree to provide accurate information for the name appearing on your official credential.</li>
-              <li>You may not impersonate others or attempt to forge verification identifiers.</li>
-              <li>Official certificates may be shared on LinkedIn, CVs, and portfolios with their unique verification code.</li>
+              <li>
+                <strong>No Academic Degree or Accreditation:</strong> Certificates do NOT constitute an academic degree, accredited qualification, university diploma, professional certification, or license. AgenticCraft is an independent tutorial platform and is not an accredited university or educational institution.
+              </li>
+              <li>
+                <strong>Zero Authenticity or Employment Responsibility:</strong> AgenticCraft and its creators assume <strong>zero responsibility, liability, or warranty</strong> regarding the authenticity, recognition, evaluation, or acceptance of any certificates by employers, universities, government bodies, or third parties.
+              </li>
+              <li>
+                <strong>Informational Use Only:</strong> Learners may reference certificates for their personal study tracking or portfolio strictly as an informal demonstration of tutorial participation.
+              </li>
             </ul>
           </section>
+
 
           {/* Section 4: Limitation of Liability ("If anything happens, we are not responsible") */}
           <section className="p-6 rounded-2xl bg-slate-900/60 border border-amber-500/30 bg-amber-500/5 space-y-3">

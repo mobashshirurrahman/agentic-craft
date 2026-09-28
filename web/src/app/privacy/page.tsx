@@ -67,10 +67,11 @@ export default function PrivacyPolicyPage() {
                 <strong>Study Streaks & Milestones:</strong> We record daily active timestamps to calculate your learning flame streak (e.g., <code className="text-amber-400 font-mono text-xs">🔥 X Days</code>) and track module completions.
               </li>
               <li>
-                <strong>Credential Records:</strong> When you claim Level Specialist Certificates or the Master Diploma, we generate a unique verification code (e.g., <code className="text-teal-300 font-mono text-xs">AC-L1-XXXX</code>) stored in our database.
+                <strong>Informational Completion Badges:</strong> When you generate a level completion badge or certificate for informational purposes, a tracking identifier is saved alongside your chosen name. These certificates are purely informal recognitions of study participation for personal motivation and learning tracking, and do not represent any degree, accreditation, legal qualification, or authenticity guarantee.
               </li>
             </ul>
           </section>
+
 
           {/* Section 2: Marketing Updates & AI News */}
           <section className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 space-y-3">
@@ -141,8 +142,12 @@ export default function PrivacyPolicyPage() {
               <li>
                 <strong>Autonomous Code Disclaimer:</strong> All code examples, autonomous agent workflows, LangGraph graphs, and API integrations are intended for safe learning. You are solely responsible for testing and validating any autonomous agents or third-party API spend before executing code in private or production systems. We are not responsible for any financial costs, API charges, or autonomous execution outcomes.
               </li>
+              <li>
+                <strong>Informational Certificates Only (No Degree or Authenticity Responsibility):</strong> All completion certificates and recognition badges generated on AgenticCraft are strictly informal tokens of study participation and personal motivation. They do NOT constitute an academic degree, accredited qualification, university diploma, professional license, or certified credential. AgenticCraft and its creators assume ZERO authenticity, accreditation, legal, or employment-related responsibility or liability for any certificates generated or presented.
+              </li>
             </ul>
           </section>
+
 
           {/* Section 6: Data Deletion */}
           <section className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 space-y-3">
