@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
@@ -9,6 +11,20 @@
   --glow-sky: rgba(14, 165, 233, 0.12);
   --glow-violet: rgba(139, 92, 246, 0.12);
   --glow-amber: rgba(245, 158, 11, 0.12);
+}
+
+.hero-heading {
+  color: #0f172a;
+}
+.dark .hero-heading {
+  color: #ffffff;
+}
+
+.hero-subtext {
+  color: #1e293b;
+}
+.dark .hero-subtext {
+  color: #e2e8f0;
 }
 
 .dark {
@@ -66,70 +82,19 @@ body {
   transform: translateY(-2px);
 }
 
+/* Custom handwriting and calligraphy font classes */
 .font-handwriting {
-  font-family: var(--font-caveat), "Caveat", "Kalam", cursive;
+  font-family: var(--font-caveat), "Caveat", cursive;
 }
 
-/* =========================================================================
-   LIGHT THEME SMART OVERRIDES
-   Maps Tailwind dark utility variables to rich, high-contrast light styles
-   ========================================================================= */
-html:not(.dark) {
-  --color-slate-950: #ffffff;
-  --color-slate-900: #f8fafc;
-  --color-slate-850: #f1f5f9;
-  --color-slate-800: #e2e8f0;
-  --color-slate-750: #cbd5e1;
-  --color-slate-700: #cbd5e1;
-  --color-slate-600: #94a3b8;
-  --color-slate-500: #64748b;
-  --color-slate-400: #475569;
-  --color-slate-300: #334155;
-  --color-slate-200: #1e293b;
-  --color-slate-100: #0f172a;
+.font-calligraphy {
+  font-family: var(--font-caveat), "Caveat", "Brush Script MT", cursive;
 }
 
-/* Text white adaptation on headings, paragraphs, and cards in light mode */
-html:not(.dark) :is(h1, h2, h3, h4, h5, h6, strong, b, dt, th).text-white:not([class*="bg-violet"]):not([class*="bg-amber"]):not([class*="bg-teal"]):not([class*="bg-emerald"]):not([class*="bg-sky"]):not([class*="bg-red"]):not([class*="bg-indigo"]):not([class*="bg-rose"]) {
-  color: #0f172a !important;
-}
-
-html:not(.dark) :is(p, span, td, li).text-white:not([class*="bg-violet"]):not([class*="bg-amber"]):not([class*="bg-teal"]):not([class*="bg-emerald"]):not([class*="bg-sky"]):not([class*="bg-red"]):not([class*="bg-indigo"]):not([class*="bg-rose"]) {
-  color: #0f172a !important;
-}
-
-html:not(.dark) a.text-white:not([class*="bg-violet"]):not([class*="bg-amber"]):not([class*="bg-teal"]):not([class*="bg-emerald"]):not([class*="bg-sky"]):not([class*="bg-red"]):not([class*="bg-indigo"]):not([class*="bg-rose"]) {
-  color: #0f172a !important;
-}
-
-html:not(.dark) .hover\:text-white:hover:not([class*="bg-violet"]):not([class*="bg-amber"]):not([class*="bg-teal"]):not([class*="bg-emerald"]):not([class*="bg-sky"]) {
-  color: #0f172a !important;
-}
-
-/* Light mode accent readability adjustments */
-html:not(.dark) .text-sky-400 {
-  color: #0284c7;
-}
-
-html:not(.dark) .text-teal-400 {
-  color: #0d9488;
-}
-
-html:not(.dark) .text-emerald-400 {
-  color: #059669;
-}
-
-html:not(.dark) .text-violet-400 {
-  color: #7c3aed;
-}
-
-html:not(.dark) .text-amber-400 {
-  color: #d97706;
-}
-
+/* Light mode card and glass panel refinements */
 html:not(.dark) .glass-panel {
-  background: rgba(255, 255, 255, 0.88);
-  border-color: rgba(226, 232, 240, 0.95);
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(226, 232, 240, 0.9);
   box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
 }
 
