@@ -1,0 +1,66 @@
+# Dependencies
+node_modules/
+web/node_modules/
+.pnp
+.pnp.js
+
+# Next.js Build Outputs
+.next/
+web/.next/
+out/
+web/out/
+build/
+web/build/
+dist/
+pdf_ref/
+# Python & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Environment variables & secrets
+.env
+.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
+web/.env*
+*.pem
+*.key
+
+# Debug & Error logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+
+# Vercel & Deployment
+.vercel/
+web/.vercel/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+web/next-env.d.ts
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.sublime-workspace
+*.sublime-project

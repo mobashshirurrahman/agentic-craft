@@ -1,0 +1,173 @@
+"use client";
+import React, { useState } from "react";
+import confetti from "canvas-confetti";
+import { CheckCircle2, XCircle, Award, RotateCcw } from "lucide-react";
+
+const QUESTIONS = [
+  {
+    id: 1,
+    question: "When rolling out an improved system prompt or tool configuration to an agent serving 100,000 active users, what is the safest deployment strategy?",
+    options: [
+      "Deploy 100% immediately so all users benefit from the improvement right away.",
+      "A 90/10 Canary traffic split: route 90% of traffic to the stable control prompt and 10% to the treatment candidate, while monitoring guardrail metrics (latency, error rate, token cost).",
+      "Only test with internal team members and never measure real production feedback.",
+      "Duplicate the database and run two completely separate companies.",
+    ],
+    correctIndex: 1,
+    explanation: "A 90/10 Canary A/B split limits the blast radius of any unexpected prompt regression or tool loop to only 10% of users. Guardrail metrics (p95 latency, token cost, negative feedback rate) can trigger an automated rollback if the treatment causes unexpected degradation.",
+  },
+  {
+    id: 2,
+    question: "You notice that whenever you update the system prompt to fix an edge case with refunds, the agent begins failing previously working shipping inquiries. How do you prevent this 'Prompt Regression'?",
+    options: [
+      "Stop modifying the prompt and manually hardcode answers for all users.",
+      "Before promoting any prompt candidate, run it through an automated Golden Dataset regression suite that tests both the new edge case and all past working scenarios.",
+      "Switch to an older LLM model with fewer parameters.",
+      "Increase the temperature to 1.5 to make the model more creative.",
+    ],
+    correctIndex: 1,
+    explanation: "Prompt engineering is notoriously prone to 'whack-a-mole' regressions: fixing one behavior often subtly alters how the model interprets other tasks. Running every candidate through a versioned Golden Dataset regression suite before deployment guarantees that historical capabilities are preserved.",
+  },
+  {
+    id: 3,
+    question: "What is the primary role of a 'Meta-LLM' in an automated feedback improvement pipeline?",
+    options: [
+      "To serve real-time chatbot queries to end users.",
+      "To analyze clusters of negative feedback, identify root cause patterns (e.g. instruction ambiguity vs tool overuse), and propose targeted candidate prompt patches.",
+      "To act as a load balancer for API requests.",
+      "To encrypt API keys in transit.",
+    ],
+    correctIndex: 1,
+    explanation: "A Meta-LLM acts as an offline engineer: it digests dozens or hundreds of production failure traces, clusters them into actionable themes, and synthesizes refined system prompts or tool documentation to address the exact failure points.",
+  },
+];
+
+export default function Module4_12Quiz() {
+  const [selected, setSelected] = useState<Record<number, number>>({});
+  const [submitted, setSubmitted] = useState(false);
+  const score = QUESTIONS.filter((q) => selected[q.id] === q.correctIndex).length;
+
+  const handleSubmit = () => {
+    setSubmitted(true);
+    if (score === QUESTIONS.length) {
+      confetti({ particleCount: 70, spread: 75, origin: { y: 0.75 } });
+    }
+  };
+
+  return (
+    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/90 shadow-sm p-6 md:p-8 space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+        <div>
+          <span className="text-xs font-mono font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400">
+            Concept Mastery Check
+          </span>
+          <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white">
+            Module 4.12 • Agent Feedback & Monitoring Quiz
+          </h3>
+        </div>
+        {submitted && (
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border text-xs font-mono font-bold">
+              <Award className="w-4 h-4 text-teal-500" />
+              {score} / {QUESTIONS.length}
+            </div>
+            <button
+              onClick={() => {
+                setSelected({});
+                setSubmitted(false);
+              }}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-mono transition"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              Retry
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-6">
+        {QUESTIONS.map((q, idx) => {
+          const isCorrect = selected[q.id] === q.correctIndex;
+          return (
+            <div
+              key={q.id}
+              className="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 space-y-3"
+            >
+              <div className="flex items-start gap-2">
+                <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-teal-500/20 text-teal-600 dark:text-teal-400 shrink-0">
+                  Q{idx + 1}
+                </span>
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                  {q.question}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                {q.options.map((opt, optIdx) => {
+                  const sel = selected[q.id] === optIdx;
+                  let style =
+                    "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:border-slate-300";
+                  if (sel) {
+                    style =
+                      "border-teal-500 bg-teal-50/50 dark:bg-teal-950/40 text-teal-900 dark:text-teal-200 font-semibold";
+                  }
+                  if (submitted) {
+                    if (optIdx === q.correctIndex) {
+                      style =
+                        "border-emerald-500 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 font-semibold";
+                    } else if (sel && !isCorrect) {
+                      style =
+                        "border-red-500 bg-red-500/10 text-red-800 dark:text-red-300";
+                    }
+                  }
+                  return (
+                    <button
+                      key={optIdx}
+                      disabled={submitted}
+                      onClick={() =>
+                        !submitted &&
+                        setSelected((p) => ({ ...p, [q.id]: optIdx }))
+                      }
+                      className={`w-full text-left p-3 rounded-lg border text-xs transition flex items-center justify-between gap-3 ${style}`}
+                    >
+                      <span>{opt}</span>
+                      {submitted && optIdx === q.correctIndex && (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                      )}
+                      {submitted && sel && !isCorrect && (
+                        <XCircle className="w-4 h-4 text-red-500 shrink-0" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {submitted && (
+                <div
+                  className={`p-3 rounded-lg text-xs leading-relaxed ${
+                    isCorrect
+                      ? "bg-emerald-50 dark:bg-emerald-950/30 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                      : "bg-red-50 dark:bg-red-950/30 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-800"
+                  }`}
+                >
+                  <span className="font-bold">Why: </span>
+                  {q.explanation}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {!submitted && (
+        <button
+          onClick={handleSubmit}
+          disabled={Object.keys(selected).length < QUESTIONS.length}
+          className="w-full py-3 rounded-xl bg-teal-600 hover:bg-teal-700 disabled:opacity-50 text-white font-semibold text-xs tracking-wider uppercase transition shadow-sm"
+        >
+          Submit Answers
+        </button>
+      )}
+    </div>
+  );
+}
