@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useProgress } from "@/lib/store";
 import { getAllModules } from "@/lib/curriculum-data";
 import ThemeToggle from "./ThemeToggle";
+import ViewCounter from "./ViewCounter";
 import {
   Bot,
   Compass,
@@ -93,6 +94,9 @@ export default function Header() {
 
         {/* Right Action Area */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Live Global Visit / View Counter */}
+          <ViewCounter />
+
           {/* Overall Progress Badge */}
           <div className="hidden sm:flex items-center">
             <Link
