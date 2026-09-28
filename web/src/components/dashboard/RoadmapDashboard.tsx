@@ -2,27 +2,56 @@
 
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import { COURSE_LEVELS, CourseLevel, CourseModule } from "@/lib/curriculum-data";
 import { useProgress } from "@/lib/store";
 import {
   Search,
   CheckCircle2,
   Clock,
-  FileText,
   ArrowRight,
   Sparkles,
   BookOpen,
   Filter,
   Layers,
+  ChevronDown,
   ChevronRight,
-  Bookmark,
+  Circle,
+  X,
 } from "lucide-react";
 
 export default function RoadmapDashboard() {
-  const { isCompleted, isBookmarked, toggleBookmark } = useProgress();
-  const [selectedLevelId, setSelectedLevelId] = useState<string>("all");
+  const { isCompleted } = useProgress();
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedTag, setSelectedTag] = useState<string>("all");
+  const [expandedLevels, setExpandedLevels] = useState<Record<string, boolean>>({
+    "level-1": true, // Level 1 open by default for immediate exploration
+    "level-2": false,
+    "level-3": false,
+    "level-4": false,
+  });
+
+  const toggleLevel = (id: string) => {
+    setExpandedLevels((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const expandAll = () => {
+    setExpandedLevels({
+      "level-1": true,
+      "level-2": true,
+      "level-3": true,
+      "level-4": true,
+    });
+  };
+
+  const collapseAll = () => {
+    setExpandedLevels({
+      "level-1": false,
+      "level-2": false,
+      "level-3": false,
+      "level-4": false,
+    });
+  };
 
   // Extract all unique tags
   const allTags = useMemo(() => {
@@ -35,13 +64,10 @@ export default function RoadmapDashboard() {
     return Array.from(tags).sort();
   }, []);
 
-  // Filter modules
+  // Filter modules by search or tag
   const filteredLevels = useMemo(() => {
     return COURSE_LEVELS.map((level) => {
-      // Filter modules within this level
       const matchingModules = level.modules.filter((mod) => {
-        const matchesLevel =
-          selectedLevelId === "all" || selectedLevelId === level.id;
         const matchesTag =
           selectedTag === "all" || mod.tags.includes(selectedTag);
         const matchesSearch =
@@ -53,7 +79,7 @@ export default function RoadmapDashboard() {
             t.toLowerCase().includes(searchQuery.toLowerCase())
           );
 
-        return matchesLevel && matchesTag && matchesSearch;
+        return matchesTag && matchesSearch;
       });
 
       return {
@@ -61,7 +87,7 @@ export default function RoadmapDashboard() {
         filteredModules: matchingModules,
       };
     }).filter((level) => level.filteredModules.length > 0);
-  }, [selectedLevelId, searchQuery, selectedTag]);
+  }, [searchQuery, selectedTag]);
 
   const totalMatchingModules = useMemo(() => {
     return filteredLevels.reduce(
@@ -70,118 +96,77 @@ export default function RoadmapDashboard() {
     );
   }, [filteredLevels]);
 
-  return (
-    <section id="curriculum" className="w-full py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      {/* Section Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
-        <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/30 text-teal-400 text-xs font-mono mb-3">
-            <Layers className="w-3.5 h-3.5" />
-            <span>EXHAUSTIVE 4-LEVEL CURRICULUM</span>
-          </div>
-          <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white">
-            The Complete Agentic AI Roadmap
-          </h2>
-          <p className="text-slate-400 text-sm md:text-base mt-2 max-w-2xl leading-relaxed">
-            A comprehensive, structured roadmap taking you from foundational agent reasoning to production-scale multi-agent architectures with interactive visualizations and runnable code.
-          </p>
-        </div>
+  const isSearching = searchQuery.trim().length > 0 || selectedTag !== "all";
 
-        {/* Quick Stats Pill */}
-        <div className="flex items-center gap-4 bg-slate-900/80 border border-slate-800 p-3 rounded-2xl shadow-inner self-start md:self-auto">
-          <div className="text-center px-2">
-            <span className="text-xl font-bold font-mono text-white block">4</span>
-            <span className="text-[11px] text-slate-400 uppercase tracking-wider">Levels</span>
-          </div>
-          <div className="h-7 w-[1px] bg-slate-800" />
-          <div className="text-center px-2">
-            <span className="text-xl font-bold font-mono text-teal-400 block">59</span>
-            <span className="text-[11px] text-slate-400 uppercase tracking-wider">Lessons</span>
-          </div>
-          <div className="h-7 w-[1px] bg-slate-800" />
-          <div className="text-center px-2">
-            <span className="text-xl font-bold font-mono text-violet-400 block">100%</span>
-            <span className="text-[11px] text-slate-400 uppercase tracking-wider">Hands-On</span>
-          </div>
-        </div>
+  return (
+    <section id="curriculum" className="w-full py-12 md:py-20 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Section Header */}
+      <div className="text-center max-w-2xl mx-auto mb-10 space-y-2">
+        <span className="text-xs font-mono font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400">
+          Structured Roadmap
+        </span>
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+          The 4-Level Curriculum
+        </h2>
+        <p className="font-handwriting text-xl text-teal-700 dark:text-teal-300 font-bold">
+          From first ReAct loop to distributed production scaling 🚀
+        </p>
       </div>
 
-      {/* Filter and Search Bar */}
-      <div className="space-y-4 mb-10 bg-slate-900/60 border border-slate-800/80 rounded-2xl p-4 md:p-5 backdrop-blur-md">
-        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-          {/* Level Tabs */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
-            <button
-              onClick={() => setSelectedLevelId("all")}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition ${
-                selectedLevelId === "all"
-                  ? "bg-teal-500 text-slate-950 shadow-md shadow-teal-500/25"
-                  : "bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white"
-              }`}
-            >
-              All Levels (59)
-            </button>
-            {COURSE_LEVELS.map((lvl) => {
-              const isActive = selectedLevelId === lvl.id;
-              return (
-                <button
-                  key={lvl.id}
-                  onClick={() => setSelectedLevelId(lvl.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition flex items-center gap-1.5 ${
-                    isActive
-                      ? "bg-slate-100 text-slate-950 font-bold"
-                      : "bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white"
-                  }`}
-                >
-                  <span
-                    className={`w-2 h-2 rounded-full ${
-                      lvl.levelNumber === 1
-                        ? "bg-emerald-400"
-                        : lvl.levelNumber === 2
-                        ? "bg-sky-400"
-                        : lvl.levelNumber === 3
-                        ? "bg-violet-400"
-                        : "bg-amber-400"
-                    }`}
-                  />
-                  L{lvl.levelNumber}: {lvl.subtitle.split("&")[0]}
-                </button>
-              );
-            })}
-          </div>
-
+      {/* Clean Search & Filter Bar */}
+      <div className="mb-8 p-3 sm:p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           {/* Search Input */}
-          <div className="relative w-full md:w-72 shrink-0">
+          <div className="relative flex-1">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search LangGraph, MCP, Swarm..."
-              className="w-full bg-slate-950 border border-slate-850 rounded-xl pl-9 pr-3.5 py-2 text-xs md:text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-teal-500/60 focus:ring-1 focus:ring-teal-500/30 transition"
+              placeholder="Search by keyword (e.g., LangGraph, MCP, Redis, Celery)..."
+              className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl pl-9 pr-8 py-2.5 text-xs sm:text-sm text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:border-teal-500 transition"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500 hover:text-slate-300"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
               >
-                Clear
+                <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
+
+          {/* Quick Expand / Collapse All Toggle */}
+          {!isSearching && (
+            <div className="flex items-center justify-end gap-2 text-xs font-mono shrink-0">
+              <button
+                onClick={expandAll}
+                className="px-2.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              >
+                Expand All
+              </button>
+              <span className="text-slate-300 dark:text-slate-700">|</span>
+              <button
+                onClick={collapseAll}
+                className="px-2.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              >
+                Collapse All
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Tag pills */}
-        <div className="flex items-center gap-1.5 flex-wrap pt-2 border-t border-slate-800/60">
-          <span className="text-[11px] font-mono text-slate-500 flex items-center gap-1 mr-1">
-            <Filter className="w-3 h-3" /> Topic:
+        <div className="flex items-center gap-1.5 overflow-x-auto whitespace-nowrap pt-1 scrollbar-none text-xs">
+          <span className="text-[11px] font-mono text-slate-400 flex items-center gap-1 shrink-0 mr-1">
+            <Filter className="w-3 h-3" /> Filter:
           </span>
           <button
             onClick={() => setSelectedTag("all")}
-            className={`px-2.5 py-1 rounded-lg text-[11px] font-mono transition ${
+            className={`px-2.5 py-1 rounded-lg text-xs font-medium transition shrink-0 ${
               selectedTag === "all"
-                ? "bg-slate-700 text-teal-300"
-                : "bg-slate-950 text-slate-400 hover:text-slate-200"
+                ? "bg-teal-600 text-white font-semibold"
+                : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
             }`}
           >
             All
@@ -190,10 +175,10 @@ export default function RoadmapDashboard() {
             <button
               key={tag}
               onClick={() => setSelectedTag(tag === selectedTag ? "all" : tag)}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-mono transition ${
+              className={`px-2.5 py-1 rounded-lg text-xs transition shrink-0 ${
                 selectedTag === tag
-                  ? "bg-teal-500/20 text-teal-300 border border-teal-500/40"
-                  : "bg-slate-950 border border-slate-850 text-slate-400 hover:text-slate-200 hover:border-slate-800"
+                  ? "bg-teal-600 text-white font-semibold"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
               }`}
             >
               {tag}
@@ -202,143 +187,136 @@ export default function RoadmapDashboard() {
         </div>
       </div>
 
-      {/* Result Count Announcement */}
-      {searchQuery && (
-        <div className="mb-6 text-xs font-mono text-slate-400">
-          Showing <span className="text-teal-400 font-bold">{totalMatchingModules}</span> matching modules
+      {/* Active Search Results Count */}
+      {isSearching && (
+        <div className="mb-4 text-xs font-mono text-slate-500">
+          Found <strong className="text-teal-600 dark:text-teal-400">{totalMatchingModules}</strong> matching lessons:
         </div>
       )}
 
-      {/* Levels and Modules Render */}
-      <div className="space-y-14">
+      {/* The 4 Level Milestone Accordion Cards */}
+      <div className="space-y-4">
         {filteredLevels.map((lvl) => {
+          const isExpanded = isSearching || expandedLevels[lvl.id];
+          const completedCount = lvl.modules.filter((m) => isCompleted(m.id)).length;
+
           return (
-            <div key={lvl.id} className="relative">
-              {/* Level Category Banner */}
-              <div
-                className={`p-6 rounded-2xl border ${lvl.color.border} bg-gradient-to-r ${lvl.color.gradient} backdrop-blur-sm mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4`}
+            <div
+              key={lvl.id}
+              className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden transition-all duration-200"
+            >
+              {/* Level Card Header Button */}
+              <button
+                onClick={() => !isSearching && toggleLevel(lvl.id)}
+                className="w-full p-5 sm:p-6 text-left flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-slate-50/60 dark:hover:bg-slate-850/50 transition cursor-pointer select-none"
               >
-                <div>
-                  <div className="flex items-center gap-2 mb-1.5">
+                <div className="space-y-1.5 max-w-xl">
+                  <div className="flex items-center gap-2">
                     <span
-                      className={`text-xs font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${lvl.color.badge}`}
+                      className={`text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${lvl.color.badge}`}
                     >
                       Level {lvl.levelNumber}
                     </span>
                     <span className="text-xs font-mono text-slate-400">
-                      {lvl.modulesCount} Core Modules
+                      {lvl.modulesCount} Lessons
+                    </span>
+                    <span className="text-xs font-mono text-slate-300 dark:text-slate-700">•</span>
+                    <span className="text-xs font-mono text-slate-500">
+                      {completedCount}/{lvl.modulesCount} completed
                     </span>
                   </div>
-                  <h3 className="text-2xl font-extrabold text-white tracking-tight">
+
+                  <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
                     {lvl.title}
                   </h3>
-                  <p className="text-xs md:text-sm text-slate-300 mt-1 max-w-2xl leading-relaxed">
+
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2">
                     {lvl.description}
                   </p>
                 </div>
-              </div>
 
-              {/* Module Cards Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {lvl.filteredModules.map((mod) => {
-                  const completed = isCompleted(mod.id);
-                  const bookmarked = isBookmarked(mod.id);
+                {/* Right Action / Accordion Indicator */}
+                <div className="flex items-center gap-3 self-end md:self-center">
+                  <Link
+                    href={`/learn/${lvl.id}/${lvl.modules[0].id}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 transition flex items-center gap-1"
+                  >
+                    <span>Start Level</span>
+                    <ArrowRight className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
+                  </Link>
 
-                  return (
+                  {!isSearching && (
                     <div
-                      key={mod.id}
-                      className="group rounded-2xl border border-slate-800/90 bg-slate-950/70 hover:bg-slate-900/80 p-5 flex flex-col justify-between transition-all duration-300 hover:border-slate-700 hover:shadow-xl hover:shadow-slate-950/50 relative overflow-hidden"
+                      className={`p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 transition-transform duration-200 ${
+                        isExpanded ? "rotate-180" : ""
+                      }`}
                     >
-                      {/* Top bar with module badge and bookmark */}
-                      <div>
-                        <div className="flex items-center justify-between gap-2 mb-3">
-                          <span
-                            className={`font-mono text-xs font-bold px-2 py-0.5 rounded-md border ${
-                              completed
-                                ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
-                                : "bg-slate-900 text-teal-400 border-slate-800"
-                            }`}
-                          >
-                            Module {mod.number}
-                          </span>
-
-                          <div className="flex items-center gap-1.5">
-                            <button
-                              onClick={(e) => {
-                                e.preventDefault();
-                                toggleBookmark(mod.id);
-                              }}
-                              className={`p-1.5 rounded-lg hover:bg-slate-800 transition ${
-                                bookmarked
-                                  ? "text-amber-400"
-                                  : "text-slate-600 hover:text-slate-400"
-                              }`}
-                              title={bookmarked ? "Bookmarked" : "Bookmark Module"}
-                            >
-                              <Bookmark className="w-3.5 h-3.5 fill-current" />
-                            </button>
-
-                            {completed && (
-                              <span
-                                className="flex items-center gap-1 text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20"
-                                title="Module Completed"
-                              >
-                                <CheckCircle2 className="w-3 h-3" /> Done
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        <Link
-                          href={`/learn/${mod.levelId}/${mod.id}`}
-                          className="block group-hover:text-teal-300 transition-colors"
-                        >
-                          <h4 className="text-base font-bold text-white line-clamp-2 leading-snug">
-                            {mod.title}
-                          </h4>
-                        </Link>
-
-                        <p className="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">
-                          {mod.summary}
-                        </p>
-                      </div>
-
-                      {/* Meta information & CTA footer */}
-                      <div className="pt-4 mt-4 border-t border-slate-850">
-                        {/* Tags */}
-                        <div className="flex items-center gap-1.5 flex-wrap mb-3">
-                          {mod.tags.map((t) => (
-                            <span
-                              key={t}
-                              className="text-[10px] font-mono text-slate-400 px-2 py-0.5 rounded bg-slate-900 border border-slate-800"
-                            >
-                              {t}
-                            </span>
-                          ))}
-                        </div>
-
-                        <div className="flex items-center justify-between text-xs font-mono text-slate-400">
-                          <span className="flex items-center gap-1.5 text-slate-400">
-                            <Clock className="w-3.5 h-3.5 text-slate-500" />
-                            ~{mod.estimatedMinutes} mins
-                          </span>
-
-                          <Link
-                            href={`/learn/${mod.levelId}/${mod.id}`}
-                            className="inline-flex items-center gap-1 font-semibold text-teal-400 hover:text-teal-300 group-hover:translate-x-0.5 transition-transform"
-                          >
-                            <span>Learn</span>
-                            <ArrowRight className="w-3.5 h-3.5" />
-                          </Link>
-                        </div>
-                      </div>
+                      <ChevronDown className="w-4 h-4" />
                     </div>
-                  );
-                })}
-              </div>
+                  )}
+                </div>
+              </button>
+
+              {/* Collapsible Module Grid */}
+              <AnimatePresence initial={false}>
+                {isExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.25, ease: "easeInOut" }}
+                    className="border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-950/40 p-4 sm:p-6"
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                      {lvl.filteredModules.map((mod) => {
+                        const done = isCompleted(mod.id);
+
+                        return (
+                          <Link
+                            key={mod.id}
+                            href={`/learn/${lvl.id}/${mod.id}`}
+                            className="p-3 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 bg-white dark:bg-slate-900 hover:border-teal-500/50 hover:shadow-md transition-all flex items-center justify-between gap-3 group"
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <span
+                                className={`w-2 h-2 rounded-full shrink-0 ${
+                                  done ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-700"
+                                }`}
+                              />
+                              <div className="truncate">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-mono text-[10px] font-bold text-slate-400">
+                                    Mod {mod.number}
+                                  </span>
+                                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-500">
+                                    {mod.estimatedMinutes}m
+                                  </span>
+                                </div>
+                                <h4 className="text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors truncate">
+                                  {mod.title}
+                                </h4>
+                              </div>
+                            </div>
+
+                            <ChevronRight className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-teal-500 group-hover:translate-x-0.5 transition-all shrink-0" />
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           );
         })}
+      </div>
+
+      {/* Gentle Footer Note */}
+      <div className="mt-12 text-center select-none">
+        <p className="font-handwriting text-xl text-slate-500 dark:text-slate-400">
+          ✨ Every single module includes an interactive workbench lab & concept check!
+        </p>
       </div>
     </section>
   );

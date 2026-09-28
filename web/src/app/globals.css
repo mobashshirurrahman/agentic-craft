@@ -66,6 +66,10 @@ body {
   transform: translateY(-2px);
 }
 
+.font-handwriting {
+  font-family: var(--font-caveat), "Caveat", "Kalam", cursive;
+}
+
 /* =========================================================================
    LIGHT THEME SMART OVERRIDES
    Maps Tailwind dark utility variables to rich, high-contrast light styles

@@ -17,21 +17,18 @@ const ThemeContext = createContext<ThemeContextType>({
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("dark");
+  const [theme, setThemeState] = useState<Theme>("light");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Check local storage or system preference
+    // Check local storage or default to clean light mode
     const savedTheme = localStorage.getItem("agentic_theme") as Theme | null;
     if (savedTheme === "dark" || savedTheme === "light") {
       setThemeState(savedTheme);
       applyTheme(savedTheme);
     } else {
-      // Default to dark for AgenticCraft, or match system if prefers light
-      const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const initial = systemPrefersDark ? "dark" : "light";
-      setThemeState(initial);
-      applyTheme(initial);
+      setThemeState("light");
+      applyTheme("light");
     }
     setMounted(true);
   }, []);

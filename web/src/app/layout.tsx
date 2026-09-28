@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Caveat } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { ThemeProvider } from "@/lib/theme-context";
@@ -11,6 +11,11 @@ const geistSans = Geist({
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+const caveat = Caveat({
+  variable: "--font-caveat",
   subsets: ["latin"],
 });
 
@@ -50,7 +55,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} dark`}
+      className={`${geistSans.variable} ${geistMono.variable} ${caveat.variable}`}
       suppressHydrationWarning
     >
       <head>
@@ -59,8 +64,7 @@ export default function RootLayout({
           {`
             try {
               var saved = localStorage.getItem('agentic_theme');
-              var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-              var t = saved ? saved : (prefersDark ? 'dark' : 'light');
+              var t = saved ? saved : 'light';
               if (t === 'dark') {
                 document.documentElement.classList.add('dark');
                 document.documentElement.classList.remove('light');
