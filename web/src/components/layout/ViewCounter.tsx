@@ -42,27 +42,27 @@ export default function ViewCounter() {
 
   return (
     <div
-      title="Total Live Website Visits (Increments on each session & refresh)"
-      className="flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-slate-700 transition select-none group"
+      title="Total Live Website Visitors"
+      className="flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-slate-700 transition select-none group shadow-inner"
     >
-      <div className="relative flex items-center justify-center">
+      <div className="relative flex items-center justify-center shrink-0">
         <Eye className="w-3.5 h-3.5 text-teal-400 group-hover:text-teal-300 transition-colors" />
         <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
       </div>
 
-      <div className="flex items-center gap-1 text-[11px] sm:text-xs font-mono font-bold text-slate-300">
+      <div className="flex items-center gap-1 text-[11px] sm:text-xs font-mono">
+        <span className="text-slate-400 font-sans text-[10px] sm:text-[11px] font-medium tracking-wide shrink-0">
+          <span className="hidden sm:inline">Total </span>Visitors:
+        </span>
         {views !== null ? (
-          <span className="text-white tracking-tight">
+          <span className="text-teal-400 dark:text-teal-300 font-bold tracking-tight font-mono">
             {views.toLocaleString()}
           </span>
         ) : loading ? (
-          <span className="inline-block w-8 h-3 bg-slate-800 animate-pulse rounded" />
+          <span className="inline-block w-7 h-3 bg-slate-800 animate-pulse rounded" />
         ) : (
           <span className="text-slate-400">--</span>
         )}
-        <span className="text-[10px] text-slate-400 uppercase font-sans font-medium hidden xs:inline">
-          views
-        </span>
       </div>
     </div>
   );
