@@ -70,13 +70,20 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Bottom copyright */}
+        {/* Bottom copyright & legal */}
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400 font-mono">
           <p>© 2026 AgenticCraft Academy. Built for hands-on practical learning.</p>
-          <p className="flex items-center gap-1">
-            Explained with simple English & relatable everyday analogies.
-          </p>
+          <div className="flex items-center gap-4">
+            <Link href="/privacy" className="hover:text-teal-400 transition underline underline-offset-4">
+              Privacy Policy
+            </Link>
+            <span>•</span>
+            <Link href="/terms" className="hover:text-teal-400 transition underline underline-offset-4">
+              Terms of Service
+            </Link>
+          </div>
         </div>
+
       </div>
     </footer>
   );

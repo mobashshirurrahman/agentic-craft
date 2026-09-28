@@ -3,6 +3,10 @@ import { Geist, Geist_Mono, Caveat } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { ThemeProvider } from "@/lib/theme-context";
+import { AuthProvider } from "@/lib/auth-context";
+import AuthModal from "@/components/auth/AuthModal";
+import CertificateModal from "@/components/auth/CertificateModal";
+
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -78,8 +82,15 @@ export default function RootLayout({
         </Script>
       </head>
       <body className="min-h-screen flex flex-col text-[var(--foreground)] bg-[var(--background)] selection:bg-teal-500/30 selection:text-teal-500 transition-colors duration-200">
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            {children}
+            <AuthModal />
+            <CertificateModal />
+          </AuthProvider>
+        </ThemeProvider>
       </body>
+
     </html>
   );
 }

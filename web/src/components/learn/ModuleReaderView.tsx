@@ -19,7 +19,10 @@ import {
   Terminal,
 } from "lucide-react";
 import confetti from "canvas-confetti";
+import LessonStartAuthOffer from "./LessonStartAuthOffer";
+import LevelCertificateCard from "./LevelCertificateCard";
 import Module1_1Content from "@/components/modules/Module1_1/Module1_1Content";
+
 import Module1_2Content from "@/components/modules/Module1_2/Module1_2Content";
 import Module1_3Content from "@/components/modules/Module1_3/Module1_3Content";
 import Module1_4Content from "@/components/modules/Module1_4/Module1_4Content";
@@ -96,6 +99,9 @@ export default function ModuleReaderView({
     useProgress();
   const completed = isCompleted(module.id);
   const bookmarked = isBookmarked(module.id);
+  const isEndOfLevel =
+    nextModule === null || nextModule.levelId !== module.levelId;
+
 
   const handleCompleteClick = () => {
     if (!completed) {
@@ -264,6 +270,9 @@ export default function ModuleReaderView({
           </div>
         </div>
       </div>
+
+      {/* Free Learner Perk: Certificate & Streak Signup Offer */}
+      <LessonStartAuthOffer moduleTitle={module.title} />
 
       {/* Render Module Content if Generated, else Syllabus Outline */}
       <div className="lesson-content-body pt-2 space-y-10">
@@ -455,7 +464,17 @@ export default function ModuleReaderView({
       )}
       </div>
 
+      {/* End-of-Level / Final Milestone Certificate Claim Card */}
+      {isEndOfLevel && (
+        <LevelCertificateCard
+          levelNumber={level.levelNumber}
+          levelTitle={level.subtitle || level.title}
+          isFinalModule={module.id === "module-4-17"}
+        />
+      )}
+
       {/* Bottom Previous / Next Navigation */}
+
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-6 border-t border-slate-200 dark:border-slate-800">
         {prevModule ? (
           <Link

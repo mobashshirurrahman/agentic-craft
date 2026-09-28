@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 import { COURSE_LEVELS } from "@/lib/curriculum-data";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://agentic-craft.dev";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://agenticcraft.vercel.app";
 
   const moduleUrls = COURSE_LEVELS.flatMap((level) =>
     level.modules.map((mod) => ({
@@ -20,6 +20,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "daily",
       priority: 1.0,
     },
+    {
+      url: `${baseUrl}/learn`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/privacy`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/terms`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
     ...moduleUrls,
   ];
 }
+

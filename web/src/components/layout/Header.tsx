@@ -6,6 +6,7 @@ import { useProgress } from "@/lib/store";
 import { getAllModules } from "@/lib/curriculum-data";
 import ThemeToggle from "./ThemeToggle";
 import ViewCounter from "./ViewCounter";
+import UserProfileButton from "@/components/auth/UserProfileButton";
 import {
   Bot,
   Compass,
@@ -97,7 +98,11 @@ export default function Header() {
           {/* Live Global Visit / View Counter */}
           <ViewCounter />
 
+          {/* User Profile & Streak Indicator */}
+          <UserProfileButton />
+
           {/* Overall Progress Badge */}
+
           <div className="hidden sm:flex items-center">
             <Link
               href="/learn/level-1/module-1-1"

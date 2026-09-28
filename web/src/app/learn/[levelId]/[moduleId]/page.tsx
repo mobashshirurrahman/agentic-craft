@@ -24,6 +24,8 @@ export async function generateStaticParams() {
   return params;
 }
 
+import { CourseJsonLd } from "@/components/seo/JsonLd";
+
 export async function generateMetadata({
   params,
 }: {
@@ -37,9 +39,26 @@ export async function generateMetadata({
     return { title: "Module Not Found | AgenticCraft Academy" };
   }
 
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://agenticcraft.vercel.app";
+  const pageUrl = `${baseUrl}/learn/${levelId}/${moduleId}`;
+
   return {
     title: `Module ${mod.number}: ${mod.title} | ${lvl.subtitle} | AgenticCraft`,
     description: `Learn ${mod.title} step-by-step. Master practical Agentic AI engineering with hands-on code, interactive architecture diagrams, and exercises.`,
+    alternates: {
+      canonical: pageUrl,
+    },
+    openGraph: {
+      title: `Module ${mod.number}: ${mod.title} | AgenticCraft`,
+      description: `Master ${mod.title} in Level ${lvl.levelNumber} (${lvl.subtitle}). 100% free, interactive code walkthroughs and diagrams.`,
+      url: pageUrl,
+      type: "article",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `Module ${mod.number}: ${mod.title} | AgenticCraft`,
+      description: `Master ${mod.title} with pure Python code, ReAct loops, and LangGraph architecture.`,
+    },
   };
 }
 
@@ -56,6 +75,9 @@ export default async function ModulePage({
     notFound();
   }
 
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://agenticcraft.vercel.app";
+  const pageUrl = `${baseUrl}/learn/${levelId}/${moduleId}`;
+
   const allModules = getAllModules();
   const currentIndex = allModules.findIndex((m) => m.id === mod.id);
   const prevModule = currentIndex > 0 ? allModules[currentIndex - 1] : null;
@@ -64,6 +86,7 @@ export default async function ModulePage({
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--background)] transition-colors duration-200">
+      <CourseJsonLd module={mod} level={lvl} url={pageUrl} />
       <Header />
       <div className="learn-workspace flex-1 flex flex-col lg:flex-row max-w-7xl w-full mx-auto">
         <LearnSidebar currentModuleId={mod.id} currentLevelId={lvl.id} />

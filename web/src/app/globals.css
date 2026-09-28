@@ -316,3 +316,31 @@ html:not(.dark) ::-webkit-scrollbar-thumb:hover {
 pre {
   font-family: var(--font-geist-mono), monospace;
 }
+
+/* Certificate Print Optimization */
+@media print {
+  @page {
+    size: landscape;
+    margin: 0.5cm;
+  }
+  body * {
+    visibility: hidden;
+  }
+  #certificate-print-area,
+  #certificate-print-area * {
+    visibility: visible;
+  }
+  #certificate-print-area {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    border-width: 3px !important;
+    background: #090d16 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
