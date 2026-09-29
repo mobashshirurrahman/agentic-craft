@@ -45,9 +45,12 @@ export const metadata: Metadata = {
     title: "AgenticCraft — Learn Agentic AI by Building",
     description:
       "The complete visual, interactive tutorial platform for building production AI agents.",
-    url: "https://agentic-craft.dev",
+    url: "https://agenticcraft.vercel.app",
     siteName: "AgenticCraft",
     type: "website",
+  },
+  verification: {
+    google: "gsLRX-BtDwFFOLHfI1IGU4u9LNKXfmfq9LqcStdsn0M",
   },
 };
 
@@ -64,7 +67,12 @@ export default function RootLayout({
     >
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta
+          name="google-site-verification"
+          content="gsLRX-BtDwFFOLHfI1IGU4u9LNKXfmfq9LqcStdsn0M"
+        />
         <Script id="theme-boot" strategy="beforeInteractive">
+
           {`
             try {
               var p = window.location.pathname;
