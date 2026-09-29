@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { supabase, isSupabaseConfigured } from "./supabase";
+import { COURSE_LEVELS } from "./curriculum-data";
 
 export interface UserProfile {
   id: string;
@@ -27,6 +28,40 @@ export interface CertificateRecord {
   studentName: string;
 }
 
+export const isLevelCompletedInStorage = (levelNumber: number): boolean => {
+  if (typeof window === "undefined") return false;
+  try {
+    const raw = localStorage.getItem("agentic_craft_progress_v1");
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    const completedList: string[] = Array.isArray(data?.completedModules)
+      ? data.completedModules
+      : [];
+    const lvl = COURSE_LEVELS.find((l) => l.levelNumber === levelNumber);
+    if (!lvl) return false;
+    return lvl.modules.every((m) => completedList.includes(m.id));
+  } catch {
+    return false;
+  }
+};
+
+export const isCourseCompletedInStorage = (): boolean => {
+  if (typeof window === "undefined") return false;
+  try {
+    const raw = localStorage.getItem("agentic_craft_progress_v1");
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    const completedList: string[] = Array.isArray(data?.completedModules)
+      ? data.completedModules
+      : [];
+    return COURSE_LEVELS.every((lvl) =>
+      lvl.modules.every((m) => completedList.includes(m.id))
+    );
+  } catch {
+    return false;
+  }
+};
+
 interface AuthContextType {
   user: UserProfile | null;
   isAuthenticated: boolean;
@@ -42,10 +77,12 @@ interface AuthContextType {
   loginWithEmail: (email: string, name?: string) => Promise<void>;
   loginWithDemo: (name?: string, email?: string) => void;
   logout: () => Promise<void>;
-  claimLevelCertificate: (levelNumber: number, levelTitle: string) => CertificateRecord;
-  claimMasterCertificate: () => CertificateRecord;
+  claimLevelCertificate: (levelNumber: number, levelTitle: string) => CertificateRecord | null;
+  claimMasterCertificate: () => CertificateRecord | null;
   hasLevelCertificate: (levelNumber: number) => boolean;
   hasMasterCertificate: () => boolean;
+  isLevelCompleted: (levelNumber: number) => boolean;
+  isMasterCompleted: () => boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -64,10 +101,12 @@ const AuthContext = createContext<AuthContextType>({
   loginWithDemo: () => {},
   logout: async () => {},
 
-  claimLevelCertificate: () => ({} as CertificateRecord),
-  claimMasterCertificate: () => ({} as CertificateRecord),
+  claimLevelCertificate: () => null,
+  claimMasterCertificate: () => null,
   hasLevelCertificate: () => false,
   hasMasterCertificate: () => false,
+  isLevelCompleted: () => false,
+  isMasterCompleted: () => false,
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -134,11 +173,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem("agentic_user_streak", JSON.stringify(initial));
     }
 
-    // Load certificates
+    // Load certificates (only keep ones where the level was truly completed)
     const savedCerts = localStorage.getItem("agentic_certificates");
     if (savedCerts) {
       try {
-        setCertificates(JSON.parse(savedCerts));
+        const rawCerts = JSON.parse(savedCerts);
+        if (Array.isArray(rawCerts)) {
+          const verifiedCerts = rawCerts.filter((c: CertificateRecord) => {
+            if (c.type === "master") return isCourseCompletedInStorage();
+            if (c.type === "level" && c.levelNumber) return isLevelCompletedInStorage(c.levelNumber);
+            return false;
+          });
+          setCertificates(verifiedCerts);
+          if (verifiedCerts.length !== rawCerts.length) {
+            localStorage.setItem("agentic_certificates", JSON.stringify(verifiedCerts));
+          }
+        }
       } catch {}
     }
 
@@ -276,10 +326,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("agentic_local_user");
   };
 
-  // Certificate claim functions
-  const claimLevelCertificate = (levelNumber: number, levelTitle: string): CertificateRecord => {
+  // Certificate claim functions with STRICT COMPLETION GATING
+  const claimLevelCertificate = (levelNumber: number, levelTitle: string): CertificateRecord | null => {
+    // 1. Enforce all lessons in this level completed
+    if (!isLevelCompletedInStorage(levelNumber)) {
+      alert(`⚠️ You cannot generate this certificate yet! You must complete all lessons in Level ${levelNumber} first.`);
+      return null;
+    }
+
     const existing = certificates.find((c) => c.levelNumber === levelNumber);
-    if (existing) return existing;
+    if (existing) {
+      setCertificateModalData(existing);
+      return existing;
+    }
 
     const studentName = user?.name || "Agentic Craftsman";
     const verificationCode = `AC-L${levelNumber}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
@@ -305,9 +364,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return newCert;
   };
 
-  const claimMasterCertificate = (): CertificateRecord => {
+  const claimMasterCertificate = (): CertificateRecord | null => {
+    // 1. Enforce all 59 lessons in curriculum completed
+    if (!isCourseCompletedInStorage()) {
+      alert("⚠️ You cannot generate the Master Diploma yet! You must complete all 59 lessons across all 4 levels first.");
+      return null;
+    }
+
     const existing = certificates.find((c) => c.type === "master");
-    if (existing) return existing;
+    if (existing) {
+      setCertificateModalData(existing);
+      return existing;
+    }
 
     const studentName = user?.name || "Agentic Craftsman";
     const verificationCode = `AC-MAST-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
@@ -315,7 +383,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const masterCert: CertificateRecord = {
       id: `cert-master-${Date.now()}`,
       type: "master",
-      title: "Master of Agentic AI Engineering (Distinction)",
+      title: "Master of Agentic AI Engineering (Completion Badge)",
       issuedAt: new Date().toLocaleDateString("en-US", {
         month: "long",
         day: "numeric",
@@ -340,6 +408,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return certificates.some((c) => c.type === "master");
   };
 
+  const isLevelCompleted = (levelNumber: number) => {
+    return isLevelCompletedInStorage(levelNumber);
+  };
+
+  const isMasterCompleted = () => {
+    return isCourseCompletedInStorage();
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -362,6 +438,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         claimMasterCertificate,
         hasLevelCertificate,
         hasMasterCertificate,
+        isLevelCompleted,
+        isMasterCompleted,
       }}
     >
       {children}

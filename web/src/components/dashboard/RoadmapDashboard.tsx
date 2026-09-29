@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { COURSE_LEVELS, CourseLevel, CourseModule } from "@/lib/curriculum-data";
 import { useProgress } from "@/lib/store";
+import { useAuth } from "@/lib/auth-context";
 import {
   Search,
   CheckCircle2,
@@ -18,10 +19,23 @@ import {
   ChevronRight,
   Circle,
   X,
+  Award,
+  Lock,
+  Download,
+  Printer,
 } from "lucide-react";
 
 export default function RoadmapDashboard() {
   const { isCompleted } = useProgress();
+  const {
+    isAuthenticated,
+    setAuthModalOpen,
+    certificates,
+    claimLevelCertificate,
+    claimMasterCertificate,
+    setCertificateModalData,
+  } = useAuth();
+
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedTag, setSelectedTag] = useState<string>("all");
   const [expandedLevels, setExpandedLevels] = useState<Record<string, boolean>>({
@@ -95,6 +109,54 @@ export default function RoadmapDashboard() {
       0
     );
   }, [filteredLevels]);
+
+  const totalCourseModules = useMemo(() => COURSE_LEVELS.flatMap((l) => l.modules), []);
+  const totalCourseCompleted = useMemo(
+    () => totalCourseModules.filter((m) => isCompleted(m.id)).length,
+    [totalCourseModules, isCompleted]
+  );
+  const isMasterComplete = totalCourseCompleted >= 59;
+
+  const handleDownloadLevelCert = (levelNumber: number, levelTitle: string, isComplete: boolean) => {
+    if (!isComplete) {
+      const lvl = COURSE_LEVELS.find((l) => l.levelNumber === levelNumber);
+      const total = lvl?.modulesCount || 13;
+      const done = lvl ? lvl.modules.filter((m) => isCompleted(m.id)).length : 0;
+      alert(`🔒 Certificate Locked!\n\nYou must complete all ${total} lessons in Level ${levelNumber} to download this certificate.\n\nCurrently completed: ${done} of ${total} lessons (${total - done} remaining).`);
+      return;
+    }
+
+    if (!isAuthenticated) {
+      setAuthModalOpen(true);
+      return;
+    }
+
+    const existing = certificates.find((c) => c.levelNumber === levelNumber);
+    if (existing) {
+      setCertificateModalData(existing);
+    } else {
+      claimLevelCertificate(levelNumber, levelTitle);
+    }
+  };
+
+  const handleDownloadMasterCert = (isComplete: boolean) => {
+    if (!isComplete) {
+      alert(`🔒 Master Diploma Locked!\n\nYou must complete all 59 lessons across all 4 levels to download the Grand Master Diploma.\n\nCurrently completed: ${totalCourseCompleted} of 59 lessons (${59 - totalCourseCompleted} remaining).`);
+      return;
+    }
+
+    if (!isAuthenticated) {
+      setAuthModalOpen(true);
+      return;
+    }
+
+    const existing = certificates.find((c) => c.type === "master");
+    if (existing) {
+      setCertificateModalData(existing);
+    } else {
+      claimMasterCertificate();
+    }
+  };
 
   const isSearching = searchQuery.trim().length > 0 || selectedTag !== "all";
 
@@ -307,9 +369,140 @@ export default function RoadmapDashboard() {
                   </motion.div>
                 )}
               </AnimatePresence>
+              {/* ── Below Level: Dedicated Download Certificate Bar ── */}
+              <div className="border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/70 dark:bg-slate-950/70 px-4 sm:px-6 py-3.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div
+                    className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                      completedCount >= lvl.modulesCount
+                        ? "bg-teal-500/20 text-teal-600 dark:text-teal-400 border border-teal-500/30 shadow-xs"
+                        : "bg-slate-200 dark:bg-slate-800 text-slate-400 border border-slate-300 dark:border-slate-700/60"
+                    }`}
+                  >
+                    {completedCount >= lvl.modulesCount ? (
+                      <Award className="w-5 h-5" />
+                    ) : (
+                      <Lock className="w-4 h-4" />
+                    )}
+                  </div>
+                  <div className="truncate">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-slate-900 dark:text-white">
+                        Level {lvl.levelNumber} Certificate
+                      </span>
+                      {completedCount >= lvl.modulesCount ? (
+                        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30">
+                          ✓ Ready to Download
+                        </span>
+                      ) : (
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30">
+                          🔒 {completedCount}/{lvl.modulesCount} Done
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono truncate">
+                      {completedCount >= lvl.modulesCount
+                        ? `All ${lvl.modulesCount} lessons completed • Informational Completion Credential`
+                        : `Complete all ${lvl.modulesCount} lessons to download Level ${lvl.levelNumber} certificate (${lvl.modulesCount - completedCount} remaining)`}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() =>
+                    handleDownloadLevelCert(
+                      lvl.levelNumber,
+                      lvl.subtitle || lvl.title,
+                      completedCount >= lvl.modulesCount
+                    )
+                  }
+                  className={`px-4 py-2 rounded-xl text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all shrink-0 cursor-pointer ${
+                    completedCount >= lvl.modulesCount
+                      ? "bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-slate-950 shadow-md shadow-teal-500/20 hover:scale-[1.02]"
+                      : "bg-slate-200/80 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-750 border border-slate-300/80 dark:border-slate-700/60"
+                  }`}
+                  title={
+                    completedCount >= lvl.modulesCount
+                      ? `Download Level ${lvl.levelNumber} Certificate`
+                      : `Complete all ${lvl.modulesCount} lessons to unlock certificate (${completedCount}/${lvl.modulesCount} done)`
+                  }
+                >
+                  {completedCount >= lvl.modulesCount ? (
+                    <>
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Download Certificate Level {lvl.levelNumber}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="w-3.5 h-3.5" />
+                      <span>Download Certificate Level {lvl.levelNumber} ({completedCount}/{lvl.modulesCount})</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           );
         })}
+      </div>
+
+      {/* ── Grand Final Master Diploma Download Bar ── */}
+      <div className="mt-6 rounded-3xl border-2 border-amber-500/40 bg-gradient-to-r from-amber-500/10 via-slate-900/40 to-orange-500/10 dark:from-amber-500/15 dark:via-slate-900/90 dark:to-orange-500/15 p-5 sm:p-6 shadow-xl shadow-amber-500/5 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div
+            className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-lg ${
+              isMasterComplete
+                ? "bg-gradient-to-br from-amber-400 to-orange-500 text-slate-950 shadow-amber-500/20"
+                : "bg-slate-200 dark:bg-slate-800 text-slate-500"
+            }`}
+          >
+            {isMasterComplete ? <Award className="w-6 h-6" /> : <Lock className="w-5 h-5" />}
+          </div>
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                Grand Milestone
+              </span>
+              <span className="text-sm font-bold text-slate-900 dark:text-white">
+                Master Diploma of Agentic AI Engineering
+              </span>
+              {isMasterComplete ? (
+                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                  ✓ 59/59 Complete
+                </span>
+              ) : (
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                  🔒 {totalCourseCompleted}/59 Lessons Done
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+              {isMasterComplete
+                ? "Congratulations! You have mastered all 59 modules across the entire curriculum. Download your verified Master Diploma."
+                : `Complete all 59 lessons across Level 1, 2, 3, and 4 to unlock the Master Diploma (${59 - totalCourseCompleted} lessons remaining).`}
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => handleDownloadMasterCert(isMasterComplete)}
+          className={`px-5 py-3 rounded-xl text-xs font-mono font-bold flex items-center justify-center gap-2 transition-all shrink-0 cursor-pointer ${
+            isMasterComplete
+              ? "bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-500 text-slate-950 shadow-lg shadow-amber-500/30 hover:scale-[1.02]"
+              : "bg-slate-200/80 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-750 border border-slate-300/80 dark:border-slate-700/60"
+          }`}
+        >
+          {isMasterComplete ? (
+            <>
+              <Download className="w-4 h-4" />
+              <span>Download Master Diploma</span>
+            </>
+          ) : (
+            <>
+              <Lock className="w-4 h-4" />
+              <span>Download Master Diploma ({totalCourseCompleted}/59)</span>
+            </>
+          )}
+        </button>
       </div>
 
       {/* Gentle Footer Note */}

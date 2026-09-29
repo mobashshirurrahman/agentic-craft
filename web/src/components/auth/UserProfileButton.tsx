@@ -158,7 +158,7 @@ export default function UserProfileButton() {
                     No certificates claimed yet.
                   </p>
                   <p className="text-[11px] text-teal-600 dark:text-teal-400 font-mono mt-1">
-                    Finish Level 1 (Module 1.13) to earn your first badge!
+                    Complete all 13 lessons in Level 1 to earn your first certificate!
                   </p>
                 </div>
               ) : (

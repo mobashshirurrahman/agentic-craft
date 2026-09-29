@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { COURSE_LEVELS, CourseModule } from "@/lib/curriculum-data";
 import { useProgress } from "@/lib/store";
+import { useAuth } from "@/lib/auth-context";
 import {
   ChevronLeft,
   ChevronDown,
@@ -17,6 +18,9 @@ import {
   Menu,
   X,
   BookOpen,
+  Award,
+  Lock,
+  Download,
 } from "lucide-react";
 
 interface LearnSidebarProps {
@@ -29,6 +33,15 @@ export default function LearnSidebar({
   currentLevelId,
 }: LearnSidebarProps) {
   const { isCompleted, toggleComplete } = useProgress();
+  const {
+    isAuthenticated,
+    setAuthModalOpen,
+    certificates,
+    claimLevelCertificate,
+    claimMasterCertificate,
+    setCertificateModalData,
+  } = useAuth();
+
   const [activeLevelAccordion, setActiveLevelAccordion] =
     useState<string>(currentLevelId);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState<boolean>(false);
@@ -37,6 +50,59 @@ export default function LearnSidebar({
   const currentModule = currentLevel?.modules.find(
     (m) => m.id === currentModuleId
   );
+
+  const totalAllCompleted = COURSE_LEVELS.flatMap((l) => l.modules).filter((m) =>
+    isCompleted(m.id)
+  ).length;
+
+  const handleSidebarLevelCert = (
+    levelNumber: number,
+    levelTitle: string,
+    isComplete: boolean
+  ) => {
+    if (!isComplete) {
+      const lvl = COURSE_LEVELS.find((l) => l.levelNumber === levelNumber);
+      const total = lvl?.modulesCount || 13;
+      const done = lvl ? lvl.modules.filter((m) => isCompleted(m.id)).length : 0;
+      alert(
+        `🔒 Certificate Locked!\n\nYou must complete all ${total} lessons in Level ${levelNumber} to download this certificate.\n\nCurrently completed: ${done} of ${total} lessons (${total - done} remaining).`
+      );
+      return;
+    }
+
+    if (!isAuthenticated) {
+      setAuthModalOpen(true);
+      return;
+    }
+
+    const existing = certificates.find((c) => c.levelNumber === levelNumber);
+    if (existing) {
+      setCertificateModalData(existing);
+    } else {
+      claimLevelCertificate(levelNumber, levelTitle);
+    }
+  };
+
+  const handleSidebarMasterCert = (isComplete: boolean) => {
+    if (!isComplete) {
+      alert(
+        `🔒 Master Diploma Locked!\n\nYou must complete all 59 lessons across all 4 levels to download the Grand Master Diploma.\n\nCurrently completed: ${totalAllCompleted} of 59 lessons (${59 - totalAllCompleted} remaining).`
+      );
+      return;
+    }
+
+    if (!isAuthenticated) {
+      setAuthModalOpen(true);
+      return;
+    }
+
+    const existing = certificates.find((c) => c.type === "master");
+    if (existing) {
+      setCertificateModalData(existing);
+    } else {
+      claimMasterCertificate();
+    }
+  };
 
   const sidebarContent = (isMobile: boolean) => (
     <div className="flex flex-col h-full overflow-hidden">
@@ -162,11 +228,88 @@ export default function LearnSidebar({
                       </Link>
                     );
                   })}
+                  {/* Dedicated Download Certificate Level {lvl.levelNumber} Tab */}
+                  <div className="pt-2 pb-1 px-1 mt-1 border-t border-slate-200 dark:border-slate-800/80">
+                    <button
+                      onClick={() =>
+                        handleSidebarLevelCert(
+                          lvl.levelNumber,
+                          lvl.subtitle || lvl.title,
+                          levelCompletedCount >= lvl.modulesCount
+                        )
+                      }
+                      className={`w-full py-2 px-2.5 rounded-lg text-xs font-mono font-bold flex items-center justify-between transition-all ${
+                        levelCompletedCount >= lvl.modulesCount
+                          ? "bg-teal-500/15 hover:bg-teal-500/25 text-teal-800 dark:text-teal-300 border border-teal-500/40 shadow-xs cursor-pointer hover:scale-[1.01]"
+                          : "bg-slate-100/80 dark:bg-slate-900/60 hover:bg-slate-200/80 dark:hover:bg-slate-850/80 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-800/80 cursor-pointer"
+                      }`}
+                      title={
+                        levelCompletedCount >= lvl.modulesCount
+                          ? `Download Level ${lvl.levelNumber} Certificate`
+                          : `Complete all ${lvl.modulesCount} lessons to download Level ${lvl.levelNumber} Certificate (${levelCompletedCount}/${lvl.modulesCount} completed)`
+                      }
+                    >
+                      <span className="flex items-center gap-1.5 truncate">
+                        {levelCompletedCount >= lvl.modulesCount ? (
+                          <Award className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400 shrink-0" />
+                        ) : (
+                          <Lock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        )}
+                        <span className="truncate">Download Certificate Level {lvl.levelNumber}</span>
+                      </span>
+                      <span
+                        className={`text-[10px] shrink-0 font-mono px-1.5 py-0.5 rounded ${
+                          levelCompletedCount >= lvl.modulesCount
+                            ? "bg-teal-500/20 text-teal-700 dark:text-teal-300 font-bold"
+                            : "bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+                        }`}
+                      >
+                        {levelCompletedCount >= lvl.modulesCount
+                          ? "Ready 🎓"
+                          : `${levelCompletedCount}/${lvl.modulesCount}`}
+                      </span>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
           );
         })}
+      </div>
+
+      {/* Master Diploma Download Row at Bottom of Sidebar */}
+      <div className="p-3 border-t border-slate-200 dark:border-slate-800/80 shrink-0 bg-white dark:bg-slate-950">
+        <button
+          onClick={() => handleSidebarMasterCert(totalAllCompleted >= 59)}
+          className={`w-full py-2.5 px-3 rounded-xl text-xs font-mono font-bold flex items-center justify-between transition-all ${
+            totalAllCompleted >= 59
+              ? "bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-500 text-slate-950 shadow-md shadow-amber-500/20 cursor-pointer hover:scale-[1.01]"
+              : "bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 cursor-pointer"
+          }`}
+          title={
+            totalAllCompleted >= 59
+              ? "Download Master Diploma (All 59 Modules Completed)"
+              : `Complete all 59 modules to unlock Master Diploma (${totalAllCompleted}/59 completed)`
+          }
+        >
+          <span className="flex items-center gap-2 truncate">
+            {totalAllCompleted >= 59 ? (
+              <Award className="w-4 h-4 shrink-0" />
+            ) : (
+              <Lock className="w-3.5 h-3.5 shrink-0" />
+            )}
+            <span className="truncate">Master Diploma</span>
+          </span>
+          <span
+            className={`text-[10px] font-mono px-1.5 py-0.5 rounded shrink-0 ${
+              totalAllCompleted >= 59
+                ? "bg-slate-950/20 text-slate-950 font-bold"
+                : "bg-slate-200 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+            }`}
+          >
+            {totalAllCompleted >= 59 ? "Unlocked 🏆" : `${totalAllCompleted}/59`}
+          </span>
+        </button>
       </div>
     </div>
   );
