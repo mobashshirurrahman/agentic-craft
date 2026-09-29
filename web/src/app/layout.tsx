@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     type: "website",
   },
   verification: {
-    google: "gsLRX-BtDwFFOLHfI1IGU4u9LNKXfmfq9LqcStdsn0M",
+    google: "obNgBFUSdjvoy5k2LTOzl5BCR3fykg1SZLV3yOd6Exg",
   },
 };
 
@@ -69,9 +69,14 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta
           name="google-site-verification"
+          content="obNgBFUSdjvoy5k2LTOzl5BCR3fykg1SZLV3yOd6Exg"
+        />
+        <meta
+          name="google-site-verification"
           content="gsLRX-BtDwFFOLHfI1IGU4u9LNKXfmfq9LqcStdsn0M"
         />
         <Script id="theme-boot" strategy="beforeInteractive">
+
 
           {`
             try {
