@@ -47,7 +47,7 @@ html {
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-sans), var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   overflow-x: hidden;
   background-image: 
     radial-gradient(circle at 50% 0%, rgba(14, 165, 233, 0.08) 0%, transparent 50%),
@@ -82,13 +82,32 @@ body {
   transform: translateY(-2px);
 }
 
-/* Custom handwriting and calligraphy font classes */
-.font-handwriting {
-  font-family: var(--font-caveat), "Caveat", cursive;
+/* Custom handwriting and handwritten notes classes */
+.font-handwriting,
+.font-note {
+  font-family: var(--font-caveat), "Caveat", "Comic Sans MS", cursive;
 }
 
 .font-calligraphy {
   font-family: var(--font-caveat), "Caveat", "Brush Script MT", cursive;
+}
+
+/* Handwritten sticky note / margin note design */
+.handwritten-note {
+  font-family: var(--font-caveat), "Caveat", cursive;
+  font-size: 1.25rem;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+}
+
+.handwritten-sticky {
+  font-family: var(--font-caveat), "Caveat", cursive;
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.handwritten-sticky:hover {
+  transform: rotate(0deg) scale(1.02);
 }
 
 /* Light mode card and glass panel refinements */
@@ -313,8 +332,8 @@ html:not(.dark) ::-webkit-scrollbar-thumb:hover {
 }
 
 /* Code block highlight */
-pre {
-  font-family: var(--font-geist-mono), monospace;
+code, pre, .font-mono {
+  font-family: var(--font-mono), var(--font-geist-mono), monospace;
 }
 
 /* Certificate Print Optimization */

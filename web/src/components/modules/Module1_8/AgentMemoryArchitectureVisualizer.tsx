@@ -21,217 +21,127 @@ type MemoryTab = "all" | "semantic" | "episodic" | "procedural";
 
 export default function AgentMemoryArchitectureVisualizer() {
   const [activeTab, setActiveTab] = useState<MemoryTab>("all");
-  const [isSimulatingRetrieval, setIsSimulatingRetrieval] = useState<boolean>(false);
   const [sessionDay, setSessionDay] = useState<"day1" | "day30">("day1");
 
   return (
-    <div className="rounded-2xl border border-slate-700/60 bg-slate-900/90 dark:bg-slate-900/90 light:bg-white light:border-slate-300 shadow-xl overflow-hidden my-8">
+    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 sm:p-6 shadow-sm dark:shadow-2xl space-y-6">
       {/* Header */}
-      <div className="border-b border-slate-700/60 dark:border-slate-700/60 light:border-slate-200 px-5 py-4 bg-slate-800/50 dark:bg-slate-800/50 light:bg-slate-50 flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
         <div>
           <div className="flex items-center gap-2">
-            <span className="flex h-2.5 w-2.5 rounded-full bg-teal-400 animate-pulse" />
-            <h3 className="font-bold text-base md:text-lg text-white dark:text-white light:text-slate-900">
-              Interactive Dual-Memory Architecture Visualizer
-            </h3>
+            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-teal-700 dark:text-teal-400 px-2.5 py-0.5 rounded-full bg-teal-50 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/30">
+              Interactive Dual-Memory Architecture
+            </span>
+            <span className="text-[11px] font-mono text-slate-500">RAM vs SSD</span>
           </div>
-          <p className="text-xs text-slate-400 dark:text-slate-400 light:text-slate-600 mt-0.5">
-            Short-Term Working Context (RAM) vs. Long-Term Persistent Knowledge Vault (SSD).
+          <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mt-1">
+            Short-Term (RAM) vs. Long-Term (Vault) Memory
+          </h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Compare volatile in-context working scratchpad with persistent multi-session memory
           </p>
         </div>
 
         {/* Multi-Session Time Jump Switcher */}
-        <div className="flex items-center bg-slate-900/80 dark:bg-slate-900/80 light:bg-slate-200 p-1 rounded-xl border border-slate-700/80 dark:border-slate-700/80 light:border-slate-300">
+        <div className="flex items-center bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-mono self-start sm:self-center shadow-sm">
           <button
             onClick={() => setSessionDay("day1")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all touch-manipulation active:scale-95 ${
               sessionDay === "day1"
-                ? "bg-teal-500 text-slate-950 font-bold shadow-sm"
-                : "text-slate-400 dark:text-slate-400 light:text-slate-700 hover:text-white dark:hover:text-white"
+                ? "bg-teal-600 text-white font-bold shadow-sm"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
           >
             <Calendar className="w-3.5 h-3.5" />
-            <span>Day 1: Initial Onboarding</span>
+            <span>Day 1: Onboarding</span>
           </button>
           <button
             onClick={() => setSessionDay("day30")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all touch-manipulation active:scale-95 ${
               sessionDay === "day30"
-                ? "bg-teal-500 text-slate-950 font-bold shadow-sm"
-                : "text-slate-400 dark:text-slate-400 light:text-slate-700 hover:text-white dark:hover:text-white"
+                ? "bg-teal-600 text-white font-bold shadow-sm"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
           >
             <History className="w-3.5 h-3.5" />
-            <span>Day 30: Brand New Session</span>
+            <span>Day 30: Persistent Recall</span>
           </button>
         </div>
       </div>
 
-      <div className="p-5 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Short-Term Memory (Working Context Window) */}
-        <div className="lg:col-span-6 flex flex-col justify-between gap-4">
-          <div className="bg-slate-800/40 dark:bg-slate-800/40 light:bg-slate-50 border border-slate-700/50 dark:border-slate-700/50 light:border-slate-200 rounded-xl p-4 flex flex-col flex-1">
-            <div className="flex items-center justify-between pb-2 mb-3 border-b border-slate-700/60 dark:border-slate-700/60 light:border-slate-200">
-              <div className="flex items-center gap-2">
-                <Cpu className="w-4 h-4 text-sky-400" />
-                <h4 className="text-sm font-bold text-white dark:text-white light:text-slate-900">
-                  Short-Term Memory (Context Window / RAM)
-                </h4>
+      {/* Main Dual Architecture Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        {/* Left Column: Short-Term Memory (In-Context RAM) */}
+        <div className="lg:col-span-6 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 space-y-3 shadow-sm">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
+            <div className="flex items-center gap-2 text-sky-700 dark:text-sky-400 font-bold text-xs font-mono">
+              <Cpu className="w-4 h-4" />
+              <span>SHORT-TERM MEMORY (In-Context RAM)</span>
+            </div>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-sky-100 dark:bg-sky-500/20 text-sky-800 dark:text-sky-300 font-bold">
+              Volatile
+            </span>
+          </div>
+
+          <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+            Lives strictly inside the active context window. Fast, instantaneous to read, but erased the moment the session closes.
+          </p>
+
+          <div className="p-3 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-mono space-y-2 shadow-sm">
+            <span className="text-slate-400 text-[10px] uppercase block">
+              Active Context Buffer:
+            </span>
+            {sessionDay === "day1" ? (
+              <div className="space-y-1 text-slate-700 dark:text-slate-300">
+                <div>[Turn 1] User: &quot;I work in Python backend and deploy on AWS.&quot;</div>
+                <div>[Turn 2] Agent: &quot;Got it! I will remember your AWS and Python stack.&quot;</div>
+                <div className="text-sky-700 dark:text-sky-400 font-bold pt-1">
+                  ✓ Active in context window (Tokens: ~240)
+                </div>
               </div>
-              <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-sky-500/20 text-sky-300 font-bold">
-                Session Scope Only
-              </span>
-            </div>
-
-            <p className="text-xs text-slate-300 dark:text-slate-300 light:text-slate-600 mb-3 leading-relaxed">
-              Holds active conversation turns, task scratchpad, intermediate tool outputs, and working variables for the immediate interaction.
-            </p>
-
-            {/* Conversation Window Display */}
-            <div className="space-y-2.5 flex-1 font-mono text-xs">
-              {sessionDay === "day1" ? (
-                <>
-                  <div className="p-2.5 rounded-lg bg-sky-500/10 border border-sky-500/30 text-sky-200 dark:text-sky-200 light:text-sky-800">
-                    <span className="font-bold block text-[10px] uppercase text-sky-400">User (Turn 1):</span>
-                    "Hello! My name is Rahul. I lead backend engineering at FinCorp. We build exclusively in Python and use PostgreSQL."
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-slate-950/60 dark:bg-slate-950/60 light:bg-slate-100 border border-slate-800 dark:border-slate-800 light:border-slate-200 text-slate-300 dark:text-slate-300 light:text-slate-800">
-                    <span className="font-bold block text-[10px] uppercase text-teal-400">Agent (Turn 1):</span>
-                    "Great to meet you, Rahul! I have noted your stack (Python + PostgreSQL at FinCorp). How can I assist today?"
-                  </div>
-                  <div className="p-2.5 rounded-lg border border-teal-500/40 bg-teal-500/10 text-teal-300 text-[11px] font-mono">
-                    ⚡ <strong>Background Memory Worker:</strong> Automatically extracted 3 facts and persisted to Long-Term Memory Vault!
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px]">
-                    ℹ️ <strong>Fresh Session Notice:</strong> Short-term conversation history was cleared when the session ended 30 days ago.
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-sky-500/10 border border-sky-500/30 text-sky-200 dark:text-sky-200 light:text-sky-800">
-                    <span className="font-bold block text-[10px] uppercase text-sky-400">User (Day 30, Turn 1):</span>
-                    "Hey, generate a production database connection pool script for our services."
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-slate-950/60 dark:bg-slate-950/60 light:bg-slate-100 border border-slate-800 dark:border-slate-800 light:border-slate-200 text-slate-300 dark:text-slate-300 light:text-slate-800">
-                    <span className="font-bold block text-[10px] uppercase text-teal-400">Agent Response (Synthesized with Long-Term Memory):</span>
-                    "Welcome back, Rahul! Here is a production connection pool using <strong>asyncpg</strong> in <strong>Python</strong> for your <strong>PostgreSQL</strong> cluster at FinCorp..."
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Context prep button */}
-            {sessionDay === "day30" && (
-              <button
-                onClick={() => {
-                  setIsSimulatingRetrieval(true);
-                  setTimeout(() => setIsSimulatingRetrieval(false), 1200);
-                }}
-                className="mt-3 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold bg-sky-500 text-slate-950 hover:bg-sky-400 transition cursor-pointer"
-              >
-                <Search className="w-3.5 h-3.5" />
-                <span>{isSimulatingRetrieval ? "Querying Vector Memory Vault..." : "Simulate Memory Retrieval Injection"}</span>
-              </button>
+            ) : (
+              <div className="space-y-1 text-slate-700 dark:text-slate-300">
+                <div>[Turn 1] User: &quot;Draft a deployment script for our service.&quot;</div>
+                <div className="text-slate-500 text-[11px] italic">
+                  Note: User did not mention Python or AWS in this prompt!
+                </div>
+                <div className="text-emerald-700 dark:text-emerald-400 font-bold pt-1">
+                  ⚡ Retrieved from Long-Term Vault into Context: &quot;Stack: Python + AWS ECS&quot;
+                </div>
+              </div>
             )}
           </div>
         </div>
 
-        {/* Right Column: Long-Term Memory Vault */}
-        <div className="lg:col-span-6 flex flex-col justify-between gap-4">
-          <div className="bg-slate-800/40 dark:bg-slate-800/40 light:bg-slate-50 border border-slate-700/50 dark:border-slate-700/50 light:border-slate-200 rounded-xl p-4 flex flex-col flex-1">
-            <div className="flex items-center justify-between pb-2 mb-3 border-b border-slate-700/60 dark:border-slate-700/60 light:border-slate-200">
-              <div className="flex items-center gap-2">
-                <Database className="w-4 h-4 text-teal-400" />
-                <h4 className="text-sm font-bold text-white dark:text-white light:text-slate-900">
-                  Long-Term Persistent Memory Vault
-                </h4>
+        {/* Right Column: Long-Term Memory (Persistent Vault) */}
+        <div className="lg:col-span-6 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 space-y-3 shadow-sm">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
+            <div className="flex items-center gap-2 text-teal-700 dark:text-teal-400 font-bold text-xs font-mono">
+              <HardDrive className="w-4 h-4" />
+              <span>LONG-TERM MEMORY (Vector &amp; Relational Vault)</span>
+            </div>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-teal-100 dark:bg-teal-500/20 text-teal-800 dark:text-teal-300 font-bold">
+              Persistent
+            </span>
+          </div>
+
+          <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+            Persisted outside the LLM in vector databases (Chroma, Pinecone) or PostgreSQL. Survives browser restarts and lasts across months.
+          </p>
+
+          <div className="p-3 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-mono space-y-2 shadow-sm">
+            <span className="text-slate-400 text-[10px] uppercase block">
+              Indexed Memory Records:
+            </span>
+            <div className="space-y-1 text-xs">
+              <div className="p-2 rounded bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                <span className="text-purple-700 dark:text-purple-400 font-bold block">[Semantic Memory]:</span>
+                <span className="text-slate-700 dark:text-slate-300">&quot;User Tech Stack: Python 3.11, FastAPI, AWS ECS, PostgreSQL&quot;</span>
               </div>
-              <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-teal-500/20 text-teal-300 font-bold">
-                Survives Across Months
-              </span>
-            </div>
-
-            {/* 3 Classical Long-Term Memory Categories */}
-            <div className="flex items-center gap-1 bg-slate-900/60 dark:bg-slate-900/60 light:bg-slate-200 p-1 rounded-lg border border-slate-800 dark:border-slate-800 light:border-slate-300 mb-3 text-xs font-semibold">
-              <button
-                onClick={() => setActiveTab("all")}
-                className={`flex-1 py-1 rounded text-center transition ${
-                  activeTab === "all" ? "bg-teal-500 text-slate-950 font-bold" : "text-slate-400 hover:text-white"
-                }`}
-              >
-                All (3)
-              </button>
-              <button
-                onClick={() => setActiveTab("semantic")}
-                className={`flex-1 py-1 rounded text-center transition ${
-                  activeTab === "semantic" ? "bg-teal-500 text-slate-950 font-bold" : "text-slate-400 hover:text-white"
-                }`}
-              >
-                Semantic
-              </button>
-              <button
-                onClick={() => setActiveTab("episodic")}
-                className={`flex-1 py-1 rounded text-center transition ${
-                  activeTab === "episodic" ? "bg-teal-500 text-slate-950 font-bold" : "text-slate-400 hover:text-white"
-                }`}
-              >
-                Episodic
-              </button>
-              <button
-                onClick={() => setActiveTab("procedural")}
-                className={`flex-1 py-1 rounded text-center transition ${
-                  activeTab === "procedural" ? "bg-teal-500 text-slate-950 font-bold" : "text-slate-400 hover:text-white"
-                }`}
-              >
-                Procedural
-              </button>
-            </div>
-
-            {/* Memory Items Cards */}
-            <div className="space-y-2.5 flex-1 font-mono text-xs">
-              {(activeTab === "all" || activeTab === "semantic") && (
-                <div className="p-3 rounded-lg border border-purple-500/40 bg-purple-500/10 text-purple-200">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-bold text-[10px] text-purple-400 uppercase">Semantic Memory (Facts & Knowledge)</span>
-                    <span className="text-[10px] text-slate-400">Vector Store (Pinecone)</span>
-                  </div>
-                  <p className="text-[11px] leading-relaxed">
-                    • <strong>User Profile:</strong> Name: Rahul | Title: Lead Engineer at FinCorp
-                    <br />
-                    • <strong>Tech Stack:</strong> Primary Language: Python | Database: PostgreSQL
-                  </p>
-                </div>
-              )}
-
-              {(activeTab === "all" || activeTab === "episodic") && (
-                <div className="p-3 rounded-lg border border-sky-500/40 bg-sky-500/10 text-sky-200">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-bold text-[10px] text-sky-400 uppercase">Episodic Memory (Events & Experiences)</span>
-                    <span className="text-[10px] text-slate-400">Relational DB (Postgres)</span>
-                  </div>
-                  <p className="text-[11px] leading-relaxed">
-                    • <strong>2026-08-29 (Session #01):</strong> Rahul successfully completed architecture review for FinCorp's ledger engine.
-                  </p>
-                </div>
-              )}
-
-              {(activeTab === "all" || activeTab === "procedural") && (
-                <div className="p-3 rounded-lg border border-emerald-500/40 bg-emerald-500/10 text-emerald-200">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-bold text-[10px] text-emerald-400 uppercase">Procedural Memory (Rules & Skills)</span>
-                    <span className="text-[10px] text-slate-400">Rules / System Prompt</span>
-                  </div>
-                  <p className="text-[11px] leading-relaxed">
-                    • <strong>FinCorp Security Policy:</strong> Always enforce connection pool limits (`max_connections=20`) and type hints in all Python code.
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Storage note */}
-            <div className="mt-3 p-2.5 rounded-lg bg-slate-950/60 dark:bg-slate-950/60 light:bg-slate-100 border border-slate-800 dark:border-slate-800 light:border-slate-200 text-[11px] text-slate-400 flex items-center justify-between">
-              <span>Persistence Layer:</span>
-              <span className="text-teal-400 font-bold">Hybrid Vector + PostgreSQL</span>
+              <div className="p-2 rounded bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                <span className="text-sky-700 dark:text-sky-400 font-bold block">[Episodic Memory]:</span>
+                <span className="text-slate-700 dark:text-slate-300">&quot;Day 1: Onboarded user, established AWS ECS architecture&quot;</span>
+              </div>
             </div>
           </div>
         </div>

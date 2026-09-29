@@ -12,17 +12,13 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: "dark",
+  theme: "light",
   toggleTheme: () => {},
   setTheme: () => {},
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  // Landing page ('/') is always light. Lesson workspace ('/learn' and sub-routes) is dark.
-  const isLearnRoute = pathname?.startsWith("/learn");
-  const defaultTheme: Theme = isLearnRoute ? "dark" : "light";
-  const [theme, setThemeState] = useState<Theme>(defaultTheme);
+  const [theme, setThemeState] = useState<Theme>("light");
 
   const applyTheme = (t: Theme) => {
     const root = document.documentElement;
@@ -38,14 +34,22 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    const targetTheme: Theme = pathname?.startsWith("/learn") ? "dark" : "light";
-    setThemeState(targetTheme);
-    applyTheme(targetTheme);
-  }, [pathname]);
+    try {
+      const saved = localStorage.getItem("agentic_theme") as Theme | null;
+      const initialTheme = saved === "dark" || saved === "light" ? saved : "light";
+      setThemeState(initialTheme);
+      applyTheme(initialTheme);
+    } catch {
+      applyTheme("light");
+    }
+  }, []);
 
   const setTheme = (t: Theme) => {
     setThemeState(t);
     applyTheme(t);
+    try {
+      localStorage.setItem("agentic_theme", t);
+    } catch {}
   };
 
   const toggleTheme = () => {

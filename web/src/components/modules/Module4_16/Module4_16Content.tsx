@@ -1,205 +1,455 @@
 "use client";
-import React from "react";
+
+import React, { useState } from "react";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  DollarSign,
-  TrendingDown,
-  Layers,
-  Database,
+  Target,
+  ArrowRight,
   Code2,
+  Layers,
   Sparkles,
-  Lightbulb,
-  CheckCircle2,
+  HelpCircle,
+  Copy,
+  CheckCheck,
+  Play,
+  RotateCcw,
+  FileText,
+  AlertTriangle,
+  Coins,
+  Cpu,
   Zap,
-  Briefcase,
-  Sliders,
-  Scale,
+  Repeat,
+  DollarSign,
 } from "lucide-react";
 import CostOptimizerStudio from "./CostOptimizerStudio";
 import Module4_16Quiz from "./Module4_16Quiz";
 
 export default function Module4_16Content() {
+  const [selectedPillar, setSelectedPillar] = useState<string>("model_tiering");
+  const [showQuiz, setShowQuiz] = useState<boolean>(false);
+  const [activeCodeTab, setActiveCodeTab] = useState<"code" | "output">("code");
+  const [copiedCode, setCopiedCode] = useState<boolean>(false);
+  const [isSimulating, setIsSimulating] = useState<boolean>(false);
+  const [simStep, setSimStep] = useState<number>(0);
+
+  const pillars = [
+    {
+      id: "model_tiering",
+      title: "1. Model Tiering Router",
+      tagline: "Intelligent Task-Based Routing",
+      desc: "Route simple summarization, classification, and formatting tasks to cheap models (GPT-4o-mini at $0.15/1M). Reserve frontier models (Claude 3.5 Sonnet / o3) for complex planning.",
+      icon: Cpu,
+      color: "text-amber-600 dark:text-amber-400",
+      bg: "bg-amber-50 dark:bg-amber-500/10",
+      border: "border-amber-200 dark:border-amber-500/30",
+      badge: "Dynamic Tiering",
+      codeSnippet: `# 1. DYNAMIC MODEL TIERING ROUTER
+def select_model_tier(task_complexity: str):
+    """Assigns optimal cost-effective LLM based on task nature."""
+    if task_complexity in ["classification", "json_format", "fact_extraction"]:
+        # 100x cheaper than frontier models!
+        return ChatOpenAI(model="gpt-4o-mini", temperature=0.0)
+    elif task_complexity in ["multi_step_planning", "code_gen", "subgraph_synthesis"]:
+        return ChatAnthropic(model="claude-3-5-sonnet-20241022", temperature=0.1)
+    else:
+        return ChatOpenAI(model="gpt-4o", temperature=0.2)`,
+    },
+    {
+      id: "prompt_caching",
+      title: "2. Native Prompt Caching",
+      tagline: "90% Prefix Token Cost Reduction",
+      desc: "Place static instructions, massive schemas, and few-shot examples at the exact top of your prompt. Modern LLMs cache prefixes, slashing input token billing by 90%.",
+      icon: Coins,
+      color: "text-blue-600 dark:text-blue-400",
+      bg: "bg-blue-50 dark:bg-blue-500/10",
+      border: "border-blue-200 dark:border-blue-500/30",
+      badge: "Prompt Caching",
+      codeSnippet: `# 2. ANTHROPIC / OPENAI PROMPT PREFIX CACHING
+system_message = {
+    "role": "system",
+    "content": [
+        {
+            "type": "text",
+            "text": IMMUTABLE_5000_TOKEN_DOCSTRING_AND_RULES,
+            # Cache checkpoint: reads cost only $0.375/1M instead of $3.00/1M!
+            "cache_control": {"type": "ephemeral"}
+        }
+    ]
+}
+
+# In multi-turn agents, turns 2-15 pay nearly ZERO for the system prompt!`,
+    },
+    {
+      id: "semantic_cache",
+      title: "3. Semantic Vector Caching",
+      tagline: "Zero-Cost Deduplication",
+      desc: "Embed incoming user queries and check a vector cache. If a near-identical query was answered within the last 2 hours (cosine >= 0.95), return the cached response instantly.",
+      icon: Zap,
+      color: "text-purple-600 dark:text-purple-400",
+      bg: "bg-purple-50 dark:bg-purple-500/10",
+      border: "border-purple-200 dark:border-purple-500/30",
+      badge: "Semantic Cache",
+      codeSnippet: `# 3. REDIS SEMANTIC QUERY CACHE
+from langchain_community.cache import RedisSemanticCache
+import langchain
+
+# Intercepts identical or semantically equivalent questions
+langchain.llm_cache = RedisSemanticCache(
+    redis_url="redis://localhost:6379",
+    embedding=embed_model,
+    score_threshold=0.05 # Cosine distance <= 0.05 (Similarity >= 95%)
+)
+
+# Second invocation of "What's Apple's PE ratio?" returns in 2ms for $0.00!`,
+    },
+    {
+      id: "tool_caching",
+      title: "4. Idempotent Tool Caching",
+      tagline: "Eliminating Redundant API Calls",
+      desc: "Decorate expensive search and SQL tools with TTL memoization. Multiple parallel sub-agents asking for the same data share a single cached API response.",
+      icon: Repeat,
+      color: "text-emerald-600 dark:text-emerald-400",
+      bg: "bg-emerald-50 dark:bg-emerald-500/10",
+      border: "border-emerald-200 dark:border-emerald-500/30",
+      badge: "Tool Memoization",
+      codeSnippet: `# 4. TOOL LEVEL RESULT CACHING
+from functools import lru_cache
+import redis
+
+r = redis.Redis()
+
+def cached_web_search(query: str, ttl_seconds: int = 1800):
+    cache_key = f"tool:search:{hash(query)}"
+    cached = r.get(cache_key)
+    if cached:
+        return cached.decode()
+        
+    result = serpapi_search(query) # $0.01 per search
+    r.set(cache_key, result, ex=ttl_seconds)
+    return result`,
+    },
+  ];
+
+  const currentSnippet = pillars.find((p) => p.id === selectedPillar)?.codeSnippet || "";
+
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(currentSnippet);
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2000);
+  };
+
+  const runSimulation = () => {
+    setIsSimulating(true);
+    setSimStep(1);
+    setTimeout(() => setSimStep(2), 700);
+    setTimeout(() => setSimStep(3), 1400);
+    setTimeout(() => {
+      setSimStep(4);
+      setIsSimulating(false);
+    }, 2100);
+  };
+
   return (
     <div className="space-y-10">
-      {/* Hero Header */}
-      <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-slate-50 dark:to-slate-950 p-6 md:p-8">
+      {/* HERO BANNER */}
+      <div className="rounded-2xl border border-amber-200 dark:border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-slate-50 dark:to-slate-950 p-6 md:p-8 relative overflow-hidden transition-colors">
         <div className="space-y-3 max-w-3xl">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30">
               Module 4.16 • Production, Scaling & Optimization
             </span>
-            <span className="text-xs font-mono text-slate-500">~30 min</span>
+            <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
+              ~25 min interactive
+            </span>
           </div>
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
             Implementing Cost Optimization Strategies
           </h1>
           <p className="text-sm md:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
-            In AI agents, token bills scale linearly with activity: LLM API calls account for <strong>70% to 80%</strong> of your total infrastructure budget. If every user query triggers a 15-step agent loop on Claude 3.5 Sonnet or GPT-4o, your monthly bill will quickly spiral into tens of thousands of dollars. Here is how leading engineering teams slash agent costs by <strong>70% to 85%</strong> while maintaining identical output quality.
+            LLM bills represent <strong>75% to 85% of total agent infrastructure costs</strong>. In unoptimized systems, every turn invokes a frontier model with repeating system prompts. Master <strong>model tiering</strong>, prompt prefix caching, semantic vector deduplication, and tool memoization.
           </p>
         </div>
       </div>
 
-      {/* Real-World Analogy */}
+      {/* SECTION 1: 4 ARCHITECTURE PILLARS */}
       <section className="space-y-4">
-        <h2 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-          <Briefcase className="w-5 h-5 text-emerald-500" />
-          1. The Law Firm Analogy: Senior Partner vs. Junior Paralegal
-        </h2>
-        <div className="p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 space-y-3 text-xs md:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
-          <p>
-            Imagine a premier corporate law firm handling high-stakes litigation:
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-2">
-            <div className="p-4 rounded-xl border border-rose-200 dark:border-rose-900/40 bg-rose-50/50 dark:bg-rose-950/20 space-y-1.5">
-              <span className="font-bold text-rose-700 dark:text-rose-400 flex items-center gap-1.5 text-xs uppercase tracking-wider">
-                ❌ Unoptimized: The $1,500/hour Partner for Everything
-              </span>
-              <p className="text-xs text-slate-600 dark:text-slate-300">
-                A client asks for directions to the parking garage. You assign a $1,500/hour senior trial partner to write a 10-page memorandum detailing how to park. The firm goes bankrupt and the client is horrified by the bill.
-              </p>
-            </div>
-            <div className="p-4 rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/50 dark:bg-emerald-950/20 space-y-1.5">
-              <span className="font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5 text-xs uppercase tracking-wider">
-                ✅ Model Tiering: Intelligent Triage
-              </span>
-              <p className="text-xs text-slate-600 dark:text-slate-300">
-                A sharp receptionist (router) directs parking questions and standard form lookups to junior paralegals (GPT-4o-mini at $0.15/1M). The senior trial partners (Sonnet / o3 at $15/1M) are called <em>only</em> when navigating complex contract disputes!
-              </p>
-            </div>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <Target className="w-5 h-5 text-amber-500" />
+            1. Core Pillars of Cost Optimization
+          </h2>
+          <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
+            Select a cost optimization vector
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {pillars.map((pillar) => {
+            const Icon = pillar.icon;
+            const isSelected = selectedPillar === pillar.id;
+            return (
+              <button
+                key={pillar.id}
+                onClick={() => setSelectedPillar(pillar.id)}
+                className={`p-4 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                  isSelected
+                    ? `${pillar.border} ${pillar.bg} shadow-md ring-1 ring-amber-500/50`
+                    : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-slate-300 dark:hover:border-slate-700"
+                }`}
+              >
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className={`p-2 rounded-lg ${pillar.bg} ${pillar.color}`}>
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 font-semibold">
+                      {pillar.badge}
+                    </span>
+                  </div>
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-white">
+                    {pillar.title}
+                  </h3>
+                  <div className="text-[11px] font-medium text-amber-600 dark:text-amber-400">
+                    {pillar.tagline}
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                    {pillar.desc}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* SECTION 2: CODE & EXECUTION INSPECTOR */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Code2 className="w-4 h-4 text-amber-500" />
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white font-mono uppercase tracking-wider">
+              Token Economy &amp; Cost Auditor
+            </h3>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={runSimulation}
+              disabled={isSimulating}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold shadow-xs disabled:opacity-50 transition-all cursor-pointer"
+            >
+              {isSimulating ? (
+                <>
+                  <RotateCcw className="w-3.5 h-3.5 animate-spin" />
+                  <span>Auditing Costs...</span>
+                </>
+              ) : (
+                <>
+                  <Play className="w-3.5 h-3.5" />
+                  <span>Simulate Cost Optimization</span>
+                </>
+              )}
+            </button>
+            <button
+              onClick={handleCopyCode}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 text-slate-600 dark:text-slate-400 text-xs font-mono transition-all cursor-pointer"
+            >
+              {copiedCode ? <CheckCheck className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copiedCode ? "Copied" : "Copy"}</span>
+            </button>
           </div>
         </div>
-      </section>
 
-      {/* The 4 Optimization Pillars */}
-      <section className="space-y-4">
-        <h2 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-          <Scale className="w-5 h-5 text-teal-500" />
-          2. The Four Pillars of Agent Cost Optimization
-        </h2>
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-100 dark:bg-slate-800">
-                {["Optimization Pillar", "Mechanism", "Typical Savings", "Watch Out For"].map((h) => (
-                  <th key={h} className="p-3 font-mono font-bold text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                ["1. Model Tiering Router", "Classify query complexity; send 70%+ of simple steps to 4o-mini / Haiku", "50%–70% overall cost cut", "Underestimating complex queries (provide fallback retry)"],
-                ["2. Semantic Vector Cache", "Store query embeddings in Redis/pgvector; return cached answer if cosine >= 0.92", "20%–45% cache hits (99% saved per hit)", "Cache staleness (must configure strict TTLs)"],
-                ["3. Tool Response Caching", "Cache expensive SerpAPI/Tavily searches & SQL query results for 30–60 mins", "15%–30% tool cost & latency drop", "Never cache non-idempotent actions (e.g. POST payments)"],
-                ["4. Prompt Minimization", "Remove redundant instructions, use concise JSON, compress system prompts", "10%–20% token savings", "Accidentally stripping critical safety or formatting guardrails"],
-              ].map(([pill, mech, sav, watch], i) => (
-                <tr key={i} className="border-b border-slate-200 dark:border-slate-800">
-                  <td className="p-3 font-semibold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-950/40">
-                    {pill}
-                  </td>
-                  <td className="p-3 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
-                    {mech}
-                  </td>
-                  <td className="p-3 font-mono font-bold text-emerald-600 dark:text-emerald-400 border border-slate-200 dark:border-slate-700">
-                    {sav}
-                  </td>
-                  <td className="p-3 text-slate-500 font-mono text-[11px] border border-slate-200 dark:border-slate-700">
-                    {watch}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="rounded-xl border border-slate-800 bg-slate-950 overflow-hidden text-xs font-mono shadow-md">
+          <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800/80 bg-slate-900/60">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80 inline-block" />
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80 inline-block" />
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block" />
+              <span className="text-slate-400 text-[11px] ml-2 font-mono">
+                cost_optimizer.py • {selectedPillar}
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setActiveCodeTab("code")}
+                className={`px-2.5 py-0.5 rounded text-[11px] font-medium transition-all ${
+                  activeCodeTab === "code"
+                    ? "bg-amber-600/30 text-amber-300 border border-amber-500/40"
+                    : "text-slate-400 hover:text-slate-200"
+                }`}
+              >
+                Code
+              </button>
+              <button
+                onClick={() => setActiveCodeTab("output")}
+                className={`px-2.5 py-0.5 rounded text-[11px] font-medium transition-all ${
+                  activeCodeTab === "output"
+                    ? "bg-amber-600/30 text-amber-300 border border-amber-500/40"
+                    : "text-slate-400 hover:text-slate-200"
+                }`}
+              >
+                Billing Audit
+              </button>
+            </div>
+          </div>
+
+          <div className="p-4 overflow-x-auto text-slate-300 leading-relaxed font-mono">
+            {activeCodeTab === "code" ? (
+              <pre>
+                <code>{currentSnippet}</code>
+              </pre>
+            ) : (
+              <div className="space-y-2 text-amber-300 font-mono text-[11px]">
+                <p className="text-slate-400">&gt;&gt; Workload: 10,000 multi-turn agent turns / day</p>
+                <p className="text-rose-400">   [Unoptimized Baseline] 100% Claude 3.5 Sonnet: $450.00 / day</p>
+                <p className="text-sky-300">   [Model Tiering] 68% routed to GPT-4o-mini: Saved $235.00</p>
+                <p className="text-emerald-400">   [Prompt Prefix Cache] 90% discount on 4,000 token system prompt: Saved $128.00</p>
+                <p className="text-amber-400">   [Semantic Cache] 18% query exact/near-match hit: Saved $32.00</p>
+                <p className="text-emerald-400 font-bold">&gt;&gt; New Daily Cost: $55.00 / day (87.7% Net Savings!)</p>
+              </div>
+            )}
+          </div>
         </div>
+
+        {/* Simulation Banner */}
+        {simStep > 0 && (
+          <div className="p-3.5 rounded-xl border border-amber-200 dark:border-amber-500/30 bg-amber-50/80 dark:bg-amber-950/30 flex items-center justify-between text-xs font-mono">
+            <span className="text-amber-800 dark:text-amber-200">
+              {simStep === 1 && "Evaluating incoming query semantics against Redis semantic vector cache..."}
+              {simStep === 2 && "Triage router assigns simple tasks to mini models with 100x cost reduction..."}
+              {simStep === 3 && "Static system instructions pinned with ephemeral prefix cache control..."}
+              {simStep === 4 && "Billing audit verified: 87.7% total cost reduction with zero quality loss!"}
+            </span>
+            <span className="text-amber-600 dark:text-amber-400 font-bold">
+              Step {simStep}/4
+            </span>
+          </div>
+        )}
       </section>
 
-      {/* Production Semantic Caching Code */}
+      {/* SECTION 3: INTERACTIVE STUDIO */}
       <section className="space-y-4">
-        <h2 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-          <Code2 className="w-5 h-5 text-emerald-500" />
-          3. Semantic Caching Implementation (Python + Redis Vector Search)
-        </h2>
-        <div className="p-4 rounded-xl bg-slate-900 text-slate-200 font-mono text-xs border border-slate-800 overflow-x-auto">
-          <pre>{`import numpy as np
-from openai import OpenAI
-
-client = OpenAI()
-SIMILARITY_THRESHOLD = 0.92 # Cosine similarity threshold for cache hit
-
-# Simulated in-memory vector cache (In prod: Redis VSS or pgvector)
-vector_cache = []
-
-def get_embedding(text: str) -> list[float]:
-    res = client.embeddings.create(input=text, model="text-embedding-3-small")
-    return res.data[0].embedding
-
-def cosine_similarity(v1, v2):
-    return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
-
-def ask_agent_with_semantic_cache(user_prompt: str):
-    query_vec = get_embedding(user_prompt)
-    
-    # 1. Search semantic vector cache
-    for cached in vector_cache:
-        sim = cosine_similarity(query_vec, cached["embedding"])
-        if sim >= SIMILARITY_THRESHOLD:
-            print(f"⚡ [CACHE HIT] Similarity: {sim:.3f} | Cost: $0.00002")
-            return cached["response"]
-            
-    # 2. Cache Miss: Execute LLM Agent Call
-    print("⚠️ [CACHE MISS] Invoking LLM Agent (~$0.02)...")
-    completion = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[{"role": "user", "content": user_prompt}]
-    )
-    answer = completion.choices[0].message.content
-    
-    # 3. Store in Semantic Cache with 24-Hour TTL
-    vector_cache.append({
-        "prompt": user_prompt,
-        "embedding": query_vec,
-        "response": answer
-    })
-    return answer`}</pre>
-        </div>
-      </section>
-
-      {/* Interactive Studio Workbench */}
-      <section className="space-y-4">
-        <div>
+        <div className="flex items-center justify-between">
           <h2 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <DollarSign className="w-5 h-5 text-emerald-500" />
-            4. Interactive Studio: Unit Economics & Semantic Caching Workbench
+            <Sparkles className="w-5 h-5 text-amber-500" />
+            2. Interactive Cost Optimizer Studio
           </h2>
-          <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400 mt-1">
-            Toggle Model Tiering, Semantic Caching, and Tool Caching. Type different phrasing of refund queries to see how semantic vector matching reduces monthly bills from $4,250 to $600!
-          </p>
+          <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
+            Real-Time Token &amp; Billing Calculator
+          </span>
         </div>
         <CostOptimizerStudio />
       </section>
 
-      {/* Interview Gold Callout */}
-      <section className="p-6 rounded-2xl border border-emerald-300 dark:border-emerald-800/60 bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent space-y-3">
-        <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-bold text-sm">
-          <Lightbulb className="w-5 h-5 text-emerald-500" />
-          💡 Interview Gold: &ldquo;How Did You Cut Agent LLM Costs by 70%+ in Production?&rdquo;
-        </div>
-        <div className="text-xs md:text-sm text-slate-700 dark:text-slate-300 space-y-2 leading-relaxed">
-          <p>
-            <strong>Question:</strong> &ldquo;Your company&apos;s customer service agent is burning $40,000/month in OpenAI API bills. How would you systematically cut this cost without hurting customer satisfaction?&rdquo;
-          </p>
-          <div className="pl-4 border-l-2 border-emerald-400 space-y-1 font-mono text-xs text-slate-800 dark:text-slate-200">
-            <p>1. <strong>Model Tiering Classifier:</strong> Analyze telemetry logs. 75% of customer queries are simple factual FAQs or policy questions. Deploy a lightweight routing classifier that sends simple queries to GPT-4o-mini ($0.15/1M) and only escalates multi-step edge cases to Sonnet ($3.00/1M). <em>(Saves ~55%)</em></p>
-            <p>2. <strong>Semantic Caching with Redis:</strong> Implement cosine-similarity caching with a 0.92 similarity threshold on query embeddings. In repetitive customer support domains, hit rates reach 30–45%, delivering answers in 15ms for $0.0001. <em>(Saves another 30%)</em></p>
-            <p>3. <strong>Tool Result TTLs:</strong> Cache common SerpAPI web search results and database catalog queries with 30-minute Redis TTLs to avoid redundant external billing.</p>
-            <p>4. <strong>Prompt Optimization:</strong> Compress bloated system prompts, strip redundant few-shot examples, and enforce strict token output limits using structured JSON schemas.</p>
+      {/* SECTION 4: HANDWRITTEN PRODUCTION INSIGHT */}
+      <div className="p-4 rounded-xl border border-amber-200 dark:border-amber-500/30 bg-amber-50/90 dark:bg-amber-500/10 shadow-sm">
+        <span className="font-['Caveat',cursive] text-base text-amber-950 dark:text-amber-200 block">
+          📌 Production Insight: Keep dynamic variables out of the top of your system prompt! If you put current timestamp or session_id on line 1 of your system prompt, every turn looks like a brand-new prompt to OpenAI and Anthropic, completely destroying your prompt caching! Put all timestamps and dynamic variables at the very end of the user message.
+        </span>
+      </div>
+
+      {/* SECTION 5: TRAPS & PITFALLS */}
+      <section className="space-y-4">
+        <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <AlertTriangle className="w-5 h-5 text-amber-500" />
+          Common Engineering Traps
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="p-4 rounded-xl border border-rose-200 dark:border-rose-500/30 bg-rose-50/50 dark:bg-rose-500/5 space-y-2">
+            <span className="text-xs font-mono font-bold text-rose-700 dark:text-rose-400 uppercase tracking-wider block">
+              TRAP #1: Caching Non-Idempotent Tool Calls
+            </span>
+            <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+              Applying a generic HTTP cache over all agent tools. If the agent calls <code>send_email()</code> or <code>charge_credit_card()</code> and the cache intercepts it with an old cached confirmation, the real transaction never executes. Only cache read-only idempotent tools.
+            </p>
+          </div>
+          <div className="p-4 rounded-xl border border-amber-200 dark:border-amber-500/30 bg-amber-50/50 dark:bg-amber-500/5 space-y-2">
+            <span className="text-xs font-mono font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider block">
+              TRAP #2: The One-Model-Fits-All Fallacy
+            </span>
+            <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+              Using Claude 3.5 Sonnet or GPT-4o for every single node in your graph. Nodes that simply format markdown or extract a stock symbol do not need an expensive frontier model. Route 70%+ of simple intermediate nodes to lightweight models.
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Mastery Quiz */}
-      <section className="space-y-4">
-        <Module4_16Quiz />
+      {/* SECTION 6: KEY TAKEAWAYS */}
+      <section className="rounded-xl border border-amber-200 dark:border-amber-500/30 bg-amber-50/50 dark:bg-amber-500/5 p-5 space-y-3">
+        <h4 className="font-bold text-sm text-amber-900 dark:text-amber-300 flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+          Key Architectural Takeaways
+        </h4>
+        <ul className="space-y-2 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+          {[
+            ["1.", "Model Tiering:", "Delegate simple formatting and routing to mini models, saving up to 70% in baseline API bills."],
+            ["2.", "Protect Cache Prefixes:", "Keep static instructions and tool definitions strictly at the top of the prompt to maximize prompt cache hits."],
+            ["3.", "Semantic Deduplication:", "Intercept high-frequency recurring user questions with vector caching for 2ms zero-cost answers."],
+          ].map(([n, bold, rest]) => (
+            <li key={n} className="flex items-start gap-2">
+              <span className="text-amber-600 dark:text-amber-400 font-bold">{n}</span>
+              <span><strong>{bold}</strong> {rest}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* SECTION 7: QUIZ */}
+      <section className="space-y-3">
+        <button
+          onClick={() => setShowQuiz(!showQuiz)}
+          className="w-full flex items-center justify-between p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all text-left cursor-pointer"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400">
+              <HelpCircle className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white">
+                Concept Check: Cost Optimization
+              </h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {showQuiz ? "Click to collapse" : "Test your understanding of model tiering, prompt caching, and tool memoization (3 questions)"}
+              </p>
+            </div>
+          </div>
+          <span className="text-xs font-mono font-semibold px-3 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30">
+            {showQuiz ? "Hide Quiz" : "Start Quiz"}
+          </span>
+        </button>
+        <AnimatePresence>
+          {showQuiz && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Module4_16Quiz />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </section>
+
+      {/* SECTION 8: NEXT MODULE BRIDGE */}
+      <section className="rounded-2xl border border-amber-200 dark:border-amber-500/30 bg-gradient-to-r from-amber-50 via-white to-slate-50 dark:from-amber-500/10 dark:via-slate-900 dark:to-slate-950 p-6 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xs">
+        <div className="space-y-1 text-center sm:text-left">
+          <div className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider">
+            <span>Up Next • Module 4.17 • Final Capstone</span>
+          </div>
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white">Building Deep Agents for Complex Tasks</h3>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-xl">
+            The ultimate capstone of the entire AgenticCraft curriculum. Synthesize everything: planning, multi-agent swarms, time-travel debugging, async workers, and self-improving feedback loops into an autonomous Deep Research Agent.
+          </p>
+        </div>
+        <Link
+          href="/learn/level-4/module-4-17"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs sm:text-sm shadow-sm hover:shadow-amber-500/20 transition-all shrink-0 cursor-pointer"
+        >
+          <span>Begin Final Capstone</span>
+          <ArrowRight className="w-4 h-4" />
+        </Link>
       </section>
     </div>
   );

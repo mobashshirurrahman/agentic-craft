@@ -15,7 +15,6 @@ import {
   Check,
   Network,
   Cpu,
-  FileCode,
   ShieldCheck,
 } from "lucide-react";
 
@@ -58,25 +57,27 @@ class FinancialQueryInput(BaseModel):
 
 def query_financial_metrics(ticker: str, quarter: str, fiscal_year: int) -> dict:
     """
-    Retrieves official audited revenue and profit margins from the SEC database.
-    Use this tool whenever the user asks for financial, balance sheet, or revenue data.
+    Retrieves revenue, EPS, and gross margin for public companies.
+    Returns: JSON dictionary with audited SEC filing statistics.
     """
-    # Deterministic database lookup (executed by Host Runtime)
+    # 1. Pydantic validates inputs automatically
+    # 2. Database query executed safely via parameterized SQL
     return {
-        "status": "success",
         "ticker": ticker.upper(),
-        "period": f"{fiscal_year}-{quarter}",
-        "revenue_usd_billions": 85.4,
-        "net_margin_pct": 24.2,
-        "filing_date": f"{fiscal_year}-10-24"
+        "quarter": quarter,
+        "fiscal_year": fiscal_year,
+        "revenue_billions": 85.78,
+        "net_income_billions": 21.45,
+        "eps": 1.40,
+        "status": "audited"
     }`;
 
-  // Generated JSON Schema
+  // Compiled JSON Schema
   const generatedJsonSchema = `{
   "type": "function",
   "function": {
     "name": "query_financial_metrics",
-    "description": "Retrieves official audited revenue and profit margins from the SEC database. Use this tool whenever the user asks for financial, balance sheet, or revenue data.",
+    "description": "Retrieves revenue, EPS, and gross margin for public companies. Returns audited SEC filing statistics.",
     "parameters": {
       "type": "object",
       "properties": {
@@ -102,130 +103,151 @@ def query_financial_metrics(ticker: str, quarter: str, fiscal_year: int) -> dict
   }
 }`;
 
-  const runToolSimulation = () => {
-    setIsExecuting(true);
-    setConsoleLogs(["[Host Runtime] Initiating tool invocation pipeline..."]);
-
-    setTimeout(() => {
-      setConsoleLogs((prev) => [
-        ...prev,
-        "[LLM Output] Parsing generated function call: `query_financial_metrics`",
-      ]);
-    }, 500);
-
-    setTimeout(() => {
-      if (selectedTestCase === "valid") {
-        setConsoleLogs((prev) => [
-          ...prev,
-          "[Pydantic] Validating inputs: ticker='AAPL', quarter='Q3', fiscal_year=2024",
-          "[Pydantic] Schema validation: 100% PASSED (Strict types confirmed)",
-          "[Execution] Connecting to audited financial metrics service...",
-          "[Result 200 OK] Received payload:",
-          JSON.stringify(
-            {
-              status: "success",
-              ticker: "AAPL",
-              period: "2024-Q3",
-              revenue_usd_billions: 85.78,
-              net_margin_pct: 25.3,
-            },
-            null,
-            2
-          ),
-          "[Agent State] Observation ingested into context. Ready for final synthesis.",
-        ]);
-      } else {
-        setConsoleLogs((prev) => [
-          ...prev,
-          "[Pydantic] Validating inputs: ticker='AAPL', quarter='SUMMER', fiscal_year='last year'",
-          "[VALIDATION ERROR]: Value error on 'quarter': 'SUMMER' is not a permitted enum value (allowed: Q1, Q2, Q3, Q4)",
-          "[VALIDATION ERROR]: Value error on 'fiscal_year': Input should be a valid integer, unable to parse string 'last year'",
-          "[Self-Healing Protocol] Returning structured error back to LLM context window:",
-          "  ToolError: Parameter validation failed. 'quarter' must be in ['Q1','Q2','Q3','Q4'] and 'fiscal_year' must be an integer.",
-          "[LLM Recovery] Agent reads error string, self-corrects arguments, and re-submits valid call.",
-        ]);
-      }
-      setIsExecuting(false);
-    }, 1400);
-  };
-
   const handleCopyCode = () => {
     navigator.clipboard.writeText(pythonCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // MCP Simulator handler
+  const runToolSimulation = () => {
+    setIsExecuting(true);
+    setConsoleLogs([]);
+
+    if (selectedTestCase === "valid") {
+      const logs = [
+        "[*] [Agent LLM]: Received user prompt: 'What was Apple revenue in Q3 2024?'",
+        "[*] [Agent LLM]: Evaluated tool catalog. Selected tool: 'query_financial_metrics'",
+        "[*] [Agent LLM]: Emitted tool call JSON payload:",
+        '    {"ticker": "AAPL", "quarter": "Q3", "fiscal_year": 2024}',
+        "[+] [Host Runtime]: Intercepted tool call. Validating against Pydantic schema...",
+        "    - Field 'ticker' = 'AAPL' -> PASSED",
+        "    - Field 'quarter' = 'Q3' (in ['Q1','Q2','Q3','Q4']) -> PASSED",
+        "    - Field 'fiscal_year' = 2024 (2015 <= 2024 <= 2026) -> PASSED",
+        "[+] [Database Connection]: Executing parameterized query on SEC database replica...",
+        "[+] [Tool Output]: 200 OK -> {\"revenue_billions\": 85.78, \"eps\": 1.40, \"status\": \"audited\"}",
+        "[+] [Agent LLM]: Observation ingested into context. Generating final response to user:",
+        '    "In Q3 2024, Apple (AAPL) generated $85.78 billion in revenue with an EPS of $1.40."'
+      ];
+
+      logs.forEach((log, index) => {
+        setTimeout(() => {
+          setConsoleLogs((prev) => [...prev, log]);
+          if (index === logs.length - 1) setIsExecuting(false);
+        }, (index + 1) * 260);
+      });
+    } else {
+      const logs = [
+        "[*] [Agent LLM]: Received user prompt: 'Give me finances for summer last year'",
+        "[!] [Agent LLM]: Hallucinated invalid parameters in tool call:",
+        '    {"ticker": "aapl", "quarter": "SUMMER", "fiscal_year": "last year"}',
+        "[X] [Pydantic Validation ERROR]: Input payload rejected by schema validator!",
+        "    - ValidationError: quarter='SUMMER' not in Literal['Q1','Q2','Q3','Q4']",
+        "    - ValidationError: fiscal_year='last year' is not an integer between 2015 and 2026",
+        "[!] [Host Runtime]: Intercepted error. Injecting validation feedback into LLM context...",
+        "[*] [Agent LLM (Self-Healing)]: Reading validation error. Correcting parameters autonomously:",
+        '    {"ticker": "AAPL", "quarter": "Q3", "fiscal_year": 2024}',
+        "[+] [Host Runtime]: Re-validation check: ALL 3 PARAMETERS PASSED!",
+        "[+] [Tool Output]: 200 OK -> SEC Data retrieved successfully after recovery cycle."
+      ];
+
+      logs.forEach((log, index) => {
+        setTimeout(() => {
+          setConsoleLogs((prev) => [...prev, log]);
+          if (index === logs.length - 1) setIsExecuting(false);
+        }, (index + 1) * 300);
+      });
+    }
+  };
+
   const runMcpSimulation = () => {
     setMcpStep("listing");
-    setMcpLogs([`[Client] Establishing JSON-RPC stdio transport with \`${selectedMcpServer}-mcp\` server...`]);
+    setMcpLogs([
+      `[1/3] [Agent Client]: Connecting to '${selectedMcpServer}-mcp' via JSON-RPC stdio...`,
+      `[1/3] [Handshake]: Sent initialize request -> Protocol version: 2024-11-05`,
+      `[1/3] [Server]: Initialized! Capabilities: { "tools": true, "resources": true }`
+    ]);
 
     setTimeout(() => {
-      setMcpLogs((prev) => [
-        ...prev,
-        `[Client -> Server] JSON-RPC Request: {"method": "tools/list", "id": 1}`,
-        `[Server -> Client] JSON-RPC Response: Found 3 tools registered on \`${selectedMcpServer}-mcp\`:`,
-        selectedMcpServer === "postgres"
-          ? "  • query_sql(sql: string) -> rows\n  • list_tables() -> tables[]\n  • describe_schema(table: string) -> columns[]"
-          : selectedMcpServer === "github"
-          ? "  • list_pull_requests(repo: string, state: string)\n  • create_issue(title: string, body: string)\n  • search_code(query: string)"
-          : "  • read_file(path: string)\n  • write_file(path: string, content: string)\n  • list_directory(path: string)",
-      ]);
       setMcpStep("calling");
-    }, 1000);
-
-    setTimeout(() => {
       setMcpLogs((prev) => [
         ...prev,
-        `[Client -> Server] JSON-RPC Request: {"method": "tools/call", "params": {"name": "${
-          selectedMcpServer === "postgres"
-            ? "query_sql"
-            : selectedMcpServer === "github"
-            ? "list_pull_requests"
-            : "read_file"
-        }", "arguments": {...}}, "id": 2}`,
-        `[Server] Executing capability locally through standard protocol...`,
-        `[Server -> Client] JSON-RPC Result: 200 SUCCESS (0 bespoke adapter code required)`,
+        `[2/3] [Agent Client]: Sending 'tools/list' request to MCP server...`,
+        selectedMcpServer === "postgres"
+          ? `[2/3] [Server]: Registered tools: ['query_read_only', 'describe_schema', 'explain_query']`
+          : selectedMcpServer === "github"
+          ? `[2/3] [Server]: Registered tools: ['search_repositories', 'create_pull_request', 'read_issue']`
+          : `[2/3] [Server]: Registered tools: ['read_file', 'write_file', 'list_directory']`,
+        `[2/3] [Agent Client]: Invoking 'tools/call' on ${selectedMcpServer} server...`
       ]);
-      setMcpStep("complete");
-    }, 2200);
+
+      setTimeout(() => {
+        setMcpStep("complete");
+        setMcpLogs((prev) => [
+          ...prev,
+          `[3/3] [MCP JSON-RPC Wire Frame]:`,
+          JSON.stringify(
+            {
+              jsonrpc: "2.0",
+              id: "req_mcp_4402",
+              result: {
+                content: [
+                  {
+                    type: "text",
+                    text:
+                      selectedMcpServer === "postgres"
+                        ? "Query executed: SELECT count(*) FROM users -> Result: 48,219 active records."
+                        : selectedMcpServer === "github"
+                        ? "GitHub Issue #104 fetched: 'Fix CSS z-index modal bug on mobile devices'."
+                        : "Directory /src/components contains 24 TypeScript files."
+                  }
+                ],
+                isError: false
+              }
+            },
+            null,
+            2
+          ),
+          `[+] [MCP Transaction]: 200 SUCCESS via universal standard.`
+        ]);
+      }, 700);
+    }, 700);
   };
 
   return (
-    <div className="rounded-2xl border border-slate-700/60 bg-slate-900/90 dark:bg-slate-900/90 light:bg-white light:border-slate-300 shadow-xl overflow-hidden my-8">
-      {/* Studio Header */}
-      <div className="border-b border-slate-700/60 dark:border-slate-700/60 light:border-slate-200 px-5 py-4 bg-slate-800/50 dark:bg-slate-800/50 light:bg-slate-50 flex flex-wrap items-center justify-between gap-4">
+    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 overflow-hidden shadow-sm dark:shadow-2xl">
+      {/* Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
         <div>
           <div className="flex items-center gap-2">
-            <span className="flex h-2.5 w-2.5 rounded-full bg-cyan-400 animate-pulse" />
-            <h3 className="font-bold text-base md:text-lg text-white dark:text-white light:text-slate-900">
-              Interactive Tool Engineering & MCP Studio
+            <span className="flex h-2.5 w-2.5 rounded-full bg-teal-500 animate-pulse" />
+            <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white">
+              Interactive Tool Engineering &amp; MCP Studio
             </h3>
           </div>
-          <p className="text-xs text-slate-400 dark:text-slate-400 light:text-slate-600 mt-0.5">
-            Test Python schemas, validation resilience, and universal Model Context Protocol (MCP) servers.
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Test Python schemas, validation resilience, and universal Model Context Protocol (MCP) servers
           </p>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex items-center bg-slate-900/80 dark:bg-slate-900/80 light:bg-slate-200 p-1 rounded-xl border border-slate-700/80 dark:border-slate-700/80 light:border-slate-300">
+        <div className="flex items-center bg-white dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm text-xs font-mono self-start sm:self-center">
           <button
             onClick={() => setActiveTab("schema")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all touch-manipulation active:scale-95 ${
               activeTab === "schema"
-                ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
-                : "text-slate-400 dark:text-slate-400 light:text-slate-700 hover:text-white dark:hover:text-white"
+                ? "bg-teal-600 text-white font-bold shadow-sm"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
           >
             <Code2 className="w-3.5 h-3.5" />
-            <span>Python Tool & Schema</span>
+            <span>Python Tool &amp; Schema</span>
           </button>
           <button
             onClick={() => setActiveTab("mcp")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all touch-manipulation active:scale-95 ${
               activeTab === "mcp"
-                ? "bg-cyan-500 text-slate-950 font-bold shadow-sm"
-                : "text-slate-400 dark:text-slate-400 light:text-slate-700 hover:text-white dark:hover:text-white"
+                ? "bg-teal-600 text-white font-bold shadow-sm"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
           >
             <Network className="w-3.5 h-3.5" />
@@ -236,27 +258,27 @@ def query_financial_metrics(ticker: str, quarter: str, fiscal_year: int) -> dict
 
       {/* Tab 1: Python Tool & JSON Schema Explorer */}
       {activeTab === "schema" ? (
-        <div className="p-5 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="p-4 sm:p-5 grid grid-cols-1 lg:grid-cols-12 gap-5">
           {/* Left: Code & Schema View */}
           <div className="lg:col-span-7 flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setShowJsonSchema(false)}
-                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all touch-manipulation ${
                     !showJsonSchema
-                      ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40"
-                      : "text-slate-400 hover:text-white"
+                      ? "bg-teal-50 dark:bg-teal-500/20 text-teal-800 dark:text-teal-300 border border-teal-200 dark:border-teal-500/40"
+                      : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                   }`}
                 >
                   Python Definition (@tool)
                 </button>
                 <button
                   onClick={() => setShowJsonSchema(true)}
-                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all touch-manipulation ${
                     showJsonSchema
-                      ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40"
-                      : "text-slate-400 hover:text-white"
+                      ? "bg-teal-50 dark:bg-teal-500/20 text-teal-800 dark:text-teal-300 border border-teal-200 dark:border-teal-500/40"
+                      : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                   }`}
                 >
                   Compiled JSON Schema (LLM View)
@@ -266,32 +288,32 @@ def query_financial_metrics(ticker: str, quarter: str, fiscal_year: int) -> dict
               {!showJsonSchema && (
                 <button
                   onClick={handleCopyCode}
-                  className="flex items-center gap-1 text-xs text-slate-400 hover:text-cyan-400 transition-colors"
+                  className="flex items-center gap-1 text-xs text-slate-500 hover:text-teal-600 dark:hover:text-teal-400 transition-colors touch-manipulation active:scale-95"
                 >
-                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
                   <span>{copied ? "Copied!" : "Copy Code"}</span>
                 </button>
               )}
             </div>
 
-            <div className="relative rounded-xl border border-slate-800 dark:border-slate-800 light:border-slate-200 overflow-hidden bg-slate-950 dark:bg-slate-950 light:bg-slate-900 shadow-inner">
+            <div className="relative rounded-xl border border-slate-800 bg-slate-950 overflow-hidden shadow-inner">
               <pre className="p-4 text-xs font-mono text-slate-200 overflow-x-auto leading-relaxed max-h-[380px]">
                 {showJsonSchema ? generatedJsonSchema : pythonCode}
               </pre>
             </div>
 
-            <div className="text-xs text-slate-400 dark:text-slate-400 light:text-slate-600 flex items-start gap-2 bg-slate-800/40 dark:bg-slate-800/40 light:bg-slate-50 p-3 rounded-lg border border-slate-700/50 dark:border-slate-700/50 light:border-slate-200">
-              <Sparkles className="w-4 h-4 text-cyan-400 flex-shrink-0 mt-0.5" />
+            <div className="text-xs text-slate-600 dark:text-slate-400 flex items-start gap-2 bg-slate-50 dark:bg-slate-900/40 p-3 rounded-lg border border-slate-200 dark:border-slate-800">
+              <Sparkles className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0 mt-0.5" />
               <span>
-                <strong>How the magic works:</strong> The LLM never sees raw Python code! Frameworks convert the Pydantic type annotations and docstring into the strict JSON Schema shown above. The model uses the description to decide <em>when</em> to call the tool and the parameter schema to formulate valid JSON.
+                <strong>How the magic works:</strong> The LLM never sees raw Python code! Frameworks convert Pydantic type annotations into the JSON Schema shown above. The model uses the parameter schema to formulate valid structured tool calls.
               </span>
             </div>
           </div>
 
           {/* Right: Test Execution Terminal */}
           <div className="lg:col-span-5 flex flex-col justify-between gap-4">
-            <div className="bg-slate-800/40 dark:bg-slate-800/40 light:bg-slate-50 border border-slate-700/50 dark:border-slate-700/50 light:border-slate-200 rounded-xl p-4">
-              <span className="text-xs font-mono uppercase tracking-wider text-slate-400 dark:text-slate-400 light:text-slate-600 block mb-3">
+            <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-3">
+              <span className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold block">
                 Simulate Agent Tool Calling Test Case
               </span>
 
@@ -299,43 +321,43 @@ def query_financial_metrics(ticker: str, quarter: str, fiscal_year: int) -> dict
               <div className="flex flex-col gap-2">
                 <button
                   onClick={() => setSelectedTestCase("valid")}
-                  className={`p-2.5 rounded-lg border text-left transition-all ${
+                  className={`p-2.5 rounded-lg border text-left transition-all touch-manipulation ${
                     selectedTestCase === "valid"
-                      ? "border-emerald-500 bg-emerald-500/15 text-emerald-200"
-                      : "border-slate-700/50 dark:border-slate-700/50 light:border-slate-200 bg-slate-900/50 dark:bg-slate-900/50 light:bg-white text-slate-400"
+                      ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-500/15 text-emerald-950 dark:text-emerald-200 shadow-sm"
+                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-400"
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-white dark:text-white light:text-slate-900">
+                    <span className="text-xs font-bold text-slate-900 dark:text-white">
                       Test Case A: Valid Inputs
                     </span>
-                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/20 px-1.5 py-0.5 rounded">
+                    <span className="text-[10px] font-mono text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-500/20 px-1.5 py-0.5 rounded font-bold">
                       Pass
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-400 dark:text-slate-400 light:text-slate-600 mt-1 font-mono">
-                    ticker="AAPL", quarter="Q3", fiscal_year=2024
+                  <p className="text-[11px] text-slate-500 font-mono mt-1">
+                    ticker=&quot;AAPL&quot;, quarter=&quot;Q3&quot;, fiscal_year=2024
                   </p>
                 </button>
 
                 <button
                   onClick={() => setSelectedTestCase("invalid")}
-                  className={`p-2.5 rounded-lg border text-left transition-all ${
+                  className={`p-2.5 rounded-lg border text-left transition-all touch-manipulation ${
                     selectedTestCase === "invalid"
-                      ? "border-rose-500 bg-rose-500/15 text-rose-200"
-                      : "border-slate-700/50 dark:border-slate-700/50 light:border-slate-200 bg-slate-900/50 dark:bg-slate-900/50 light:bg-white text-slate-400"
+                      ? "border-rose-500 bg-rose-50 dark:bg-rose-500/15 text-rose-950 dark:text-rose-200 shadow-sm"
+                      : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-400"
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-white dark:text-white light:text-slate-900">
+                    <span className="text-xs font-bold text-slate-900 dark:text-white">
                       Test Case B: Schema Validation Failure
                     </span>
-                    <span className="text-[10px] font-mono text-rose-400 bg-rose-500/20 px-1.5 py-0.5 rounded">
+                    <span className="text-[10px] font-mono text-rose-700 dark:text-rose-400 bg-rose-100 dark:bg-rose-500/20 px-1.5 py-0.5 rounded font-bold">
                       Self-Healing
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-400 dark:text-slate-400 light:text-slate-600 mt-1 font-mono">
-                    quarter="SUMMER", fiscal_year="last year"
+                  <p className="text-[11px] text-slate-500 font-mono mt-1">
+                    quarter=&quot;SUMMER&quot;, fiscal_year=&quot;last year&quot;
                   </p>
                 </button>
               </div>
@@ -344,7 +366,7 @@ def query_financial_metrics(ticker: str, quarter: str, fiscal_year: int) -> dict
               <button
                 onClick={runToolSimulation}
                 disabled={isExecuting}
-                className="w-full mt-4 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 shadow-md transition-all disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold bg-teal-600 hover:bg-teal-500 text-white shadow-sm transition-all disabled:opacity-50 touch-manipulation active:scale-95"
               >
                 <Play className="w-3.5 h-3.5 fill-current" />
                 <span>{isExecuting ? "Executing Pipeline..." : "Run Tool Call Simulation"}</span>
@@ -352,18 +374,18 @@ def query_financial_metrics(ticker: str, quarter: str, fiscal_year: int) -> dict
             </div>
 
             {/* Terminal Window */}
-            <div className="flex-1 min-h-[220px] rounded-xl border border-slate-800 dark:border-slate-800 light:border-slate-200 bg-slate-950 dark:bg-slate-950 light:bg-slate-900 p-3.5 font-mono text-xs shadow-inner flex flex-col">
+            <div className="flex-1 min-h-[220px] rounded-xl border border-slate-800 bg-slate-950 p-3.5 font-mono text-xs shadow-inner flex flex-col">
               <div className="flex items-center justify-between pb-2 border-b border-slate-800 text-slate-400 text-[11px]">
                 <div className="flex items-center gap-1.5">
-                  <Terminal className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Runtime Stream & Validation Logs</span>
+                  <Terminal className="w-3.5 h-3.5 text-teal-400" />
+                  <span>Runtime Stream &amp; Validation Logs</span>
                 </div>
                 <span>stdout</span>
               </div>
-              <div className="flex-1 overflow-y-auto mt-2 space-y-1.5 text-slate-300 text-[11px] leading-relaxed">
+              <div className="flex-1 overflow-y-auto mt-2 space-y-1.5 text-slate-300 text-[11px] leading-relaxed scrollbar-thin">
                 {consoleLogs.length === 0 ? (
-                  <span className="text-slate-600 dark:text-slate-600 italic">
-                    Click "Run Tool Call Simulation" above to view live parsing, validation, and self-healing error traces...
+                  <span className="text-slate-600 italic">
+                    Click &quot;Run Tool Call Simulation&quot; above to view live parsing, validation, and self-healing error traces...
                   </span>
                 ) : (
                   consoleLogs.map((log, idx) => (
@@ -389,75 +411,75 @@ def query_financial_metrics(ticker: str, quarter: str, fiscal_year: int) -> dict
         </div>
       ) : (
         /* Tab 2: Model Context Protocol (MCP) Architecture */
-        <div className="p-5 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="p-4 sm:p-5 grid grid-cols-1 lg:grid-cols-12 gap-5">
           {/* Left: Architecture Comparison */}
           <div className="lg:col-span-6 flex flex-col gap-4">
-            <h4 className="font-bold text-white dark:text-white light:text-slate-900 text-sm">
+            <h4 className="font-bold text-slate-900 dark:text-white text-sm">
               The M × N Integration Problem vs. Universal MCP
             </h4>
 
             {/* Comparison boxes */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Old way */}
-              <div className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-4 flex flex-col">
-                <div className="flex items-center gap-1.5 text-rose-400 text-xs font-bold mb-2">
+              <div className="rounded-xl border border-rose-200 dark:border-rose-500/30 bg-rose-50/50 dark:bg-rose-950/10 p-4 flex flex-col shadow-sm">
+                <div className="flex items-center gap-1.5 text-rose-700 dark:text-rose-400 text-xs font-bold mb-2">
                   <AlertCircle className="w-4 h-4" />
                   <span>The Old Way (Bespoke)</span>
                 </div>
-                <p className="text-xs text-slate-300 dark:text-slate-300 light:text-slate-700 leading-relaxed mb-3">
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
                   If you have 4 AI frameworks and 10 external tools (GitHub, Slack, SQL, Drive), you must write and maintain <strong>40 custom connectors</strong>.
                 </p>
-                <div className="mt-auto bg-slate-950 dark:bg-slate-950 light:bg-slate-100 rounded p-2 text-[10px] font-mono text-rose-300 dark:text-rose-300 light:text-rose-700">
-                  4 AI Agents × 10 APIs = 40 Custom Connectors (Brittle & fragmented)
+                <div className="mt-auto bg-white dark:bg-slate-950 rounded p-2 text-[10px] font-mono text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-900/50">
+                  4 AI Agents × 10 APIs = 40 Custom Connectors (Brittle)
                 </div>
               </div>
 
               {/* MCP Way */}
-              <div className="rounded-xl border border-cyan-500/40 bg-cyan-500/5 p-4 flex flex-col">
-                <div className="flex items-center gap-1.5 text-cyan-400 text-xs font-bold mb-2">
+              <div className="rounded-xl border border-teal-200 dark:border-teal-500/30 bg-teal-50/50 dark:bg-teal-950/10 p-4 flex flex-col shadow-sm">
+                <div className="flex items-center gap-1.5 text-teal-700 dark:text-teal-400 text-xs font-bold mb-2">
                   <CheckCircle2 className="w-4 h-4" />
                   <span>The MCP Standard</span>
                 </div>
-                <p className="text-xs text-slate-300 dark:text-slate-300 light:text-slate-700 leading-relaxed mb-3">
-                  Anthropic's open standard protocol: The tool author creates <strong>1 MCP Server</strong>. Any MCP-compliant client can instantly use it via JSON-RPC!
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                  The open standard protocol: The tool author creates <strong>1 MCP Server</strong>. Any MCP-compliant client can instantly use it via JSON-RPC!
                 </p>
-                <div className="mt-auto bg-slate-950 dark:bg-slate-950 light:bg-slate-100 rounded p-2 text-[10px] font-mono text-cyan-300 dark:text-cyan-300 light:text-cyan-700">
-                  4 AI Agents + 10 MCP Servers = 14 Components (Build once, work everywhere)
+                <div className="mt-auto bg-white dark:bg-slate-950 rounded p-2 text-[10px] font-mono text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-900/50">
+                  4 AI Agents + 10 MCP Servers = 14 Components
                 </div>
               </div>
             </div>
 
             {/* Architecture Flow Diagram */}
-            <div className="rounded-xl border border-slate-700/60 dark:border-slate-700/60 light:border-slate-200 bg-slate-950/60 dark:bg-slate-950/60 light:bg-slate-50 p-4">
-              <span className="text-[11px] font-mono uppercase tracking-wider text-slate-400 block mb-3">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 p-4 shadow-sm">
+              <span className="text-[11px] font-mono uppercase tracking-wider text-slate-500 font-bold block mb-3">
                 Standard MCP Client-Server Handshake
               </span>
-              <div className="flex items-center justify-between text-xs font-mono text-slate-200 gap-2">
-                <div className="p-2.5 rounded-lg bg-teal-500/20 border border-teal-500/40 text-center flex-1">
-                  <div className="font-bold text-teal-300">AI Client</div>
-                  <div className="text-[10px] text-slate-400">Agent / IDE Host</div>
+              <div className="flex items-center justify-between text-xs font-mono text-slate-800 dark:text-slate-200 gap-2">
+                <div className="p-2.5 rounded-lg bg-teal-50 dark:bg-teal-500/20 border border-teal-200 dark:border-teal-500/40 text-center flex-1 shadow-sm">
+                  <div className="font-bold text-teal-800 dark:text-teal-300">AI Client</div>
+                  <div className="text-[10px] text-slate-500">Agent / IDE Host</div>
                 </div>
 
-                <div className="text-center text-[10px] text-cyan-400 font-semibold px-1">
+                <div className="text-center text-[10px] text-teal-600 dark:text-teal-400 font-semibold px-1">
                   JSON-RPC
                   <br />
                   ⇄ stdio / SSE ⇄
                 </div>
 
-                <div className="p-2.5 rounded-lg bg-cyan-500/20 border border-cyan-500/40 text-center flex-1">
-                  <div className="font-bold text-cyan-300">MCP Server</div>
-                  <div className="text-[10px] text-slate-400">Tools & Resources</div>
+                <div className="p-2.5 rounded-lg bg-sky-50 dark:bg-sky-500/20 border border-sky-200 dark:border-sky-500/40 text-center flex-1 shadow-sm">
+                  <div className="font-bold text-sky-800 dark:text-sky-300">MCP Server</div>
+                  <div className="text-[10px] text-slate-500">Tools &amp; Resources</div>
                 </div>
 
-                <div className="text-center text-[10px] text-purple-400 font-semibold px-1">
+                <div className="text-center text-[10px] text-purple-600 dark:text-purple-400 font-semibold px-1">
                   Executes
                   <br />
                   ➔
                 </div>
 
-                <div className="p-2.5 rounded-lg bg-purple-500/20 border border-purple-500/40 text-center flex-1">
-                  <div className="font-bold text-purple-300">Database / API</div>
-                  <div className="text-[10px] text-slate-400">Target System</div>
+                <div className="p-2.5 rounded-lg bg-purple-50 dark:bg-purple-500/20 border border-purple-200 dark:border-purple-500/40 text-center flex-1 shadow-sm">
+                  <div className="font-bold text-purple-800 dark:text-purple-300">Target System</div>
+                  <div className="text-[10px] text-slate-500">Database / API</div>
                 </div>
               </div>
             </div>
@@ -465,12 +487,12 @@ def query_financial_metrics(ticker: str, quarter: str, fiscal_year: int) -> dict
 
           {/* Right: Live MCP Inspector Simulator */}
           <div className="lg:col-span-6 flex flex-col justify-between gap-4">
-            <div className="bg-slate-800/40 dark:bg-slate-800/40 light:bg-slate-50 border border-slate-700/50 dark:border-slate-700/50 light:border-slate-200 rounded-xl p-4">
-              <span className="text-xs font-mono uppercase tracking-wider text-slate-400 dark:text-slate-400 light:text-slate-600 block mb-2">
+            <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-3">
+              <span className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold block">
                 Test a Pre-Built MCP Server
               </span>
 
-              <div className="grid grid-cols-3 gap-2 mb-4">
+              <div className="grid grid-cols-3 gap-2">
                 {(["postgres", "github", "filesystem"] as const).map((srv) => (
                   <button
                     key={srv}
@@ -479,10 +501,10 @@ def query_financial_metrics(ticker: str, quarter: str, fiscal_year: int) -> dict
                       setMcpStep("idle");
                       setMcpLogs([]);
                     }}
-                    className={`py-2 px-2 rounded-lg text-xs font-mono font-semibold transition-all border ${
+                    className={`py-2 px-2 rounded-lg text-xs font-mono font-semibold transition-all border touch-manipulation ${
                       selectedMcpServer === srv
-                        ? "bg-cyan-500 text-slate-950 font-bold border-cyan-400"
-                        : "bg-slate-900/60 dark:bg-slate-900/60 light:bg-white text-slate-300 dark:text-slate-300 light:text-slate-800 border-slate-700 dark:border-slate-700 light:border-slate-200"
+                        ? "bg-teal-600 text-white font-bold border-teal-500 shadow-sm"
+                        : "bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-800"
                     }`}
                   >
                     {srv}-mcp
@@ -493,26 +515,26 @@ def query_financial_metrics(ticker: str, quarter: str, fiscal_year: int) -> dict
               <button
                 onClick={runMcpSimulation}
                 disabled={mcpStep === "listing" || mcpStep === "calling"}
-                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold bg-cyan-400 hover:bg-cyan-300 text-slate-950 shadow-md transition-all disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold bg-teal-600 hover:bg-teal-500 text-white shadow-sm transition-all disabled:opacity-50 touch-manipulation active:scale-95"
               >
                 <Network className="w-3.5 h-3.5" />
-                <span>Simulate MCP Handshake & Tool Invocation</span>
+                <span>Simulate MCP Handshake &amp; Tool Invocation</span>
               </button>
             </div>
 
             {/* MCP Console Stream */}
-            <div className="flex-1 min-h-[220px] rounded-xl border border-slate-800 dark:border-slate-800 light:border-slate-200 bg-slate-950 dark:bg-slate-950 light:bg-slate-900 p-3.5 font-mono text-xs shadow-inner flex flex-col">
+            <div className="flex-1 min-h-[220px] rounded-xl border border-slate-800 bg-slate-950 p-3.5 font-mono text-xs shadow-inner flex flex-col">
               <div className="flex items-center justify-between pb-2 border-b border-slate-800 text-slate-400 text-[11px]">
                 <div className="flex items-center gap-1.5">
-                  <Server className="w-3.5 h-3.5 text-cyan-400" />
+                  <Server className="w-3.5 h-3.5 text-teal-400" />
                   <span>MCP JSON-RPC Wire Traffic</span>
                 </div>
                 <span>stdio transport</span>
               </div>
-              <div className="flex-1 overflow-y-auto mt-2 space-y-1.5 text-slate-300 text-[11px] leading-relaxed">
+              <div className="flex-1 overflow-y-auto mt-2 space-y-1.5 text-slate-300 text-[11px] leading-relaxed scrollbar-thin">
                 {mcpLogs.length === 0 ? (
-                  <span className="text-slate-600 dark:text-slate-600 italic">
-                    Select an MCP Server and click "Simulate MCP Handshake" to inspect the JSON-RPC wire frames...
+                  <span className="text-slate-600 italic">
+                    Select an MCP Server and click &quot;Simulate MCP Handshake&quot; to inspect the JSON-RPC wire frames...
                   </span>
                 ) : (
                   mcpLogs.map((log, idx) => (

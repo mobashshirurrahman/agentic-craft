@@ -16,7 +16,6 @@ import {
   Send,
   Eye,
   Edit3,
-  FileCheck,
 } from "lucide-react";
 
 interface StepDetail {
@@ -144,22 +143,22 @@ const WRITE_STEPS: StepDetail[] = [
     title: "Agent Analyzes Task",
     actor: "Agent",
     icon: "brain",
-    description: "Agent parses intent: this is a WRITE action with external financial and client consequences.",
+    description: "The LLM identifies that sending an email alters external communications and financial credit modifies accounting.",
     payload: `Internal Thought:
-• Requires drafting formal communication.
-• Requires invoking send_email() API (State Mutation / Write Action).
-• High consequence: Cannot be undone once transmitted.`,
-    badge: "Risk Assessment",
+• Request involves sending external email + financial credit mutation.
+• Classified as: MUTATING / WRITE ACTION.
+• Requires Human-in-the-Loop review before dispatching.`,
+    badge: "Risk Classification",
   },
   {
     step: 3,
     title: "Agent Decides Tool is Needed",
     actor: "Agent",
     icon: "brain",
-    description: "The agent selects 'send_client_email' from its Communication tool category.",
+    description: "The agent selects 'send_customer_email' from its tool catalog.",
     payload: `Tool Selection:
-• Candidate: send_client_email(recipient, subject, body, credit_amount)
-• Consequence Level: HIGH (External State Modification)`,
+• Candidate: send_customer_email(recipient, subject, body, credit_amount)
+• Sensitivity Level: HIGH (Requires Approval Gate)`,
     badge: "Tool Decision",
   },
   {
@@ -167,67 +166,62 @@ const WRITE_STEPS: StepDetail[] = [
     title: "Agent Generates Structured Tool Call",
     actor: "Agent",
     icon: "brain",
-    description: "Agent generates structured arguments with proposed subject, recipient, and credit amount.",
+    description: "The agent outputs strict JSON parameters matching the enterprise email tool schema.",
     payload: `{
-  "tool_call_id": "call_send_email_99",
+  "tool_call_id": "call_email_dispatch_99",
   "function": {
-    "name": "send_client_email",
+    "name": "send_customer_email",
     "arguments": {
-      "recipient": "billing@acmecorp.com",
-      "subject": "Update on Ticket #4092 - Service Credit Confirmation",
+      "recipient": "support@acmecorp.com",
+      "ticket_id": 4092,
       "credit_percentage": 10,
-      "body": "Dear Acme Corp Team, we sincerely apologize for the delay..."
+      "subject": "Apology Regarding Ticket #4092 & Account Credit"
     }
   }
 }`,
-    badge: "Structured Tool Call",
+    badge: "JSON Schema Output",
   },
   {
     step: 5,
-    title: "Safety Confirmation Gate Triggered",
+    title: "HITL Approval Gate (Write Action)",
     actor: "Runtime",
     icon: "runtime",
-    description: "CRITICAL: Because this is a Write Action, the runtime pauses execution and requests human confirmation before firing the API.",
-    payload: `[SAFETY GATE: HUMAN-IN-THE-LOOP ACTIVE]
-Action: External Email & Financial Credit (10%)
-Recipient: billing@acmecorp.com
-Status: Execution PAUSED. Awaiting human supervisor approval...
--> Supervisor clicks: [APPROVED]`,
-    badge: "Human Confirmation Gate",
+    description: "The host runtime halts execution! Because this is a mutating write action, a human must approve before email fires.",
+    payload: `[POLICY INTERCEPT]: Action 'send_customer_email' flagged as WRITE OPERATION.
+Credit Impact: 10% on Ticket #4092.
+Execution Status: PAUSED -> Awaiting Human Approval in Dashboard...`,
+    badge: "Human-in-the-Loop Gate",
   },
   {
     step: 6,
-    title: "Tool Returns Result",
+    title: "Tool Executes Post-Approval",
     actor: "Tool",
     icon: "tool",
-    description: "Upon human approval, the email API executes the transaction and returns a message ID.",
-    payload: `{
-  "status": "SENT",
-  "message_id": "msg_01k992fa_acme",
-  "timestamp": "2026-09-28T09:30:15Z",
-  "credit_applied": true
-}`,
-    badge: "State Modified (Success)",
+    description: "Upon human sign-off, runtime dispatches the authenticated SMTP/SendGrid webhook.",
+    payload: `[Host Runtime]: Human supervisor clicked [CONFIRM & EXECUTE].
+Calling SendGrid API: POST /v3/mail/send
+Response: 202 Accepted (Message ID: msg_acme_4092_ok)`,
+    badge: "Authorized Write",
   },
   {
     step: 7,
     title: "Agent Processes Result",
     actor: "Agent",
     icon: "brain",
-    description: "Agent observes the confirmed dispatch receipt and records the transaction in session memory.",
-    payload: `Observation Ingested: Email dispatched with msg_id msg_01k992fa_acme.
-State update confirmed. Closing ticket lifecycle.`,
+    description: "Agent receives confirmation that the email and credit memo were successfully recorded in external CRM.",
+    payload: `Observation Ingested: SendGrid accepted payload.
+CRM updated: Ticket #4092 marked as 'Resolved with 10% credit'.`,
     badge: "State Verification",
   },
   {
     step: 8,
-    title: "Agent Continues or Responds",
+    title: "Agent Responds to User",
     actor: "Agent",
     icon: "brain",
-    description: "Agent reports success back to the user with full confirmation details.",
+    description: "Agent notifies user that email was authorized, delivered, and logged in customer record.",
     payload: `Agent Response:
-"The apology email has been successfully sent to billing@acmecorp.com with a 10% credit confirmation. Confirmation ID: msg_01k992fa_acme."`,
-    badge: "Action Completed",
+"Apology email with 10% credit successfully sent to Acme Corp (Ticket #4092) following supervisor authorization."`,
+    badge: "Task Resolved",
   },
 ];
 
@@ -238,33 +232,26 @@ export default function ToolCallingCycleVisualizer() {
   const [humanApproved, setHumanApproved] = useState<boolean>(false);
 
   const steps = mode === "read" ? READ_STEPS : WRITE_STEPS;
-  const activeStepData = steps[currentStep - 1];
+  const activeStepData = steps[currentStep - 1] || steps[0];
 
-  // Auto-play timer
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (isPlaying) {
-      timer = setTimeout(() => {
-        if (mode === "write" && currentStep === 5 && !humanApproved) {
-          // Pause for human approval in write mode!
-          setIsPlaying(false);
-          return;
-        }
-        if (currentStep < 8) {
+      if (mode === "write" && currentStep === 5 && !humanApproved) {
+        setIsPlaying(false);
+        return;
+      }
+
+      if (currentStep < 8) {
+        timer = setTimeout(() => {
           setCurrentStep((prev) => prev + 1);
-        } else {
-          setIsPlaying(false);
-        }
-      }, 2500);
+        }, 1800);
+      } else {
+        setIsPlaying(false);
+      }
     }
     return () => clearTimeout(timer);
   }, [isPlaying, currentStep, mode, humanApproved]);
-
-  const handleReset = () => {
-    setIsPlaying(false);
-    setCurrentStep(1);
-    setHumanApproved(false);
-  };
 
   const handleModeChange = (newMode: "read" | "write") => {
     setMode(newMode);
@@ -273,248 +260,221 @@ export default function ToolCallingCycleVisualizer() {
     setHumanApproved(false);
   };
 
+  const handleReset = () => {
+    setCurrentStep(1);
+    setIsPlaying(false);
+    setHumanApproved(false);
+  };
+
   return (
-    <div className="rounded-2xl border border-slate-700/60 bg-slate-900/90 dark:bg-slate-900/90 light:bg-white light:border-slate-300 shadow-xl overflow-hidden my-8">
-      {/* Header bar */}
-      <div className="border-b border-slate-700/60 dark:border-slate-700/60 light:border-slate-200 px-5 py-4 bg-slate-800/50 dark:bg-slate-800/50 light:bg-slate-50 flex flex-wrap items-center justify-between gap-4">
+    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 sm:p-6 shadow-sm dark:shadow-2xl space-y-6">
+      {/* Top Header & Mode Toggle */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
         <div>
           <div className="flex items-center gap-2">
-            <span className="flex h-2.5 w-2.5 rounded-full bg-teal-400 animate-pulse" />
-            <h3 className="font-bold text-base md:text-lg text-white dark:text-white light:text-slate-900">
-              Interactive 8-Step Tool Calling Lifecycle Explorer
-            </h3>
+            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-teal-700 dark:text-teal-400 px-2.5 py-0.5 rounded-full bg-teal-50 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/30">
+              Interactive 8-Step Tool Cycle
+            </span>
+            <span className="text-[11px] font-mono text-slate-500">Live Simulator</span>
           </div>
-          <p className="text-xs text-slate-400 dark:text-slate-400 light:text-slate-600 mt-0.5">
-            Follow how an Agent bridges internal reasoning to external functions in real time.
+          <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mt-1">
+            The Complete Tool Execution Loop
+          </h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Compare safe idempotent Read actions with mutating Write actions requiring approval
           </p>
         </div>
 
-        {/* Action Type Toggle: Read vs Write */}
-        <div className="flex items-center bg-slate-900/80 dark:bg-slate-900/80 light:bg-slate-200/90 p-1 rounded-xl border border-slate-700/80 dark:border-slate-700/80 light:border-slate-300">
+        {/* Mode Switcher */}
+        <div className="flex items-center p-1 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-mono self-start sm:self-center">
           <button
             onClick={() => handleModeChange("read")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 touch-manipulation active:scale-95 ${
               mode === "read"
-                ? "bg-teal-500 text-white shadow-sm"
-                : "text-slate-400 dark:text-slate-400 light:text-slate-700 hover:text-white dark:hover:text-white"
+                ? "bg-teal-600 text-white font-bold shadow-sm"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
           >
             <Eye className="w-3.5 h-3.5" />
-            <span>Read Action (Safe Query)</span>
+            Read Action (Safe)
           </button>
           <button
             onClick={() => handleModeChange("write")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 touch-manipulation active:scale-95 ${
               mode === "write"
-                ? "bg-amber-500 text-slate-950 font-bold shadow-sm"
-                : "text-slate-400 dark:text-slate-400 light:text-slate-700 hover:text-white dark:hover:text-white"
+                ? "bg-amber-600 text-white font-bold shadow-sm"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
           >
             <Edit3 className="w-3.5 h-3.5" />
-            <span>Write Action (State Mutation)</span>
+            Write Action (HITL)
           </button>
         </div>
       </div>
 
-      {/* Stepper Strip */}
-      <div className="px-5 py-4 bg-slate-950/60 dark:bg-slate-950/60 light:bg-slate-100/70 border-b border-slate-800/80 dark:border-slate-800/80 light:border-slate-200 overflow-x-auto">
-        <div className="flex items-center min-w-[700px] justify-between gap-1">
-          {steps.map((s) => {
-            const isCompleted = s.step < currentStep;
-            const isCurrent = s.step === currentStep;
-
-            return (
-              <button
-                key={s.step}
-                onClick={() => {
-                  setCurrentStep(s.step);
-                  setIsPlaying(false);
-                }}
-                className={`flex-1 flex flex-col items-center p-2 rounded-lg transition-all relative ${
-                  isCurrent
-                    ? mode === "read"
-                      ? "bg-teal-500/20 border border-teal-500/50"
-                      : "bg-amber-500/20 border border-amber-500/50"
-                    : isCompleted
-                    ? "bg-slate-800/40 dark:bg-slate-800/40 light:bg-white text-slate-400"
-                    : "opacity-40 hover:opacity-70"
-                }`}
-              >
-                <div
-                  className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold font-mono mb-1 ${
-                    isCurrent
-                      ? mode === "read"
-                        ? "bg-teal-400 text-slate-950"
-                        : "bg-amber-400 text-slate-950"
-                      : isCompleted
-                      ? "bg-emerald-500/30 text-emerald-300"
-                      : "bg-slate-700 text-slate-400"
-                  }`}
-                >
-                  {isCompleted ? "✓" : s.step}
-                </div>
-                <span className="text-[11px] font-medium text-center line-clamp-1 text-slate-200 dark:text-slate-200 light:text-slate-800">
-                  {s.title.split(" ")[0]} {s.title.split(" ")[1] || ""}
-                </span>
-              </button>
-            );
-          })}
+      {/* Progress Dots Bar */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-xs font-mono text-slate-600 dark:text-slate-400">
+          <span>Step {currentStep} of 8: {activeStepData.title}</span>
+          <span className="font-bold text-teal-700 dark:text-teal-400">{activeStepData.badge}</span>
+        </div>
+        <div className="grid grid-cols-8 gap-1.5 sm:gap-2">
+          {steps.map((s) => (
+            <button
+              key={s.step}
+              onClick={() => {
+                setCurrentStep(s.step);
+                setIsPlaying(false);
+              }}
+              className={`h-2 sm:h-2.5 rounded-full transition-all touch-manipulation ${
+                s.step === currentStep
+                  ? "bg-teal-600 dark:bg-teal-400 ring-2 ring-teal-500/30"
+                  : s.step < currentStep
+                  ? "bg-emerald-500 dark:bg-emerald-400"
+                  : "bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700"
+              }`}
+              title={`Jump to step ${s.step}: ${s.title}`}
+            />
+          ))}
         </div>
       </div>
 
-      {/* Main Interactive Stage */}
-      <div className="p-5 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Visual Actor Flow */}
-        <div className="lg:col-span-5 flex flex-col gap-4">
-          <div className="bg-slate-800/40 dark:bg-slate-800/40 light:bg-slate-50 border border-slate-700/50 dark:border-slate-700/50 light:border-slate-200 rounded-xl p-4">
-            <span className="text-xs font-mono uppercase tracking-wider text-slate-400 dark:text-slate-400 light:text-slate-600 block mb-3">
-              Actor & Lifecycle Position
+      {/* Main Two-Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        {/* Left Column: Actor Cards & Flow */}
+        <div className="lg:col-span-5 space-y-3">
+          <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 space-y-2.5">
+            <span className="text-[11px] font-mono uppercase tracking-wider text-slate-500 font-bold block">
+              Architectural Entities Involved
             </span>
 
-            {/* Three key entities */}
-            <div className="flex flex-col gap-3">
-              {/* User Actor */}
-              <div
-                className={`p-3 rounded-lg border flex items-center justify-between transition-all ${
-                  activeStepData.actor === "User"
-                    ? "border-sky-500 bg-sky-500/15 text-sky-200"
-                    : "border-slate-700/40 dark:border-slate-700/40 light:border-slate-200 bg-slate-900/40 dark:bg-slate-900/40 light:bg-white text-slate-400"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-sky-500/20 flex items-center justify-center text-sky-400">
-                    <User className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-white dark:text-white light:text-slate-900">
-                      User / Client
-                    </h4>
-                    <p className="text-xs text-slate-400 dark:text-slate-400 light:text-slate-600">
-                      Issues prompt & receives response
-                    </p>
-                  </div>
+            {/* User */}
+            <div
+              className={`p-3 rounded-xl border transition-all flex items-center justify-between ${
+                activeStepData.actor === "User"
+                  ? "border-sky-500 bg-sky-50 dark:bg-sky-500/15 text-sky-950 dark:text-sky-200 shadow-sm"
+                  : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-400"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-sky-100 dark:bg-sky-500/20 text-sky-700 dark:text-sky-400 flex items-center justify-center font-bold">
+                  <User className="w-4 h-4" />
                 </div>
-                {activeStepData.actor === "User" && (
-                  <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-sky-500/20 text-sky-300 font-bold animate-pulse">
-                    ACTIVE
-                  </span>
-                )}
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white">Human User</h4>
+                  <p className="text-[10px] text-slate-500">Provides natural language intent</p>
+                </div>
               </div>
+              {activeStepData.actor === "User" && (
+                <span className="px-2 py-0.5 rounded text-[9px] font-mono bg-sky-100 dark:bg-sky-500/20 text-sky-800 dark:text-sky-300 font-bold animate-pulse">
+                  ACTIVE
+                </span>
+              )}
+            </div>
 
-              {/* Agent LLM Brain */}
-              <div
-                className={`p-3 rounded-lg border flex items-center justify-between transition-all ${
-                  activeStepData.actor === "Agent"
-                    ? "border-teal-500 bg-teal-500/15 text-teal-200"
-                    : "border-slate-700/40 dark:border-slate-700/40 light:border-slate-200 bg-slate-900/40 dark:bg-slate-900/40 light:bg-white text-slate-400"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-teal-500/20 flex items-center justify-center text-teal-400">
-                    <Cpu className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-white dark:text-white light:text-slate-900">
-                      Agent (LLM Reasoning Engine)
-                    </h4>
-                    <p className="text-xs text-slate-400 dark:text-slate-400 light:text-slate-600">
-                      Decides tool, crafts schema, interprets outputs
-                    </p>
-                  </div>
+            {/* Agent LLM Brain */}
+            <div
+              className={`p-3 rounded-xl border transition-all flex items-center justify-between ${
+                activeStepData.actor === "Agent"
+                  ? "border-teal-500 bg-teal-50 dark:bg-teal-500/15 text-teal-950 dark:text-teal-200 shadow-sm"
+                  : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-400"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-teal-100 dark:bg-teal-500/20 text-teal-700 dark:text-teal-400 flex items-center justify-center font-bold">
+                  <Cpu className="w-4 h-4" />
                 </div>
-                {activeStepData.actor === "Agent" && (
-                  <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-teal-500/20 text-teal-300 font-bold animate-pulse">
-                    ACTIVE
-                  </span>
-                )}
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white">Agent (LLM Engine)</h4>
+                  <p className="text-[10px] text-slate-500">Generates JSON schema tool call</p>
+                </div>
               </div>
+              {activeStepData.actor === "Agent" && (
+                <span className="px-2 py-0.5 rounded text-[9px] font-mono bg-teal-100 dark:bg-teal-500/20 text-teal-800 dark:text-teal-300 font-bold animate-pulse">
+                  ACTIVE
+                </span>
+              )}
+            </div>
 
-              {/* System Runtime & Tool */}
-              <div
-                className={`p-3 rounded-lg border flex items-center justify-between transition-all ${
-                  activeStepData.actor === "Runtime" || activeStepData.actor === "Tool"
-                    ? mode === "write" && activeStepData.step === 5
-                      ? "border-amber-500 bg-amber-500/20 text-amber-200"
-                      : "border-purple-500 bg-purple-500/15 text-purple-200"
-                    : "border-slate-700/40 dark:border-slate-700/40 light:border-slate-200 bg-slate-900/40 dark:bg-slate-900/40 light:bg-white text-slate-400"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-400">
-                    <Wrench className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-white dark:text-white light:text-slate-900">
-                      Host Runtime & External Tool
-                    </h4>
-                    <p className="text-xs text-slate-400 dark:text-slate-400 light:text-slate-600">
-                      Executes sandboxed API or database call
-                    </p>
-                  </div>
+            {/* Host Runtime & Tool */}
+            <div
+              className={`p-3 rounded-xl border transition-all flex items-center justify-between ${
+                activeStepData.actor === "Runtime" || activeStepData.actor === "Tool"
+                  ? mode === "write" && activeStepData.step === 5
+                    ? "border-amber-500 bg-amber-50 dark:bg-amber-500/20 text-amber-950 dark:text-amber-200 shadow-sm"
+                    : "border-purple-500 bg-purple-50 dark:bg-purple-500/15 text-purple-950 dark:text-purple-200 shadow-sm"
+                  : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-400"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 flex items-center justify-center font-bold">
+                  <Wrench className="w-4 h-4" />
                 </div>
-                {(activeStepData.actor === "Runtime" || activeStepData.actor === "Tool") && (
-                  <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-purple-500/20 text-purple-300 font-bold animate-pulse">
-                    ACTIVE
-                  </span>
-                )}
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white">Host Runtime &amp; Tool</h4>
+                  <p className="text-[10px] text-slate-500">Executes actual API / Python function</p>
+                </div>
               </div>
+              {(activeStepData.actor === "Runtime" || activeStepData.actor === "Tool") && (
+                <span className="px-2 py-0.5 rounded text-[9px] font-mono bg-purple-100 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 font-bold animate-pulse">
+                  ACTIVE
+                </span>
+              )}
             </div>
           </div>
 
           {/* Teacher Commentary Note */}
-          <div className="bg-slate-950/60 dark:bg-slate-950/60 light:bg-slate-50 border border-slate-800 dark:border-slate-800 light:border-slate-200 rounded-xl p-4 text-xs leading-relaxed text-slate-300 dark:text-slate-300 light:text-slate-700">
-            <span className="font-bold text-teal-400 dark:text-teal-400 light:text-teal-600 block mb-1">
-              💡 Teacher Note: Who actually executes the code?
+          <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/40 text-xs leading-relaxed text-slate-600 dark:text-slate-300 shadow-sm">
+            <span className="font-bold text-teal-700 dark:text-teal-400 font-mono text-[11px] block mb-1">
+              💡 Golden Principle: The LLM Does Not Run Tools!
             </span>
-            Remember this golden rule: <strong>The LLM does NOT execute tools directly!</strong> The LLM only generates a string of JSON describing what function to call and what arguments to supply. The surrounding host runtime (Python, Node.js, or framework) intercepts that JSON, calls the actual function, and feeds the string result back to the model.
+            The model never executes code itself. It emits a structured JSON string. The surrounding host runtime validates it, calls the Python/Node function, and injects the output back into the conversation history.
           </div>
         </div>
 
         {/* Right Column: Step Inspector & Live Payload */}
         <div className="lg:col-span-7 flex flex-col justify-between gap-4">
-          <div className="bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 dark:border-slate-800 light:border-slate-200 rounded-xl p-5 shadow-inner">
-            {/* Step header */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80 dark:border-slate-800/80 light:border-slate-200">
+          <div className="p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-sm space-y-3">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded text-xs font-mono font-bold bg-slate-800 dark:bg-slate-800 light:bg-slate-200 text-slate-200 dark:text-slate-200 light:text-slate-800">
-                  Step {activeStepData.step} of 8
+                <span className="px-2 py-0.5 rounded text-xs font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                  Step {activeStepData.step}
                 </span>
-                <h4 className="font-bold text-white dark:text-white light:text-slate-900 text-base">
+                <h4 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base">
                   {activeStepData.title}
                 </h4>
               </div>
               <span
                 className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded ${
                   mode === "read"
-                    ? "bg-teal-500/20 text-teal-300"
-                    : "bg-amber-500/20 text-amber-300"
+                    ? "bg-teal-50 dark:bg-teal-500/20 text-teal-800 dark:text-teal-300 border border-teal-200 dark:border-teal-500/30"
+                    : "bg-amber-50 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30"
                 }`}
               >
                 {activeStepData.badge}
               </span>
             </div>
 
-            {/* Step description */}
-            <p className="text-sm text-slate-300 dark:text-slate-300 light:text-slate-600 mt-3 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
               {activeStepData.description}
             </p>
 
             {/* Payload Terminal Display */}
-            <div className="mt-4">
-              <div className="flex items-center justify-between px-3 py-1.5 bg-slate-900 dark:bg-slate-900 light:bg-slate-100 rounded-t-lg border-t border-x border-slate-800 dark:border-slate-800 light:border-slate-200 text-xs font-mono text-slate-400">
+            <div>
+              <div className="flex items-center justify-between px-3 py-1.5 bg-slate-900 rounded-t-lg border-t border-x border-slate-800 text-[11px] font-mono text-slate-400">
                 <span>Payload / Runtime Stream</span>
                 <span>json / text</span>
               </div>
-              <pre className="p-3.5 bg-slate-900/90 dark:bg-slate-900/90 light:bg-slate-50 border border-slate-800 dark:border-slate-800 light:border-slate-200 rounded-b-lg font-mono text-xs text-teal-300 dark:text-teal-300 light:text-teal-700 whitespace-pre-wrap overflow-x-auto leading-relaxed max-h-56">
+              <pre className="p-3.5 bg-slate-950 border border-slate-800 rounded-b-lg font-mono text-xs text-teal-300 whitespace-pre-wrap overflow-x-auto leading-relaxed max-h-56">
                 {activeStepData.payload}
               </pre>
             </div>
 
-            {/* Special Human in the Loop approval button for Write Step 5 */}
+            {/* Human in the loop gate button */}
             {mode === "write" && activeStepData.step === 5 && (
-              <div className="mt-4 p-4 rounded-xl border border-amber-500/40 bg-amber-500/10 flex flex-col sm:flex-row items-center justify-between gap-3">
-                <div className="flex items-center gap-2 text-amber-300 text-xs">
-                  <ShieldAlert className="w-5 h-5 flex-shrink-0" />
+              <div className="p-3.5 rounded-xl border border-amber-300 dark:border-amber-500/40 bg-amber-50 dark:bg-amber-950/20 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm">
+                <div className="flex items-center gap-2 text-amber-950 dark:text-amber-300 text-xs">
+                  <ShieldAlert className="w-5 h-5 shrink-0 text-amber-600 dark:text-amber-400" />
                   <span>
                     <strong>Write Gate:</strong> An irreversible state change was requested. Approve dispatch?
                   </span>
@@ -525,27 +485,27 @@ export default function ToolCallingCycleVisualizer() {
                     setCurrentStep(6);
                   }}
                   disabled={humanApproved}
-                  className={`px-4 py-2 rounded-lg text-xs font-bold transition-all shadow-md ${
+                  className={`w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm touch-manipulation active:scale-95 ${
                     humanApproved
                       ? "bg-emerald-600 text-white cursor-default"
-                      : "bg-amber-400 hover:bg-amber-300 text-slate-950 cursor-pointer active:scale-95"
+                      : "bg-amber-600 hover:bg-amber-500 text-white"
                   }`}
                 >
-                  {humanApproved ? "✓ Approved by Supervisor" : "Confirm & Execute Tool"}
+                  {humanApproved ? "✓ Authorized by Supervisor" : "Confirm & Execute Tool"}
                 </button>
               </div>
             )}
           </div>
 
           {/* Stepper Controls */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setIsPlaying(!isPlaying)}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-md ${
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-sm touch-manipulation active:scale-95 ${
                   isPlaying
-                    ? "bg-rose-500 hover:bg-rose-400 text-white"
-                    : "bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold"
+                    ? "bg-rose-600 hover:bg-rose-500 text-white"
+                    : "bg-teal-600 hover:bg-teal-500 text-white shadow-teal-500/20"
                 }`}
               >
                 {isPlaying ? (
@@ -563,7 +523,7 @@ export default function ToolCallingCycleVisualizer() {
 
               <button
                 onClick={handleReset}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border border-slate-700 dark:border-slate-700 light:border-slate-300 text-slate-300 dark:text-slate-300 light:text-slate-700 hover:bg-slate-800 dark:hover:bg-slate-800 light:hover:bg-slate-100 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 transition touch-manipulation active:scale-95"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>Reset</span>
@@ -574,14 +534,14 @@ export default function ToolCallingCycleVisualizer() {
               <button
                 onClick={() => setCurrentStep((prev) => Math.max(prev - 1, 1))}
                 disabled={currentStep === 1}
-                className="px-3 py-2 rounded-xl text-xs font-medium border border-slate-700 dark:border-slate-700 light:border-slate-300 text-slate-300 dark:text-slate-300 light:text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-800 dark:hover:bg-slate-800 light:hover:bg-slate-100"
+                className="px-3 py-2 rounded-xl text-xs font-medium border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-900 transition touch-manipulation active:scale-95"
               >
                 Previous Step
               </button>
               <button
                 onClick={() => setCurrentStep((prev) => Math.min(prev + 1, 8))}
                 disabled={currentStep === 8 || (mode === "write" && currentStep === 5 && !humanApproved)}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 light:bg-slate-200 light:hover:bg-slate-300 text-white dark:text-white light:text-slate-900 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white disabled:opacity-40 disabled:cursor-not-allowed transition touch-manipulation active:scale-95 shadow-sm"
               >
                 <span>Next Step</span>
                 <ArrowRight className="w-3.5 h-3.5" />

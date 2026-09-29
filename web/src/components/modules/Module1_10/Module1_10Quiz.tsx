@@ -102,25 +102,25 @@ export default function Module1_10Quiz() {
   ).length;
 
   return (
-    <div className="rounded-2xl border border-slate-700/60 dark:border-slate-700/60 light:border-slate-300 bg-slate-900/90 dark:bg-slate-900/90 light:bg-white p-5 md:p-8 shadow-xl my-8">
+    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 md:p-8 shadow-sm my-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-slate-800 dark:border-slate-800 light:border-slate-200">
+      <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400">
+          <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-500/20 border border-teal-200 dark:border-teal-500/40 flex items-center justify-center text-teal-600 dark:text-teal-400">
             <HelpCircle className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-lg md:text-xl font-bold text-white dark:text-white light:text-slate-900">
-              Concept Check: Enhancing Agents with RAG
+            <h3 className="text-lg md:text-xl font-bold text-slate-900 dark:text-white">
+              Concept Check: Agentic RAG Systems
             </h3>
-            <p className="text-xs md:text-sm text-slate-400 dark:text-slate-400 light:text-slate-600">
-              Test your understanding of RAG lifecycles, Node vs. Tool architectures, and retrieval quality truths.
+            <p className="text-xs md:text-sm text-slate-600 dark:text-slate-400">
+              Validate your grasp of chunking tradeoffs, node vs tool architecture, and retrieval quality.
             </p>
           </div>
         </div>
 
         {showResults && (
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-teal-500/10 border border-teal-500/30 text-teal-300 font-mono text-xs font-bold">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-teal-50 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/30 text-teal-800 dark:text-teal-300 font-mono text-xs font-bold">
             <Award className="w-4 h-4" />
             <span>
               Score: {correctCount} / {QUESTIONS.length} (
@@ -142,13 +142,13 @@ export default function Module1_10Quiz() {
               className={`p-4 md:p-5 rounded-xl border transition-all ${
                 showResults
                   ? isCorrect
-                    ? "border-emerald-500/50 bg-emerald-500/5"
-                    : "border-rose-500/50 bg-rose-500/5"
-                  : "border-slate-800 dark:border-slate-800 light:border-slate-200 bg-slate-950/40 dark:bg-slate-950/40 light:bg-slate-50"
+                    ? "border-emerald-300 dark:border-emerald-500/50 bg-emerald-50/50 dark:bg-emerald-500/5"
+                    : "border-rose-300 dark:border-rose-500/50 bg-rose-50/50 dark:bg-rose-500/5"
+                  : "border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/40"
               }`}
             >
               <div className="flex items-start justify-between gap-3">
-                <span className="text-xs font-mono font-bold text-teal-400 px-2 py-0.5 rounded bg-teal-500/10 border border-teal-500/20 flex-shrink-0">
+                <span className="text-xs font-mono font-bold text-teal-700 dark:text-teal-400 px-2 py-0.5 rounded bg-teal-100 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/20 flex-shrink-0">
                   Question {index + 1}
                 </span>
                 {q.contextHint && !showResults && (
@@ -158,7 +158,7 @@ export default function Module1_10Quiz() {
                 )}
               </div>
 
-              <h4 className="text-sm md:text-base font-semibold text-slate-200 dark:text-slate-200 light:text-slate-900 mt-2 mb-3">
+              <h4 className="text-sm md:text-base font-semibold text-slate-900 dark:text-slate-200 mt-2 mb-3">
                 {q.question}
               </h4>
 
@@ -166,21 +166,21 @@ export default function Module1_10Quiz() {
                 {q.options.map((option, optIdx) => {
                   const isSelected = selected === optIdx;
                   let optionStyles =
-                    "border-slate-800 dark:border-slate-800 light:border-slate-200 bg-slate-900/60 dark:bg-slate-900/60 light:bg-white text-slate-300 dark:text-slate-300 light:text-slate-700 hover:border-slate-700 dark:hover:border-slate-700 light:hover:border-slate-300";
+                    "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 text-slate-800 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700";
 
                   if (showResults) {
                     if (optIdx === q.correctIndex) {
                       optionStyles =
-                        "border-emerald-500 bg-emerald-500/20 text-emerald-200 font-semibold";
+                        "border-emerald-500 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-950 dark:text-emerald-200 font-semibold";
                     } else if (isSelected && !isCorrect) {
                       optionStyles =
-                        "border-rose-500 bg-rose-500/20 text-rose-200";
+                        "border-rose-500 bg-rose-100 dark:bg-rose-500/20 text-rose-950 dark:text-rose-200";
                     } else {
-                      optionStyles = "opacity-50 border-slate-800 text-slate-500";
+                      optionStyles = "opacity-50 border-slate-200 dark:border-slate-800 text-slate-500";
                     }
                   } else if (isSelected) {
                     optionStyles =
-                      "border-teal-500 bg-teal-500/15 text-teal-200 font-semibold shadow-sm";
+                      "border-teal-500 bg-teal-50 dark:bg-teal-500/15 text-teal-900 dark:text-teal-200 font-semibold shadow-sm";
                   }
 
                   return (
@@ -188,17 +188,17 @@ export default function Module1_10Quiz() {
                       key={optIdx}
                       onClick={() => handleSelect(q.id, optIdx)}
                       disabled={showResults}
-                      className={`w-full text-left p-3 rounded-lg border text-xs md:text-sm flex items-start gap-3 transition-all ${optionStyles}`}
+                      className={`w-full text-left p-3 rounded-lg border text-xs md:text-sm flex items-start gap-3 transition-all cursor-pointer ${optionStyles}`}
                     >
                       <span className="w-5 h-5 rounded-full border border-current flex items-center justify-center text-[10px] font-mono flex-shrink-0 mt-0.5">
                         {String.fromCharCode(65 + optIdx)}
                       </span>
                       <span className="flex-1 leading-relaxed">{option}</span>
                       {showResults && optIdx === q.correctIndex && (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
                       )}
                       {showResults && isSelected && !isCorrect && (
-                        <XCircle className="w-4 h-4 text-rose-400 flex-shrink-0 mt-0.5" />
+                        <XCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0 mt-0.5" />
                       )}
                     </button>
                   );
@@ -209,8 +209,8 @@ export default function Module1_10Quiz() {
                 <div
                   className={`mt-4 p-3.5 rounded-lg border text-xs leading-relaxed ${
                     isCorrect
-                      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300 dark:text-emerald-300 light:text-emerald-800"
-                      : "border-rose-500/30 bg-rose-500/10 text-rose-300 dark:text-rose-300 light:text-rose-800"
+                      ? "border-emerald-200 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-900 dark:text-emerald-300"
+                      : "border-rose-200 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-500/10 text-rose-900 dark:text-rose-300"
                   }`}
                 >
                   <strong className="block mb-1">
@@ -225,8 +225,8 @@ export default function Module1_10Quiz() {
       </div>
 
       {/* Action Footer */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mt-8 pt-5 border-t border-slate-800 dark:border-slate-800 light:border-slate-200">
-        <p className="text-xs text-slate-400 dark:text-slate-400 light:text-slate-600">
+      <div className="flex flex-wrap items-center justify-between gap-4 mt-8 pt-5 border-t border-slate-200 dark:border-slate-800">
+        <p className="text-xs text-slate-600 dark:text-slate-400">
           {!showResults
             ? allAnswered
               ? "All questions answered! Click below to evaluate."
@@ -238,7 +238,7 @@ export default function Module1_10Quiz() {
           {showResults ? (
             <button
               onClick={handleReset}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold border border-slate-700 dark:border-slate-700 light:border-slate-300 text-slate-300 dark:text-slate-300 light:text-slate-700 hover:bg-slate-800 dark:hover:bg-slate-800 light:hover:bg-slate-100 transition-colors"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Retry Quiz</span>
@@ -247,7 +247,7 @@ export default function Module1_10Quiz() {
             <button
               onClick={handleCheckAnswers}
               disabled={!allAnswered}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-teal-400 hover:bg-teal-300 text-slate-950 shadow-md transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-teal-600 hover:bg-teal-500 text-white shadow-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
               <CheckCircle2 className="w-4 h-4" />
               <span>Check My Answers</span>

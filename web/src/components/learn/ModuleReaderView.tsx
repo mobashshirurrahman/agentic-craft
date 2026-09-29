@@ -175,104 +175,198 @@ export default function ModuleReaderView({
   const isModule4_17 = module.id === "module-4-17";
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-16">
-      {/* Breadcrumb Navigation */}
-      <nav className="flex items-center gap-2 text-xs font-mono text-slate-500 dark:text-slate-400 overflow-x-auto whitespace-nowrap pb-1 scrollbar-none">
-        <Link href="/" className="hover:text-slate-900 dark:hover:text-slate-200 transition shrink-0">
-          Home
-        </Link>
-        <span className="shrink-0">/</span>
-        <Link href="/#curriculum" className="hover:text-slate-900 dark:hover:text-slate-200 transition shrink-0">
-          Curriculum
-        </Link>
-        <span className="shrink-0">/</span>
-        <span className="text-slate-700 dark:text-slate-300 shrink-0">Level {level.levelNumber}</span>
-        <span className="shrink-0">/</span>
-        <span className="text-teal-700 dark:text-teal-400 font-bold shrink-0">Module {module.number}</span>
-      </nav>
+    <div
+      className="max-w-4xl mx-auto space-y-8 pb-16 transition-all duration-200"
+    >
+      {/* Breadcrumb Navigation & Top Prev/Next */}
+      <div className="flex items-center justify-between gap-3">
+        {/* Desktop Breadcrumbs */}
+        <nav className="hidden sm:flex items-center gap-2 text-xs font-mono text-slate-500 dark:text-slate-400 overflow-x-auto whitespace-nowrap pb-1 scrollbar-none">
+          <Link href="/" className="hover:text-slate-900 dark:hover:text-slate-200 transition shrink-0">
+            Level {level.levelNumber}
+          </Link>
+          <span className="shrink-0">›</span>
+          <Link href="/#curriculum" className="hover:text-slate-900 dark:hover:text-slate-200 transition shrink-0">
+            Module {module.number.split(".")[0]}
+          </Link>
+          <span className="shrink-0">›</span>
+          <span className="text-slate-800 dark:text-slate-200 font-semibold shrink-0">
+            {module.number} {module.title}
+          </span>
+        </nav>
 
-      {/* Module Title Header Card */}
-      <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-4 sm:p-6 md:p-8 backdrop-blur-xl relative overflow-hidden shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <div className="flex items-center gap-2">
-            <span
-              className={`text-xs font-mono font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${level.color.badge}`}
-            >
-              Level {level.levelNumber}: {level.subtitle}
-            </span>
-            <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
-              Module {module.number}
-            </span>
-          </div>
-
-          {/* Action buttons */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => toggleBookmark(module.id)}
-              className={`p-2 rounded-xl border transition flex items-center gap-1.5 text-xs font-mono ${
-                bookmarked
-                  ? "bg-amber-500/20 border-amber-500/40 text-amber-700 dark:text-amber-300"
-                  : "bg-slate-100 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-900"
-              }`}
-            >
-              <Bookmark className="w-3.5 h-3.5 fill-current" />
-              <span>{bookmarked ? "Bookmarked" : "Bookmark"}</span>
-            </button>
-
-            <button
-              onClick={handleCompleteClick}
-              className={`px-3 py-2 rounded-xl border transition flex items-center gap-1.5 text-xs font-mono font-bold ${
-                completed
-                  ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-700 dark:text-emerald-300"
-                  : "bg-teal-50 dark:bg-teal-500/10 border-teal-300 dark:border-teal-500/30 text-teal-800 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-500/20"
-              }`}
-            >
-              {completed ? (
-                <>
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Completed</span>
-                </>
-              ) : (
-                <>
-                  <Circle className="w-3.5 h-3.5" />
-                  <span>Mark Complete</span>
-                </>
-              )}
-            </button>
-          </div>
+        {/* Mobile Compact Breadcrumbs */}
+        <div className="sm:hidden flex items-center gap-1.5 text-xs font-mono text-slate-500 dark:text-slate-400 truncate">
+          <span>Level {level.levelNumber}</span>
+          <span>›</span>
+          <span className="text-slate-900 dark:text-white font-bold">Module {module.number}</span>
         </div>
 
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
-          {module.title}
-        </h1>
-
-        <p className="text-sm md:text-base text-slate-600 dark:text-slate-300 mt-3 leading-relaxed">
-          {module.summary}
-        </p>
-
-        {/* Metadata Strip */}
-        <div className="flex flex-wrap items-center gap-4 mt-6 pt-5 border-t border-slate-200 dark:border-slate-800/80 text-xs font-mono text-slate-500 dark:text-slate-400">
-          <div className="flex items-center gap-1.5 text-teal-700 dark:text-teal-400">
-            <Layers className="w-4 h-4" />
-            <span>
-              Level {level.levelNumber} • <strong className="text-slate-800 dark:text-slate-200">{level.subtitle}</strong>
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <Clock className="w-4 h-4 text-slate-400 dark:text-slate-500" />
-            <span>Est. ~{module.estimatedMinutes} mins</span>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <FileText className="w-4 h-4 text-slate-400 dark:text-slate-500" />
-            <span>{module.keyTopics.length || 5} Key Topics</span>
-          </div>
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 text-xs font-mono">
+          {prevModule && (
+            <Link
+              href={`/learn/${prevModule.levelId}/${prevModule.id}`}
+              className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-slate-700 dark:text-slate-300 flex items-center gap-1 transition shadow-2xs active:scale-95"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Previous</span>
+            </Link>
+          )}
+          {nextModule && (
+            <Link
+              href={`/learn/${nextModule.levelId}/${nextModule.id}`}
+              className="px-3 sm:px-3.5 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold flex items-center gap-1 transition shadow-xs cursor-pointer active:scale-95"
+            >
+              <span>Next</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          )}
         </div>
       </div>
 
+      {/* Module Title Header */}
+      {isModule1_1 ? (
+        <div className="space-y-4 pt-1">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono font-bold px-3 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30">
+                Module {module.number}
+              </span>
+              <span className="text-xs font-mono text-slate-500 dark:text-slate-400 flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800/60 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-800">
+                <Clock className="w-3.5 h-3.5 text-slate-400" />
+                <span>{module.estimatedMinutes} min</span>
+              </span>
+            </div>
+
+            {/* Quick Actions (Bookmark & Complete) */}
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              <button
+                onClick={() => toggleBookmark(module.id)}
+                className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl border transition flex items-center gap-1 text-xs font-mono shrink-0 cursor-pointer ${
+                  bookmarked
+                    ? "bg-amber-500/20 border-amber-500/40 text-amber-700 dark:text-amber-300"
+                    : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                }`}
+                title={bookmarked ? "Bookmarked" : "Bookmark"}
+              >
+                <Bookmark className="w-3.5 h-3.5 fill-current" />
+                <span className="hidden sm:inline">{bookmarked ? "Bookmarked" : "Bookmark"}</span>
+              </button>
+
+              <button
+                onClick={handleCompleteClick}
+                className={`px-2.5 sm:px-3 py-1.5 rounded-xl border transition flex items-center gap-1.5 text-xs font-mono font-bold shrink-0 cursor-pointer ${
+                  completed
+                    ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-700 dark:text-emerald-300"
+                    : "bg-teal-50 dark:bg-teal-500/10 border-teal-300 dark:border-teal-500/30 text-teal-800 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-500/20"
+                }`}
+              >
+                {completed ? (
+                  <>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                    <span>Done</span>
+                  </>
+                ) : (
+                  <>
+                    <Circle className="w-3.5 h-3.5" />
+                    <span><span className="hidden sm:inline">Mark </span>Complete</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          <h1 className="text-2xl sm:text-3xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-tight break-words">
+            {module.title}
+          </h1>
+
+          <p className="text-sm sm:text-base md:text-lg text-slate-600 dark:text-slate-300 leading-relaxed max-w-4xl">
+            {module.summary}
+          </p>
+        </div>
+      ) : (
+        <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-5 sm:p-7 md:p-8 backdrop-blur-xl relative overflow-hidden shadow-xs">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-2">
+              <span
+                className={`text-xs font-mono font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${level.color.badge}`}
+              >
+                Level {level.levelNumber}: {level.subtitle}
+              </span>
+              <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
+                Module {module.number}
+              </span>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => toggleBookmark(module.id)}
+                className={`p-2 rounded-xl border transition flex items-center gap-1.5 text-xs font-mono ${
+                  bookmarked
+                    ? "bg-amber-500/20 border-amber-500/40 text-amber-700 dark:text-amber-300"
+                    : "bg-slate-100 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-900"
+                }`}
+              >
+                <Bookmark className="w-3.5 h-3.5 fill-current" />
+                <span>{bookmarked ? "Bookmarked" : "Bookmark"}</span>
+              </button>
+
+              <button
+                onClick={handleCompleteClick}
+                className={`px-3 py-2 rounded-xl border transition flex items-center gap-1.5 text-xs font-mono font-bold ${
+                  completed
+                    ? "bg-emerald-500/20 border-emerald-500/40 text-emerald-700 dark:text-emerald-300"
+                    : "bg-teal-50 dark:bg-teal-500/10 border-teal-300 dark:border-teal-500/30 text-teal-800 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-500/20"
+                }`}
+              >
+                {completed ? (
+                  <>
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Completed</span>
+                  </>
+                ) : (
+                  <>
+                    <Circle className="w-3.5 h-3.5" />
+                    <span>Mark Complete</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
+            {module.title}
+          </h1>
+
+          <p className="text-sm md:text-base text-slate-600 dark:text-slate-300 mt-3 leading-relaxed">
+            {module.summary}
+          </p>
+
+          {/* Metadata Strip */}
+          <div className="flex flex-wrap items-center gap-4 mt-6 pt-5 border-t border-slate-200 dark:border-slate-800/80 text-xs font-mono text-slate-500 dark:text-slate-400">
+            <div className="flex items-center gap-1.5 text-teal-700 dark:text-teal-400">
+              <Layers className="w-4 h-4" />
+              <span>
+                Level {level.levelNumber} • <strong className="text-slate-800 dark:text-slate-200">{level.subtitle}</strong>
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <Clock className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+              <span>Est. ~{module.estimatedMinutes} mins</span>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <FileText className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+              <span>{module.keyTopics.length || 5} Key Topics</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Free Learner Perk: Certificate & Streak Signup Offer */}
-      <LessonStartAuthOffer moduleTitle={module.title} />
+      {!isModule1_1 && <LessonStartAuthOffer moduleTitle={module.title} />}
 
       {/* Render Module Content if Generated, else Syllabus Outline */}
       <div className="lesson-content-body pt-2 space-y-10">

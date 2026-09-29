@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Caveat } from "next/font/google";
+import { Plus_Jakarta_Sans, JetBrains_Mono, Caveat } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { ThemeProvider } from "@/lib/theme-context";
@@ -7,20 +7,24 @@ import { AuthProvider } from "@/lib/auth-context";
 import AuthModal from "@/components/auth/AuthModal";
 import CertificateModal from "@/components/auth/CertificateModal";
 
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const plusJakarta = Plus_Jakarta_Sans({
+  variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-mono",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const caveat = Caveat({
   variable: "--font-caveat",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -62,7 +66,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${caveat.variable}`}
+      className={`${plusJakarta.variable} ${jetbrainsMono.variable} ${caveat.variable}`}
       suppressHydrationWarning
     >
       <head>
@@ -80,8 +84,8 @@ export default function RootLayout({
 
           {`
             try {
-              var p = window.location.pathname;
-              if (p.startsWith('/learn')) {
+              var saved = localStorage.getItem('agentic_theme');
+              if (saved === 'dark') {
                 document.documentElement.classList.add('dark');
                 document.documentElement.classList.remove('light');
                 document.documentElement.setAttribute('data-theme', 'dark');

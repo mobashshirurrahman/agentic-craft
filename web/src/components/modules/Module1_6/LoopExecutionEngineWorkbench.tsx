@@ -14,7 +14,6 @@ import {
   Check,
   Copy,
   Cpu,
-  RefreshCw,
 } from "lucide-react";
 
 export default function LoopExecutionEngineWorkbench() {
@@ -70,174 +69,147 @@ class AutonomousAgent:
             
         return self.state["final_answer"]`;
 
-  const runSimulation = () => {
-    setIsRunning(true);
-    setLogs(["[Engine Init] Booting AutonomousAgent with max_iterations=" + maxIterations]);
-
-    setTimeout(() => {
-      setLogs((prev) => [
-        ...prev,
-        "[Goal Ingested]: 'Investigate latency spike on payment webhook'",
-        "--- CYCLE 1 START ---",
-        "[Phase 1: Perceive] Ingested user goal and 4 registered tools: [query_metrics, inspect_logs, ping_endpoint, restart_service]",
-        "[Phase 2: Reason] Decision: Check query_metrics(service='payments', window='15m')",
-      ]);
-    }, 400);
-
-    setTimeout(() => {
-      if (simulateFlakyTool) {
-        setLogs((prev) => [
-          ...prev,
-          "[Phase 3: Act] Dispatched `query_metrics` tool...",
-          "[Phase 4: Observe] ⚠️ HTTP 503 SERVICE_UNAVAILABLE from metrics server!",
-          "[Phase 5: Iterate] Goal NOT achieved. Error detected. Self-healing protocol engaged.",
-          "--- CYCLE 2 START (Self-Healing) ---",
-          "[Phase 1: Perceive] Error in context: Metrics server is unreachable.",
-          "[Phase 2: Reason] Fallback Strategy: Inspect raw file logs instead via `inspect_logs`",
-          "[Phase 3: Act] Dispatched `inspect_logs(service='payments', tail=20)`",
-          "[Phase 4: Observe] Log entry found: 'ConnectionPoolTimeout: 50 open connections saturated'",
-          "[Phase 5: Iterate] Root cause identified! Goal completed.",
-          "--- LOOP TERMINATED ---",
-          "[Final Output]: 'Latency spike caused by connection pool saturation (50 connections). Recommended action: Increase pool size.'",
-        ]);
-        setIsRunning(false);
-      } else if (simulateInfiniteLoop) {
-        let infiniteTrace = [
-          ...logs,
-          "[Phase 3: Act] Dispatched `query_metrics` tool...",
-          "[Phase 4: Observe] Metric: latency=420ms (unclear cause)",
-          "[Phase 5: Iterate] Goal not complete. Model repeating same question.",
-        ];
-
-        for (let i = 2; i <= maxIterations; i++) {
-          infiniteTrace.push(
-            `--- CYCLE ${i} START ---`,
-            `[Phase 2: Reason] Re-querying metrics... (Loop Drift detected)`,
-            `[Phase 3: Act] query_metrics(service='payments')`,
-            `[Phase 4: Observe] Result unchanged.`
-          );
-        }
-
-        infiniteTrace.push(
-          `⚠️ [SAFETY SHUTDOWN TRIGGERED]`,
-          `Max iterations ceiling (${maxIterations}) reached!`,
-          `Safety brake engaged to prevent runaway token spend and infinite loop lock.`,
-          `Agent cleanly exited and notified human operator for escalation.`
-        );
-
-        setLogs(infiniteTrace);
-        setIsRunning(false);
-      } else {
-        // Normal clean 2-cycle success
-        setLogs((prev) => [
-          ...prev,
-          "[Phase 3: Act] Dispatched `query_metrics`...",
-          "[Phase 4: Observe] Metric: P99 latency = 1,420ms (Normal: 120ms). Found spike at 09:14 UTC.",
-          "[Phase 5: Iterate] Goal partially complete. Identified spike time. Now need log traces.",
-          "--- CYCLE 2 START ---",
-          "[Phase 1: Perceive] Target timestamp 09:14 UTC identified.",
-          "[Phase 2: Reason] Call `inspect_logs(timestamp='09:14', level='ERROR')`",
-          "[Phase 3: Act] Dispatched `inspect_logs`...",
-          "[Phase 4: Observe] Found 3 occurrences of 'Redis cache miss cascade'.",
-          "[Phase 5: Iterate] Goal fully achieved! Terminating loop cleanly.",
-          "--- LOOP TERMINATED ---",
-          "[Final Output]: 'P99 latency spiked to 1,420ms at 09:14 UTC due to a Redis cache miss cascade.'",
-        ]);
-        setIsRunning(false);
-      }
-    }, 1200);
-  };
-
-  const handleCopyCode = () => {
+  const handleCopy = () => {
     navigator.clipboard.writeText(pythonLoopCode);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const runLoopSimulation = () => {
+    setIsRunning(true);
+    setLogs([]);
+
+    const simulationLogs: string[] = [];
+
+    simulationLogs.push(`[*] Initializing Agentic Loop (Safety Cap = ${maxIterations} steps)...`);
+    simulationLogs.push(`[*] User Goal: "Audit Q3 revenue anomaly and patch discrepancy"`);
+
+    let step = 1;
+    let finished = false;
+
+    while (step <= maxIterations && !finished) {
+      const s = step;
+      simulationLogs.push(`\n[--- CYCLE ${s} of ${maxIterations} ---]`);
+      simulationLogs.push(`[1. PERCEIVE]: Context loaded (${s - 1} prior turns).`);
+
+      if (simulateInfiniteLoop) {
+        simulationLogs.push(`[2. REASON]: Vague instructions detected. Re-querying same database table...`);
+        simulationLogs.push(`[3. ACT]: Tool call: query_db(table="sales_cache")`);
+        simulationLogs.push(`[4. OBSERVE]: Returned 400 rows identical to previous turn.`);
+        simulationLogs.push(`[5. ITERATE]: Goal NOT satisfied. No state change detected. Continuing loop...`);
+      } else if (simulateFlakyTool && s === 1) {
+        simulationLogs.push(`[2. REASON]: Inspecting balance sheet line items...`);
+        simulationLogs.push(`[3. ACT]: Tool call: fetch_erp_balance_sheet()`);
+        simulationLogs.push(`[4. OBSERVE]: [503 Service Unavailable]: ERP gateway timeout.`);
+        simulationLogs.push(`[5. ITERATE]: Failure caught! Re-entering loop with backoff retry strategy...`);
+      } else if (simulateFlakyTool && s === 2) {
+        simulationLogs.push(`[2. REASON]: Retrying ERP query with exponential backoff...`);
+        simulationLogs.push(`[3. ACT]: Tool call: fetch_erp_balance_sheet(retry=True)`);
+        simulationLogs.push(`[4. OBSERVE]: 200 OK -> Retrieved ledger records.`);
+        simulationLogs.push(`[5. ITERATE]: Anomaly found: duplicate billing on Invoice #884. Proceeding to fix.`);
+      } else {
+        if (s === 1) {
+          simulationLogs.push(`[2. REASON]: Fetching anomaly report for Q3 revenue.`);
+          simulationLogs.push(`[3. ACT]: Tool call: fetch_anomaly_records(quarter="Q3")`);
+          simulationLogs.push(`[4. OBSERVE]: Identified $12,400 duplicate billing.`);
+          simulationLogs.push(`[5. ITERATE]: Discrepancy isolated. Moving to Cycle 2 to adjust ledger.`);
+        } else if (s === 2) {
+          simulationLogs.push(`[2. REASON]: Adjusting ledger to credit customer for duplicate billing.`);
+          simulationLogs.push(`[3. ACT]: Tool call: issue_credit_memo(amount=12400)`);
+          simulationLogs.push(`[4. OBSERVE]: Credit memo #CM-901 confirmed by ERP.`);
+          simulationLogs.push(`[5. ITERATE]: Goal completely resolved! Exiting loop.`);
+          finished = true;
+        }
+      }
+
+      step++;
+    }
+
+    if (!finished && simulateInfiniteLoop) {
+      simulationLogs.push(`\n[💥 SAFETY CEILING HIT]: Loop exceeded max_iterations limit (${maxIterations}).`);
+      simulationLogs.push(`[SAFETY INTERCEPT]: Halting execution to prevent token drain and runaway billing.`);
+    }
+
+    simulationLogs.forEach((line, idx) => {
+      setTimeout(() => {
+        setLogs((prev) => [...prev, line]);
+        if (idx === simulationLogs.length - 1) setIsRunning(false);
+      }, (idx + 1) * 220);
+    });
+  };
+
   return (
-    <div className="rounded-2xl border border-slate-700/60 bg-slate-900/90 dark:bg-slate-900/90 light:bg-white light:border-slate-300 shadow-xl overflow-hidden my-8">
-      {/* Header */}
-      <div className="border-b border-slate-700/60 dark:border-slate-700/60 light:border-slate-200 px-5 py-4 bg-slate-800/50 dark:bg-slate-800/50 light:bg-slate-50 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="flex h-2.5 w-2.5 rounded-full bg-teal-400 animate-pulse" />
-            <h3 className="font-bold text-base md:text-lg text-white dark:text-white light:text-slate-900">
-              Agentic Loop Engine & Guardrails Workbench
-            </h3>
+    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 overflow-hidden shadow-sm dark:shadow-2xl">
+      {/* Header bar */}
+      <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <div className="p-2 rounded-lg bg-teal-50 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/30 text-teal-700 dark:text-teal-400">
+            <Cpu className="w-4 h-4" />
           </div>
-          <p className="text-xs text-slate-400 dark:text-slate-400 light:text-slate-600 mt-0.5">
-            Test the while-loop execution flow, self-healing retries, and the critical max-iterations safety brake.
-          </p>
+          <div>
+            <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              Agentic Loop Engine Workbench
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-teal-100 dark:bg-teal-500/20 text-teal-800 dark:text-teal-300 font-semibold border border-teal-200 dark:border-teal-500/30">
+                Python 3.11
+              </span>
+            </h4>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Configure stopping boundaries, test flaky tool self-healing, and trigger safety limits
+            </p>
+          </div>
         </div>
 
         <button
-          onClick={handleCopyCode}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono text-slate-300 dark:text-slate-300 light:text-slate-700 hover:bg-slate-700/50 dark:hover:bg-slate-700/50 light:hover:bg-slate-100 transition-colors border border-slate-700/60 dark:border-slate-700/60 light:border-slate-300"
+          onClick={handleCopy}
+          className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-teal-600 dark:hover:text-teal-400 self-start sm:self-center transition touch-manipulation active:scale-95"
         >
-          {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-          <span>{copied ? "Copied!" : "Copy Loop Architecture"}</span>
+          {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+          <span>{copied ? "Copied Engine!" : "Copy Python Loop"}</span>
         </button>
       </div>
 
-      <div className="p-5 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Python Loop Architecture & Config */}
-        <div className="lg:col-span-7 flex flex-col gap-4">
-          <div className="relative rounded-xl border border-slate-800 dark:border-slate-800 light:border-slate-200 overflow-hidden bg-slate-950 dark:bg-slate-950 light:bg-slate-900 shadow-inner">
-            <div className="px-3.5 py-1.5 bg-slate-900 dark:bg-slate-900 light:bg-slate-800 border-b border-slate-800 text-xs font-mono text-slate-400 flex items-center justify-between">
-              <span>agent_loop_engine.py</span>
-              <span className="text-[10px] text-teal-400">Pure Python Implementation</span>
-            </div>
-            <pre className="p-4 text-xs font-mono text-slate-200 overflow-x-auto leading-relaxed max-h-[340px]">
-              {pythonLoopCode}
-            </pre>
+      {/* Main Grid: Code Left, Interactive Config Right */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 border-b border-slate-200 dark:border-slate-800">
+        {/* Code Left */}
+        <div className="lg:col-span-6 bg-slate-950 p-4 font-mono text-xs overflow-x-auto">
+          <div className="flex items-center justify-between text-slate-500 pb-2 mb-2 border-b border-slate-800 text-[11px]">
+            <span>autonomous_agent_loop.py</span>
+            <span>while not is_complete:</span>
           </div>
-
-          {/* Teacher explanation box */}
-          <div className="rounded-xl border border-slate-800 dark:border-slate-800 light:border-slate-200 bg-slate-800/40 dark:bg-slate-800/40 light:bg-slate-50 p-4 text-xs text-slate-300 dark:text-slate-300 light:text-slate-600 leading-relaxed">
-            <strong className="text-teal-300 dark:text-teal-300 light:text-teal-700 block mb-1">
-              Why the `while` loop needs a strict termination condition:
-            </strong>
-            Without <code className="text-teal-400 font-mono">max_iterations</code>, an agent trapped in an ambiguous task or receiving repetitive errors will call LLM APIs indefinitely. That drains your credit card in minutes and hangs your system! Production loops always enforce a hard cap.
-          </div>
+          <pre className="text-slate-300 leading-relaxed overflow-x-auto max-h-[380px] scrollbar-thin">
+            <code>{pythonLoopCode}</code>
+          </pre>
         </div>
 
-        {/* Right Column: Interactive Guardrail Controls & Live Terminal */}
-        <div className="lg:col-span-5 flex flex-col justify-between gap-4">
-          {/* Controls Panel */}
-          <div className="bg-slate-800/40 dark:bg-slate-800/40 light:bg-slate-50 border border-slate-700/50 dark:border-slate-700/50 light:border-slate-200 rounded-xl p-4 space-y-4">
-            <span className="text-xs font-mono uppercase tracking-wider text-slate-400 dark:text-slate-400 light:text-slate-600 block">
-              Loop Parameters & Chaos Injections
+        {/* Interactive Controls & Terminal Right */}
+        <div className="lg:col-span-6 p-4 sm:p-5 flex flex-col justify-between gap-4 bg-slate-50 dark:bg-slate-900/30">
+          <div className="space-y-4">
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 block">
+              Loop Safety Parameters
             </span>
 
             {/* Max iterations slider */}
-            <div>
-              <div className="flex items-center justify-between text-xs mb-1.5">
-                <span className="font-semibold text-white dark:text-white light:text-slate-900">
-                  Max Iterations Safety Cap:
-                </span>
-                <span className="font-mono font-bold text-teal-400 bg-teal-500/20 px-2 py-0.5 rounded">
-                  {maxIterations} cycles
+            <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 space-y-2 shadow-sm">
+              <div className="flex items-center justify-between text-xs font-mono">
+                <span className="text-slate-600 dark:text-slate-400">max_iterations Safety Ceiling:</span>
+                <span className="font-bold text-teal-700 dark:text-teal-400 px-2 py-0.5 rounded bg-teal-50 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/30">
+                  {maxIterations} Cycles Max
                 </span>
               </div>
               <input
                 type="range"
-                min={2}
-                max={8}
+                min="2"
+                max="8"
+                step="1"
                 value={maxIterations}
                 onChange={(e) => setMaxIterations(Number(e.target.value))}
-                className="w-full accent-teal-400 cursor-pointer"
+                className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-teal-600 touch-manipulation"
               />
             </div>
 
-            {/* Chaos toggles */}
-            <div className="space-y-2">
-              <label className="flex items-center justify-between p-2.5 rounded-lg border border-slate-700/50 dark:border-slate-700/50 light:border-slate-200 bg-slate-900/50 dark:bg-slate-900/50 light:bg-white cursor-pointer">
-                <div>
-                  <div className="text-xs font-bold text-white dark:text-white light:text-slate-900">
-                    Simulate Flaky Tool (503 Error)
-                  </div>
-                  <div className="text-[11px] text-slate-400">Tests autonomous self-healing pivot</div>
-                </div>
+            {/* Checkbox Options */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              <label className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 flex items-center gap-2 cursor-pointer shadow-sm touch-manipulation">
                 <input
                   type="checkbox"
                   checked={simulateFlakyTool}
@@ -245,17 +217,14 @@ class AutonomousAgent:
                     setSimulateFlakyTool(e.target.checked);
                     if (e.target.checked) setSimulateInfiniteLoop(false);
                   }}
-                  className="w-4 h-4 accent-teal-400"
+                  className="rounded text-teal-600 focus:ring-teal-500"
                 />
+                <span className="text-slate-700 dark:text-slate-300 font-medium">
+                  Simulate Flaky Tool (503 Error)
+                </span>
               </label>
 
-              <label className="flex items-center justify-between p-2.5 rounded-lg border border-slate-700/50 dark:border-slate-700/50 light:border-slate-200 bg-slate-900/50 dark:bg-slate-900/50 light:bg-white cursor-pointer">
-                <div>
-                  <div className="text-xs font-bold text-white dark:text-white light:text-slate-900">
-                    Simulate Infinite Loop (Drift)
-                  </div>
-                  <div className="text-[11px] text-slate-400">Tests the max_iterations safety brake</div>
-                </div>
+              <label className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 flex items-center gap-2 cursor-pointer shadow-sm touch-manipulation">
                 <input
                   type="checkbox"
                   checked={simulateInfiniteLoop}
@@ -263,49 +232,51 @@ class AutonomousAgent:
                     setSimulateInfiniteLoop(e.target.checked);
                     if (e.target.checked) setSimulateFlakyTool(false);
                   }}
-                  className="w-4 h-4 accent-amber-400"
+                  className="rounded text-rose-600 focus:ring-rose-500"
                 />
+                <span className="text-rose-700 dark:text-rose-400 font-medium flex items-center gap-1">
+                  <Flame className="w-3.5 h-3.5" />
+                  Simulate Infinite Loop Drift
+                </span>
               </label>
             </div>
 
-            {/* Run button */}
+            {/* Run Button */}
             <button
-              onClick={runSimulation}
+              onClick={runLoopSimulation}
               disabled={isRunning}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold bg-teal-400 hover:bg-teal-300 text-slate-950 shadow-md transition-all disabled:opacity-50 cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold bg-teal-600 hover:bg-teal-500 text-white shadow-sm transition-all disabled:opacity-50 touch-manipulation active:scale-95"
             >
               <Play className="w-3.5 h-3.5 fill-current" />
-              <span>{isRunning ? "Executing Loop..." : "Run Agentic Loop Engine"}</span>
+              <span>{isRunning ? "Engine Cycling..." : "Simulate Agentic Loop Execution"}</span>
             </button>
           </div>
 
-          {/* Terminal Output */}
-          <div className="flex-1 min-h-[200px] rounded-xl border border-slate-800 dark:border-slate-800 light:border-slate-200 bg-slate-950 dark:bg-slate-950 light:bg-slate-900 p-3.5 font-mono text-xs shadow-inner flex flex-col">
+          {/* Terminal output */}
+          <div className="rounded-xl border border-slate-800 bg-slate-950 p-3.5 font-mono text-xs shadow-inner flex flex-col min-h-[180px]">
             <div className="flex items-center justify-between pb-2 border-b border-slate-800 text-slate-400 text-[11px]">
               <div className="flex items-center gap-1.5">
                 <Terminal className="w-3.5 h-3.5 text-teal-400" />
-                <span>Engine Runtime stdout</span>
+                <span>Live State Log Stream</span>
               </div>
-              <span>execution trace</span>
+              <span>stdout</span>
             </div>
-            <div className="flex-1 overflow-y-auto mt-2 space-y-1.5 text-slate-300 text-[11px] leading-relaxed max-h-52">
+            <div className="flex-1 overflow-y-auto mt-2 space-y-1 text-slate-300 text-[11px] leading-relaxed max-h-48 scrollbar-thin">
               {logs.length === 0 ? (
-                <span className="text-slate-600 dark:text-slate-600 italic">
-                  Click "Run Agentic Loop Engine" to watch the loop initialize, cycle through phases, and handle exit conditions...
+                <span className="text-slate-600 italic">
+                  Click &quot;Simulate Agentic Loop Execution&quot; to test the Python while-loop engine...
                 </span>
               ) : (
                 logs.map((log, idx) => (
                   <div
                     key={idx}
                     className={
-                      log.includes("SAFETY SHUTDOWN")
-                        ? "text-rose-400 font-bold"
-                        : log.includes("503 SERVICE_UNAVAILABLE")
-                        ? "text-amber-400 font-semibold"
-                        : log.includes("LOOP TERMINATED")
-                        ? "text-emerald-400 font-bold"
+                      log.includes("💥") || log.includes("503")
+                        ? "text-rose-400 font-semibold"
+                        : log.includes("200 OK") || log.includes("completely resolved")
+                        ? "text-emerald-300 font-semibold"
                         : log.includes("CYCLE")
-                        ? "text-teal-300 font-semibold"
+                        ? "text-teal-400 font-bold"
                         : "text-slate-300"
                     }
                   >

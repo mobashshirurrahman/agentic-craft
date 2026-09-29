@@ -15,7 +15,6 @@ import {
   Sparkles,
   Sliders,
   History,
-  FileEdit,
   ShieldCheck,
   Workflow,
 } from "lucide-react";
@@ -39,10 +38,10 @@ interface PatternData {
 const PATTERNS: PatternData[] = [
   {
     id: "planning",
-    name: "Planning & Dynamic Replanning",
+    name: "Planning & Replanning",
     subtitle: "Deconstruct, Order, and Dynamically Adapt",
     icon: GitFork,
-    color: "text-sky-400",
+    color: "text-sky-700 dark:text-sky-400",
     badge: "Structural Decomposition",
     summary:
       "The agent explicitly breaks an ambiguous objective into an ordered sequence of discrete subtasks before executing, and dynamically refines the plan as new observations arrive.",
@@ -59,228 +58,207 @@ const PATTERNS: PatternData[] = [
   },
   {
     id: "reflection",
-    name: "Reflection & Self-Correction",
-    subtitle: "Actor-Critic Dual-Loop Quality Enhancement",
+    name: "Self-Reflection (Reflexion)",
+    subtitle: "Actor-Critic Quality Optimization",
     icon: Repeat,
-    color: "text-purple-400",
-    badge: "Iterative Refinement",
+    color: "text-purple-700 dark:text-purple-400",
+    badge: "Evaluator-Optimizer",
     summary:
-      "An agent reviews its own past actions and generated outputs, prompts an LLM critic node to evaluate quality against strict rubrics, and refines the output until it meets acceptance thresholds.",
+      "A dual-node loop where an Actor generates an initial solution and an independent Critic evaluates it against strict quality rubrics, prompting iterative refinement.",
     architectureDiagram: [
-      "Actor Node ➔ Generates initial draft or code implementation",
-      "Critic / Evaluator Node ➔ Inspects output against rubric (syntax, security, tone, logic)",
-      "Decision Branch ➔ Meets threshold? YES: Output answer | NO: Generate detailed feedback",
-      "Actor Node ➔ Receives critique in context and produces refined Version 2",
+      "User Request ➔ Actor Node (Generates draft solution)",
+      "Critic Node ➔ Evaluates draft against safety, style, and correctness rubrics",
+      "Decision Gate ➔ Passed rubrics? If NO: Return structured critique to Actor",
+      "Actor Node ➔ Incorporates critique and regenerates refined solution",
     ],
     concreteExample:
-      "Secure SQL Generator: Actor produces SQL query ➔ Critic analyzes query for SQL injection vulnerabilities and missing indexes ➔ Rejects draft with recommendations ➔ Actor rewrites parameterized query.",
-    whenToUse: "High-stakes code generation, mathematical derivations, translations, and formal technical documentation.",
-    tradeoffs: "Doubles or triples token consumption and latency due to multiple LLM critique passes.",
+      "Code Refactoring Agent: Actor generates SQL query ➔ Critic identifies missing index and SQL injection risk ➔ Actor rewrites using parameterized queries ➔ Critic approves.",
+    whenToUse: "High-stakes writing, code generation, translation, and complex reasoning where first-pass outputs have subtle bugs.",
+    tradeoffs: "Multiplies token costs and latency by 2x to 3x per reflection cycle.",
   },
   {
     id: "map_reduce",
-    name: "Map-Reduce Pattern",
-    subtitle: "High-Throughput Parallel Fan-Out & Aggregation",
+    name: "Parallel Fan-Out / Fan-In",
+    subtitle: "Concurrent Execution for Independent Tasks",
     icon: Layers,
-    color: "text-amber-400",
-    badge: "Concurrent Processing",
+    color: "text-teal-700 dark:text-teal-400",
+    badge: "High-Throughput Concurrency",
     summary:
-      "A dispatcher node splits a large dataset or multi-document corpus into independent items (Map Phase), executes parallel workers on each item concurrently, and combines results into a unified summary (Reduce Phase).",
+      "A lead agent breaks a large task into independent subproblems, dispatches them across concurrent workers in parallel, and merges findings in a reducer pass.",
     architectureDiagram: [
-      "Dispatcher / Splitter ➔ Breaks 100 customer reviews into 10 parallel chunks",
-      "Map Nodes (Concurrent) ➔ 10 Worker Agents analyze sentiment & feature requests in parallel",
-      "Reduce Node (Aggregator) ➔ Ingests all 10 outputs and synthesizes an executive summary matrix",
+      "User Prompt ➔ Fan-Out Router (Splits task into N independent items)",
+      "Worker Threads [1..N] ➔ Execute concurrently via asyncio.gather()",
+      "Fan-In Reducer ➔ Synthesizes all N results into a cohesive final output",
     ],
     concreteExample:
-      "Earnings Call Transcripts: Concurrently extract key financial metrics from 50 corporate PDF reports across different sectors, then reduce into an industry-wide quarterly trend benchmark.",
-    whenToUse: "Batch document processing, data synthesis across large repositories, and embarrassingly parallel workflows.",
-    tradeoffs: "Requires graph frameworks that support dynamic conditional branching (e.g. LangGraph `Send` API) and shared state synchronization.",
+      "Contract Risk Audit: Splits a 150-page legal document into 10 sections. Dispatches 10 parallel LLM workers to audit indemnification clauses, then merges findings in 4 seconds.",
+    whenToUse: "High-volume data extraction, batch document processing, or querying multiple independent databases simultaneously.",
+    tradeoffs: "Risk of context fragmentation; requires idempotent, stateless subproblems.",
   },
   {
     id: "multi_agent",
-    name: "Multi-Agent Architectures",
-    subtitle: "Role Specialization & Collaborative Division of Labor",
+    name: "Orchestrator-Workers",
+    subtitle: "Specialized Squads Coordinated by a Manager",
     icon: Users,
-    color: "text-emerald-400",
-    badge: "Team Collaboration",
+    color: "text-amber-700 dark:text-amber-400",
+    badge: "Multi-Agent Architecture",
     summary:
-      "Instead of forcing a single generalist agent with 50 tools, tasks are divided among specialized agents (e.g., Researcher, Coder, Reviewer) coordinated by a supervisor or peer communication graph.",
+      "A central Orchestrator agent maintains the global goal and delegates sub-workflows to specialized domain agents (Researcher, Coder, Reviewer).",
     architectureDiagram: [
-      "Supervisor / Router ➔ Evaluates task and delegates subtasks to specialized agents",
-      "Research Agent (equipped with Web/Search tools) ➔ Gathers verified facts & API docs",
-      "Coding Agent (equipped with Sandbox/REPL) ➔ Writes modular Python code based on research",
-      "QA Agent (equipped with Linter/Test Runner) ➔ Validates syntax and executes test suite",
+      "Lead Orchestrator ➔ Assigns specialized sub-goals to domain agents",
+      "Research Agent ➔ Retrieves web facts & documentation",
+      "Code Agent ➔ Writes implementation using research findings",
+      "QA Agent ➔ Runs tests and flags regressions back to Orchestrator",
     ],
     concreteExample:
-      "Automated Feature Builder: Product Manager Agent drafts user stories ➔ Architect Agent designs database schema ➔ Engineer Agent writes backend routes ➔ QA Agent runs integration tests.",
-    whenToUse: "Complex domain applications where a single prompt/toolset causes model confusion or context overflow.",
-    tradeoffs: "Higher architectural complexity; inter-agent communication overhead; risk of circular debates without a decisive supervisor.",
+      "Autonomous Feature Dev: Product Manager agent drafts spec ➔ Software Engineer agent writes code ➔ QA agent writes unit tests ➔ DevOps agent creates deployment PR.",
+    whenToUse: "Complex, multidisciplinary domains requiring distinct personas, tools, or permissions.",
+    tradeoffs: "High orchestration overhead; inter-agent communication can drift without strict message schemas.",
   },
   {
     id: "hitl",
     name: "Human-in-the-Loop (HITL)",
-    subtitle: "Governance, Time Travel, and Safety Gates",
+    subtitle: "State Interception & Approval Gates",
     icon: UserCheck,
-    color: "text-teal-400",
+    color: "text-emerald-700 dark:text-emerald-400",
     badge: "Safety & Governance",
     summary:
-      "The workflow pauses execution at critical junctures, allowing human operators to approve sensitive actions, supply missing inputs, review tool arguments, or rewind state via time travel.",
+      "The agent pauses execution before triggering irreversible or high-consequence tools, yielding state control to a human operator for sign-off or parameter modification.",
     architectureDiagram: [
-      "Agent Pipeline ➔ Executes safe read operations autonomously",
-      "Checkpoint Interrupt Gate ➔ Pauses state before irreversible Write Action (e.g. wire transfer)",
-      "Human Reviewer UI ➔ (1) Approve, (2) Edit Tool Arguments, or (3) Time-Travel rewind to prior state",
-      "Resumed Pipeline ➔ Continues execution with human-verified state checkpoint",
+      "Agent Reasoning ➔ Formulates tool call for sensitive action (e.g. transfer funds)",
+      "Interception Gate ➔ Pauses loop; saves persistent checkpoint to database",
+      "Human Review Dashboard ➔ Operator inspects proposed action and clicks [Approve / Reject]",
+      "Resume Trigger ➔ Workflow resumes from checkpoint with human authorization verified",
     ],
     concreteExample:
-      "Clinical Trial Data Analysis: Agent generates draft regulatory compliance filing ➔ Pauses at checkpoint ➔ Chief Medical Officer reviews and edits claims ➔ Agent logs signed audit trail.",
-    whenToUse: "Financial transactions, client-facing communications, sensitive database writes, and regulatory compliance.",
-    tradeoffs: "Introduces human latency; requires durable state persistence (checkpoint databases) to pause/resume cleanly.",
+      "Fintech Fraud Agent: Autonomously gathers KYC records and transaction history, but pauses for a compliance officer to sign off before freezing an account.",
+    whenToUse: "Production financial actions, database migrations, customer-facing emails, or legal filings.",
+    tradeoffs: "Introduces asynchronous latency while waiting for human review.",
   },
 ];
 
 export default function AgenticDesignPatternsExplorer() {
-  const [activePatternId, setActivePatternId] = useState<PatternId>("planning");
-  const activePattern = PATTERNS.find((p) => p.id === activePatternId)!;
+  const [selectedPatternId, setSelectedPatternId] = useState<PatternId>("planning");
+  const selectedPattern = PATTERNS.find((p) => p.id === selectedPatternId) || PATTERNS[0];
+  const Icon = selectedPattern.icon;
 
   return (
-    <div className="rounded-2xl border border-slate-700/60 bg-slate-900/90 dark:bg-slate-900/90 light:bg-white light:border-slate-300 shadow-xl overflow-hidden my-8">
-      {/* Explorer Header */}
-      <div className="border-b border-slate-700/60 dark:border-slate-700/60 light:border-slate-200 px-5 py-4 bg-slate-800/50 dark:bg-slate-800/50 light:bg-slate-50 flex flex-wrap items-center justify-between gap-4">
+    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 sm:p-6 shadow-sm dark:shadow-2xl space-y-6">
+      {/* Header bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
         <div>
           <div className="flex items-center gap-2">
-            <span className="flex h-2.5 w-2.5 rounded-full bg-teal-400 animate-pulse" />
-            <h3 className="font-bold text-base md:text-lg text-white dark:text-white light:text-slate-900">
-              Interactive Agentic Design Patterns Switchboard
-            </h3>
+            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-teal-700 dark:text-teal-400 px-2.5 py-0.5 rounded-full bg-teal-50 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/30">
+              Interactive Pattern Catalog
+            </span>
+            <span className="text-[11px] font-mono text-slate-500">5 Canonical Topologies</span>
           </div>
-          <p className="text-xs text-slate-400 dark:text-slate-400 light:text-slate-600 mt-0.5">
-            Explore the 5 foundational structural blueprints that elevate simple scripts into resilient enterprise systems.
+          <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mt-1">
+            Proven Agentic Design Patterns
+          </h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Select a design pattern to inspect its architectural topology, real-world applications, and engineering trade-offs
           </p>
         </div>
 
-        <span className="px-2.5 py-1 rounded-full text-xs font-mono font-semibold bg-teal-500/10 text-teal-300 dark:text-teal-300 light:text-teal-700 border border-teal-500/30">
-          5 Core Architectural Patterns
-        </span>
+        <div className="px-3 py-1 rounded-xl bg-teal-50 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/30 text-teal-800 dark:text-teal-300 font-mono text-xs font-bold self-start sm:self-center">
+          {selectedPattern.badge}
+        </div>
       </div>
 
       {/* Pattern Selector Tabs */}
-      <div className="px-5 py-3 bg-slate-950/60 dark:bg-slate-950/60 light:bg-slate-100/80 border-b border-slate-800/80 dark:border-slate-800/80 light:border-slate-200 overflow-x-auto">
-        <div className="flex items-center min-w-[620px] gap-2">
-          {PATTERNS.map((p) => {
-            const isActive = p.id === activePatternId;
-            const Icon = p.icon;
-            return (
-              <button
-                key={p.id}
-                onClick={() => setActivePatternId(p.id)}
-                className={`flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all border ${
-                  isActive
-                    ? "bg-teal-500 text-slate-950 font-bold border-teal-400 shadow-sm"
-                    : "bg-slate-900/40 dark:bg-slate-900/40 light:bg-white text-slate-300 dark:text-slate-300 light:text-slate-700 border-slate-700/60 dark:border-slate-700/60 light:border-slate-200 hover:border-slate-600"
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5 flex-shrink-0" />
-                <span className="whitespace-nowrap">{p.name.split(" ")[0]}</span>
-              </button>
-            );
-          })}
-        </div>
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+        {PATTERNS.map((p) => {
+          const PIcon = p.icon;
+          const isSelected = p.id === selectedPatternId;
+
+          return (
+            <button
+              key={p.id}
+              onClick={() => setSelectedPatternId(p.id)}
+              className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between min-h-[90px] touch-manipulation active:scale-95 ${
+                isSelected
+                  ? "border-teal-500 bg-teal-50 dark:bg-teal-500/15 shadow-sm ring-1 ring-teal-500/30"
+                  : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:border-slate-300 dark:hover:border-slate-700"
+              }`}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <PIcon className={`w-4 h-4 ${isSelected ? "text-teal-700 dark:text-teal-400" : "text-slate-500"}`} />
+                {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-teal-500" />}
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
+                  {p.name.split(" ")[0]}
+                </h4>
+                <span className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">
+                  {p.badge}
+                </span>
+              </div>
+            </button>
+          );
+        })}
       </div>
 
-      {/* Main Pattern Detail Stage */}
-      <div className="p-5 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Pattern Description & Architecture Flow */}
-        <div className="lg:col-span-7 flex flex-col justify-between gap-5">
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-mono font-bold text-teal-400 uppercase tracking-wider">
-                Pattern Deep-Dive
-              </span>
-              <span className="px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-slate-800 dark:bg-slate-800 light:bg-slate-200 text-slate-300 dark:text-slate-300 light:text-slate-700">
-                {activePattern.badge}
-              </span>
+      {/* Main Pattern Detail Card */}
+      <div className="p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/80 dark:border-slate-800">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-teal-100 dark:bg-teal-500/20 text-teal-700 dark:text-teal-400 flex items-center justify-center shrink-0">
+              <Icon className="w-5 h-5" />
             </div>
-
-            <h4 className="text-lg md:text-xl font-bold text-white dark:text-white light:text-slate-900">
-              {activePattern.name}
-            </h4>
-            <p className="text-xs font-medium text-teal-300 dark:text-teal-300 light:text-teal-700 mt-0.5">
-              {activePattern.subtitle}
-            </p>
-
-            <p className="text-xs md:text-sm text-slate-300 dark:text-slate-300 light:text-slate-600 mt-3 leading-relaxed">
-              {activePattern.summary}
-            </p>
-
-            {/* Architecture Pipeline Flow */}
-            <div className="mt-5 space-y-2">
-              <span className="text-xs font-mono uppercase tracking-wider text-slate-400 block mb-2">
-                Execution Graph Topology
-              </span>
-              {activePattern.architectureDiagram.map((step, idx) => (
-                <div
-                  key={idx}
-                  className="p-3 rounded-lg border border-slate-800 dark:border-slate-800 light:border-slate-200 bg-slate-950/60 dark:bg-slate-950/60 light:bg-slate-50 flex items-start gap-3"
-                >
-                  <div className="w-5 h-5 rounded-full bg-teal-500/20 text-teal-300 flex items-center justify-center text-[10px] font-mono font-bold flex-shrink-0 mt-0.5">
-                    {idx + 1}
-                  </div>
-                  <span className="text-xs font-mono text-slate-200 dark:text-slate-200 light:text-slate-800 leading-relaxed">
-                    {step}
-                  </span>
-                </div>
-              ))}
+            <div>
+              <h4 className="text-base font-bold text-slate-900 dark:text-white">
+                {selectedPattern.name}
+              </h4>
+              <p className="text-xs text-teal-700 dark:text-teal-400 font-mono">
+                {selectedPattern.subtitle}
+              </p>
             </div>
-          </div>
-
-          {/* Teacher Architectural Rationale */}
-          <div className="p-4 rounded-xl border border-teal-500/30 bg-teal-950/20 dark:bg-teal-950/20 light:bg-teal-50/60 text-xs text-slate-300 dark:text-slate-300 light:text-slate-700 leading-relaxed">
-            <strong className="text-teal-400 dark:text-teal-400 light:text-teal-700 block mb-1">
-              💡 Why use this over a single basic ReAct loop?
-            </strong>
-            A basic ReAct loop tries to do everything in one unguided thought-action thread. As complexity grows, the model loses context coherence and loops aimlessly. <strong>{activePattern.name}</strong> introduces explicit structural guardrails that guarantee deterministic coordination across complex multi-step pipelines.
           </div>
         </div>
 
-        {/* Right Column: Case Study, When to Use & Tradeoffs */}
-        <div className="lg:col-span-5 flex flex-col justify-between gap-4">
-          {/* Concrete Case Study */}
-          <div className="rounded-xl border border-slate-800 dark:border-slate-800 light:border-slate-200 bg-slate-950/80 dark:bg-slate-950/80 light:bg-white p-4 shadow-sm">
-            <div className="flex items-center gap-2 text-teal-400 text-xs font-mono font-bold mb-2">
-              <Sparkles className="w-4 h-4" />
-              <span>Real-World Production Case Study</span>
-            </div>
-            <p className="text-xs text-slate-300 dark:text-slate-300 light:text-slate-700 leading-relaxed">
-              {activePattern.concreteExample}
+        <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+          {selectedPattern.summary}
+        </p>
+
+        {/* Architecture flow steps */}
+        <div className="space-y-2">
+          <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 block">
+            Execution Flow Topology
+          </span>
+          <div className="grid grid-cols-1 gap-2">
+            {selectedPattern.architectureDiagram.map((step, idx) => (
+              <div
+                key={idx}
+                className="p-2.5 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-mono text-slate-800 dark:text-slate-200 flex items-center gap-2 shadow-sm"
+              >
+                <span className="w-5 h-5 rounded-full bg-teal-50 dark:bg-teal-500/20 text-teal-800 dark:text-teal-300 flex items-center justify-center text-[10px] font-bold shrink-0">
+                  {idx + 1}
+                </span>
+                <span className="leading-snug">{step}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Concrete example & tradeoffs */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+          <div className="p-3 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-1 shadow-sm">
+            <span className="text-[11px] font-mono font-bold text-teal-700 dark:text-teal-400 uppercase tracking-wider block">
+              Production Example
+            </span>
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              {selectedPattern.concreteExample}
             </p>
           </div>
 
-          {/* When to Use */}
-          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 dark:bg-emerald-500/5 light:bg-emerald-50/50 p-4">
-            <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold mb-1.5">
-              <CheckCircle2 className="w-4 h-4" />
-              <span>When to Select this Pattern</span>
-            </div>
-            <p className="text-xs text-slate-300 dark:text-slate-300 light:text-slate-700 leading-relaxed">
-              {activePattern.whenToUse}
+          <div className="p-3 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-1 shadow-sm">
+            <span className="text-[11px] font-mono font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider block">
+              Engineering Trade-Offs
+            </span>
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              {selectedPattern.tradeoffs}
             </p>
-          </div>
-
-          {/* Engineering Tradeoffs */}
-          <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 dark:bg-amber-500/5 light:bg-amber-50/50 p-4">
-            <div className="flex items-center gap-2 text-amber-400 text-xs font-bold mb-1.5">
-              <AlertCircle className="w-4 h-4" />
-              <span>Engineering Costs & Tradeoffs</span>
-            </div>
-            <p className="text-xs text-slate-300 dark:text-slate-300 light:text-slate-700 leading-relaxed">
-              {activePattern.tradeoffs}
-            </p>
-          </div>
-
-          {/* Quick Stat Pill */}
-          <div className="p-3 rounded-lg border border-slate-800 dark:border-slate-800 light:border-slate-200 bg-slate-900/60 dark:bg-slate-900/60 light:bg-slate-50 text-[11px] font-mono text-slate-400 flex items-center justify-between">
-            <span>Pattern Classification:</span>
-            <span className="text-teal-400 font-bold">Standard Production Graph</span>
           </div>
         </div>
       </div>

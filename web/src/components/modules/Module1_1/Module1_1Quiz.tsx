@@ -164,19 +164,19 @@ export default function Module1_1Quiz() {
   const score = calculateScore();
 
   return (
-    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-6 md:p-8 space-y-6 shadow-xs">
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-200 dark:border-slate-850">
+    <div className="rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6 shadow-xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 sm:pb-4 border-b border-slate-200 dark:border-slate-850">
         <div>
-          <span className="text-xs font-mono font-bold uppercase tracking-wider text-teal-700 dark:text-teal-400">
+          <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider text-teal-700 dark:text-teal-400">
             Interactive Concept Check
           </span>
-          <h3 className="text-xl font-bold text-slate-900 dark:text-white mt-1">
+          <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mt-0.5">
             Test Your Understanding
           </h3>
         </div>
 
         {showResults && (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <span
               className={`font-mono text-xs font-bold px-3 py-1 rounded-full border ${
                 score === QUESTIONS.length
@@ -188,7 +188,7 @@ export default function Module1_1Quiz() {
             </span>
             <button
               onClick={handleReset}
-              className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition"
+              className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition cursor-pointer active:scale-95"
               title="Retake Quiz"
             >
               <RefreshCw className="w-4 h-4" />
@@ -198,7 +198,7 @@ export default function Module1_1Quiz() {
       </div>
 
       {/* Questions list */}
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {QUESTIONS.map((q, idx) => {
           const userAnswer = selectedAnswers[q.id];
           const isCorrect =
@@ -208,14 +208,14 @@ export default function Module1_1Quiz() {
           return (
             <div
               key={q.id}
-              className="p-4 rounded-xl bg-slate-50/70 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-855 space-y-3"
+              className="p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-50/70 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-855 space-y-2.5 sm:space-y-3"
             >
-              <div className="flex items-center justify-between text-xs font-mono text-slate-500">
+              <div className="flex items-center justify-between text-[11px] sm:text-xs font-mono text-slate-500">
                 <span>Question {idx + 1} of {QUESTIONS.length}</span>
                 <span className="text-slate-600 dark:text-slate-400">{q.category}</span>
               </div>
 
-              <h4 className="text-sm md:text-base font-semibold text-slate-900 dark:text-white">
+              <h4 className="text-xs sm:text-base font-semibold text-slate-900 dark:text-white leading-snug">
                 {q.question}
               </h4>
 
@@ -244,9 +244,9 @@ export default function Module1_1Quiz() {
                       key={opt.label}
                       disabled={showResults}
                       onClick={() => handleSelect(q.id, opt.label)}
-                      className={`w-full text-left p-3 rounded-xl border text-xs md:text-sm flex items-start gap-3 transition-all ${optionClass}`}
+                      className={`w-full text-left p-2.5 sm:p-3 rounded-xl border text-xs sm:text-sm flex items-start gap-2.5 sm:gap-3 transition-all cursor-pointer active:scale-[0.99] touch-manipulation ${optionClass}`}
                     >
-                      <span className="w-5 h-5 rounded-md bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center font-mono text-xs shrink-0 font-bold text-slate-700 dark:text-slate-300">
+                      <span className="w-5 h-5 rounded-md bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center font-mono text-[11px] shrink-0 font-bold text-slate-700 dark:text-slate-300 mt-0.5 sm:mt-0">
                         {opt.label}
                       </span>
                       <span className="leading-snug">{opt.text}</span>
@@ -264,7 +264,7 @@ export default function Module1_1Quiz() {
                       : "bg-amber-50 dark:bg-amber-500/10 border-amber-300 dark:border-amber-500/30 text-amber-900 dark:text-amber-200"
                   }`}
                 >
-                  <strong className="block font-mono uppercase text-[11px] mb-1">
+                  <strong className="block font-mono uppercase text-[10px] sm:text-[11px] mb-1">
                     {isCorrect ? "💡 Tutor Feedback:" : "⚠️ Helpful Insight:"}
                   </strong>
                   {isCorrect ? q.explanation.correct : q.explanation.incorrect}
@@ -281,7 +281,7 @@ export default function Module1_1Quiz() {
           <button
             disabled={!isAllAnswered}
             onClick={handleCheckAnswers}
-            className={`w-full py-3 rounded-xl font-bold text-sm tracking-wide transition flex items-center justify-center gap-2 ${
+            className={`w-full py-3 rounded-xl font-bold text-xs sm:text-sm tracking-wide transition flex items-center justify-center gap-2 active:scale-[0.99] touch-manipulation ${
               isAllAnswered
                 ? "bg-teal-600 hover:bg-teal-500 text-white shadow-md shadow-teal-600/20 cursor-pointer"
                 : "bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed"

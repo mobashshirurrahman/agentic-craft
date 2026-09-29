@@ -2,511 +2,580 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  Sparkles,
+  Target,
+  Check,
   BookOpen,
+  ChefHat,
+  ArrowRight,
   Brain,
   Wrench,
   Database,
   Eye,
-  AlertTriangle,
+  RotateCcw,
+  Sparkles,
   Lightbulb,
   CheckCircle2,
-  Copy,
-  Check,
-  ArrowRight,
+  AlertTriangle,
+  HelpCircle,
   Code2,
-  Cpu,
+  FileText,
+  Play,
   Layers,
-  Terminal,
 } from "lucide-react";
-import AgentArchitectureVisualizer from "./AgentArchitectureVisualizer";
-import Module1_1Quiz from "./Module1_1Quiz";
+import LiveAgentTraceVisualizer from "./LiveAgentTraceVisualizer";
 import InteractiveCodeExecutor from "./InteractiveCodeExecutor";
+import Module1_1Quiz from "./Module1_1Quiz";
 
 export default function Module1_1Content() {
-  const [copiedCode, setCopiedCode] = useState(false);
+  const [selectedComponent, setSelectedComponent] = useState<string>("reasoning");
+  const [activeLoopStep, setActiveLoopStep] = useState<number>(1);
+  const [showQuiz, setShowQuiz] = useState<boolean>(false);
 
-  const samplePythonCode = `"""
-Module 1.1: Anatomy of an AI Agent in Pure Python
-Demonstrating the 4 Core Components:
-1. Reasoning Engine (Cognitive brain)
-2. Tools (External capabilities)
-3. Memory (Context & state buffer)
-4. Perception (User input & tool observations)
-"""
+  const components = [
+    {
+      id: "reasoning",
+      title: "1. Reasoning",
+      tagline: "The Brain (LLM)",
+      desc: "Evaluates the user's objective, inspects observations, and decides the next action.",
+      icon: Brain,
+      color: "text-violet-600 dark:text-violet-400",
+      bg: "bg-violet-50 dark:bg-violet-500/10",
+      border: "border-violet-200 dark:border-violet-500/30",
+      badge: "Cognitive Engine",
+      codeSnippet: `if "financial" in user_goal:
+    next_action = "call_mock_financial_db"`,
+    },
+    {
+      id: "tools",
+      title: "2. Tools",
+      tagline: "The Hands (Actuators)",
+      desc: "External APIs, SQL databases, and calculators that give the agent real-world superpowers.",
+      icon: Wrench,
+      color: "text-sky-600 dark:text-sky-400",
+      bg: "bg-sky-50 dark:bg-sky-500/10",
+      border: "border-sky-200 dark:border-sky-500/30",
+      badge: "Action Layer",
+      codeSnippet: `TOOLS = {
+    "financial_db": mock_financial_db,
+    "calculator": calculate_growth
+}`,
+    },
+    {
+      id: "memory",
+      title: "3. Memory",
+      tagline: "The Notebook (State Buffer)",
+      desc: "Stores conversational context and tool responses across multiple execution turns.",
+      icon: Database,
+      color: "text-emerald-600 dark:text-emerald-400",
+      bg: "bg-emerald-50 dark:bg-emerald-500/10",
+      border: "border-emerald-200 dark:border-emerald-500/30",
+      badge: "Context & State",
+      codeSnippet: `class AgentMemory:
+    def record(self, role, content):
+        self.history.append({"role": role, "content": content})`,
+    },
+    {
+      id: "input",
+      title: "4. Perception",
+      tagline: "The Eyes & Ears (Sensors)",
+      desc: "Ingests user prompts, environment webhooks, and raw tool output observations.",
+      icon: Eye,
+      color: "text-amber-600 dark:text-amber-400",
+      bg: "bg-amber-50 dark:bg-amber-500/10",
+      border: "border-amber-200 dark:border-amber-500/30",
+      badge: "Feedback Ingestion",
+      codeSnippet: `observation = tool.execute(params)
+memory.record("observation", observation)`,
+    },
+  ];
 
-import json
-from typing import Dict, Any, List
+  const loopSteps = [
+    {
+      id: 1,
+      title: "Perception",
+      icon: Eye,
+      desc: "Agent receives user prompt or environment trigger.",
+    },
+    {
+      id: 2,
+      title: "Reasoning",
+      icon: Brain,
+      desc: "LLM analyzes intent, reviews memory, and selects a tool.",
+    },
+    {
+      id: 3,
+      title: "Tool Call",
+      icon: Wrench,
+      desc: "Agent executes external code or API call.",
+    },
+    {
+      id: 4,
+      title: "Observation",
+      icon: FileText,
+      desc: "Tool output returns and updates internal memory.",
+    },
+    {
+      id: 5,
+      title: "Repeat",
+      icon: RotateCcw,
+      desc: "Cycle repeats until the objective is 100% solved!",
+    },
+  ];
 
-# --- COMPONENT 2: TOOLS (Actuators) ---
-def calculate_growth(revenue_2025: float, revenue_2026: float) -> str:
-    """Calculates percentage growth between two financial years."""
-    growth = ((revenue_2026 - revenue_2025) / revenue_2025) * 100
-    return f"{growth:.2f}% YoY Growth"
-
-def mock_financial_db(ticker: str) -> Dict[str, Any]:
-    """Simulates a database lookup for verified company earnings."""
-    data = {
-        "TECH": {"2025": 12.0, "2026": 14.2, "unit": "Billion USD"},
-        "AUTO": {"2025": 8.5,  "2026": 9.1,  "unit": "Billion USD"}
-    }
-    return data.get(ticker.upper(), {"error": "Company ticker not found"})
-
-# Registry of tools available to our agent
-TOOLS = {
-    "mock_financial_db": mock_financial_db,
-    "calculate_growth": calculate_growth
-}
-
-# --- COMPONENT 3: MEMORY MECHANISM ---
-class AgentMemory:
-    def __init__(self):
-        self.history: List[Dict[str, str]] = []
-
-    def record(self, role: str, content: str):
-        self.history.append({"role": role, "content": content})
-
-    def get_context(self) -> List[Dict[str, str]]:
-        return self.history
-
-# --- COMPONENT 1 & 4: REASONING ENGINE & PERCEPTION-ACTION LOOP ---
-class SimpleAIAgent:
-    def __init__(self, name: str):
-        self.name = name
-        self.memory = AgentMemory()
-
-    def reason_and_act(self, user_goal: str) -> str:
-        # Step 1: Perceive user goal
-        print(f"\\n🎯 [PERCEIVE] New Goal Received: '{user_goal}'")
-        self.memory.record("user", user_goal)
-
-        # Step 2: Reasoning Engine (Analyzes situation and selects necessary tool)
-        print("🧠 [REASON] Analyzing goal... I need verified financial data for 'TECH'.")
-        print("🛠️ [ACT] Executing Tool: mock_financial_db(ticker='TECH')")
-        
-        # Tool execution
-        tool_output = TOOLS["mock_financial_db"]("TECH")
-        print(f"👁️ [OBSERVE] Tool Result: {tool_output}")
-        self.memory.record("observation", json.dumps(tool_output))
-
-        # Step 3: Second Reasoning Step (Calculating percentage)
-        rev_25 = tool_output["2025"]
-        rev_26 = tool_output["2026"]
-        print(f"🧠 [REASON] Calculating YoY growth between {rev_25}B and {rev_26}B...")
-        calc_result = TOOLS["calculate_growth"](rev_25, rev_26)
-        print(f"👁️ [OBSERVE] Calculation Result: {calc_result}")
-
-        # Step 4: Reflection & Final Synthesis
-        final_answer = (
-            f"TechCorp achieved {calc_result}, growing from \${rev_25}B in 2025 "
-            f"to \${rev_26}B in 2026."
-        )
-        self.memory.record("assistant", final_answer)
-        print(f"✅ [GOAL COMPLETE] {final_answer}")
-        return final_answer
-
-# --- RUNNING THE AGENT ---
-if __name__ == "__main__":
-    agent = SimpleAIAgent(name="FinancialAnalystBot")
-    agent.reason_and_act("Calculate YoY revenue growth for TECH.")`;
-
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(samplePythonCode);
-    setCopiedCode(true);
-    setTimeout(() => setCopiedCode(false), 2000);
-  };
+  const currentComp = components.find((c) => c.id === selectedComponent) || components[0];
 
   return (
-    <article className="space-y-12 text-slate-800 dark:text-slate-200">
-      {/* ------------------------------------------------------------- */}
-      {/* SECTION 1: THE BIG PICTURE & REAL-WORLD ANALOGY */}
-      {/* ------------------------------------------------------------- */}
-      <section className="space-y-5">
-        <div className="flex items-center gap-2 text-teal-700 dark:text-teal-400 font-mono text-xs uppercase tracking-wider font-semibold">
-          <Sparkles className="w-4 h-4" />
-          <span>Part 1 • The Big Picture & Foundations</span>
+    <div className="space-y-10 text-slate-800 dark:text-slate-200 pb-12">
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* TOP LEARNING OBJECTIVE CARD                                   */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* TOP LEARNING OBJECTIVE CARD                                   */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <div className="rounded-2xl sm:rounded-3xl border border-sky-200/90 dark:border-sky-500/30 bg-sky-50/70 dark:bg-sky-500/10 p-4 sm:p-7 shadow-xs">
+        <div className="flex items-start gap-3 sm:gap-4">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-sky-500/15 border border-sky-500/30 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 shadow-xs">
+            <Target className="w-4 h-4 sm:w-5 sm:h-5" />
+          </div>
+          <div className="space-y-2 sm:space-y-2.5 flex-1 min-w-0">
+            <h2 className="text-sm sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">
+              By the end of this module, you will:
+            </h2>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm text-slate-700 dark:text-slate-200">
+              <li className="flex items-start gap-2">
+                <Check className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
+                <span>Understand what an AI agent is and how it differs from a simple LLM</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
+                <span>Learn the 4 core components: Reasoning, Tools, Memory & Perception</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
+                <span>Explore the agent loop (perception → reasoning → action → observation)</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
+                <span>Run live agent code simulation in browser</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* SECTION 1: WHAT IS AN AI AGENT?                               */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <section className="space-y-3.5 sm:space-y-4">
+        <div className="space-y-1.5">
+          <h2 className="text-xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            1. What is an AI Agent?
+          </h2>
+          <p className="text-xs sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+            An AI agent is more than just a chatbot. It can understand its environment, make
+            decisions, use external tools, and take actions to achieve a goal — with minimal human
+            intervention.
+          </p>
         </div>
 
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-          What is an AI Agent? <span className="text-teal-600 dark:text-teal-400 font-bold">(The Chef vs The Recipe)</span>
-        </h2>
+        {/* Visual Analogy Card: Recipe Book vs Executive Chef */}
+        <div className="p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-5 transition hover:shadow-sm">
+          {/* Recipe Book */}
+          <div className="flex items-center gap-3.5 sm:gap-4 flex-1 w-full p-3 sm:p-0 rounded-xl sm:rounded-none bg-violet-50/50 dark:bg-violet-500/10 sm:bg-transparent sm:dark:bg-transparent border border-violet-100 dark:border-violet-500/20 sm:border-0">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400 flex items-center justify-center shrink-0 border border-violet-200 dark:border-violet-500/30">
+              <BookOpen className="w-5 h-5 sm:w-6 sm:h-6" />
+            </div>
+            <div>
+              <h3 className="text-xs sm:text-base font-bold text-slate-900 dark:text-white">
+                LLM = Recipe Book
+              </h3>
+              <p className="text-[11px] sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
+                Contains immense knowledge and text recipes, but cannot touch the stove.
+              </p>
+            </div>
+          </div>
 
-        <div className="p-5 rounded-2xl bg-teal-50/70 dark:bg-slate-900/90 border border-teal-200 dark:border-teal-500/30 leading-relaxed text-sm md:text-base shadow-xs">
-          <p className="font-semibold text-teal-950 dark:text-teal-300 mb-2">
-            👨‍🏫 <strong>Hello and welcome! Let's start with a simple, crystal-clear analogy:</strong>
-          </p>
-          <p className="text-slate-700 dark:text-slate-200">
-            Imagine you walk into a kitchen and ask: <em>&ldquo;How do I cook a butter chicken biryani?&rdquo;</em>
-          </p>
-          <p className="text-slate-700 dark:text-slate-200 mt-2">
-            A traditional LLM prompt response is like a <strong>recipe book</strong>. It will give you a beautiful, articulate 10-step recipe. But if your stove runs out of gas, or if the onions start to burn, the recipe book just sits there silently on the counter. It cannot taste the gravy, it cannot turn down the flame, and it cannot order extra butter from the store.
-          </p>
-          <p className="text-slate-700 dark:text-slate-200 mt-2">
-            An <strong>AI Agent</strong>, on the other hand, is like the <strong>Executive Chef</strong>! The chef reads your goal, plans the sequence of steps, turns on the stove (uses a tool), tastes the seasoning (gathers feedback and observation), adjusts the spices if salt is low (adapts to errors), and delivers the finished dish.
-          </p>
+          {/* Center Divider / Arrow */}
+          <div className="text-slate-300 dark:text-slate-600 shrink-0 hidden sm:block">
+            <ArrowRight className="w-6 h-6" />
+          </div>
+          <div className="text-slate-400 dark:text-slate-500 shrink-0 block sm:hidden py-0.5">
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 uppercase font-bold">
+              vs
+            </span>
+          </div>
+
+          {/* Executive Chef */}
+          <div className="flex items-center gap-3.5 sm:gap-4 flex-1 w-full p-3 sm:p-0 rounded-xl sm:rounded-none bg-emerald-50/50 dark:bg-emerald-500/10 sm:bg-transparent sm:dark:bg-transparent border border-emerald-100 dark:border-emerald-500/20 sm:border-0">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-200 dark:border-emerald-500/30">
+              <ChefHat className="w-5 h-5 sm:w-6 sm:h-6" />
+            </div>
+            <div>
+              <h3 className="text-xs sm:text-base font-bold text-slate-900 dark:text-white">
+                Agent = Executive Chef
+              </h3>
+              <p className="text-[11px] sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
+                Takes action, holds utensils, tastes feedback, and adapts to finish the dish.
+              </p>
+            </div>
+          </div>
         </div>
 
-        {/* 3 Core Definition Pillars */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-          <div className="p-4 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shadow-xs">
-            <div className="flex items-center gap-2 text-teal-700 dark:text-teal-400 font-mono text-xs font-bold uppercase mb-1.5">
-              <CheckCircle2 className="w-4 h-4" /> 1. Autonomous
-            </div>
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              Operates independently within defined boundaries. You set the high-level objective, and the agent determines the step-by-step path to achieve it.
-            </p>
-          </div>
-
-          <div className="p-4 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shadow-xs">
-            <div className="flex items-center gap-2 text-sky-700 dark:text-sky-400 font-mono text-xs font-bold uppercase mb-1.5">
-              <CheckCircle2 className="w-4 h-4" /> 2. Goal-Directed
-            </div>
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              Not merely predicting the next sentence! Every single step, tool call, and deliberation is executed specifically to fulfill the user's objective.
-            </p>
-          </div>
-
-          <div className="p-4 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shadow-xs">
-            <div className="flex items-center gap-2 text-violet-700 dark:text-violet-400 font-mono text-xs font-bold uppercase mb-1.5">
-              <CheckCircle2 className="w-4 h-4" /> 3. Adaptive
-            </div>
-            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-              Uses feedback from the environment. If a tool call fails or returns an unexpected error, the agent self-corrects and tries an alternative path.
-            </p>
-          </div>
+        {/* Handwritten Teacher Note */}
+        <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 p-3.5 sm:p-4 rounded-2xl bg-amber-50/90 dark:bg-amber-500/10 border border-amber-300/80 dark:border-amber-500/30 text-amber-950 dark:text-amber-200 sm:-rotate-0.5 shadow-2xs">
+          <span className="text-xl sm:text-2xl shrink-0 mt-0.5 sm:mt-0">✍️</span>
+          <p className="font-handwriting text-base sm:text-xl leading-snug">
+            "Instructor note: Chatbots talk, but Agents work! An LLM generates words; an agent takes real actions in the world."
+          </p>
         </div>
       </section>
 
-      {/* ------------------------------------------------------------- */}
-      {/* SECTION 2: THE 4 CORE COMPONENTS */}
-      {/* ------------------------------------------------------------- */}
-      <section className="space-y-5 pt-6 border-t border-slate-200 dark:border-slate-800/80">
-        <div className="flex items-center gap-2 text-violet-700 dark:text-violet-400 font-mono text-xs uppercase tracking-wider font-semibold">
-          <Brain className="w-4 h-4" />
-          <span>Part 2 • Architecture & Core Anatomy</span>
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* SECTION 2: THE 4 CORE COMPONENTS                              */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <section className="space-y-3.5 sm:space-y-4">
+        <div className="space-y-1.5">
+          <h2 className="text-xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            2. The 4 Core Components
+          </h2>
+          <p className="text-xs sm:text-base text-slate-600 dark:text-slate-300">
+            Every production AI agent is composed of four interconnected modules:
+          </p>
         </div>
 
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-          The 4 Core Components of an AI Agent
-        </h2>
+        {/* 4 Interactive Cards (2x2 Grid on Mobile, 4 Cols on Desktop) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3.5">
+          {components.map((comp) => {
+            const Icon = comp.icon;
+            const isSelected = selectedComponent === comp.id;
 
-        <p className="text-sm md:text-base text-slate-700 dark:text-slate-300 leading-relaxed">
-          Every real-world agent system—whether built using LangGraph, CrewAI, AutoGen, or pure Python—consists of four fundamental components working in concert:
-        </p>
+            return (
+              <button
+                key={comp.id}
+                onClick={() => setSelectedComponent(comp.id)}
+                className={`p-2.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between min-h-[145px] sm:min-h-[160px] active:scale-[0.98] touch-manipulation ${
+                  isSelected
+                    ? `${comp.border} ${comp.bg} ring-2 ring-teal-500/40 shadow-xs`
+                    : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
+                }`}
+              >
+                <div>
+                  <div
+                    className={`w-7 h-7 sm:w-9 sm:h-9 rounded-xl ${comp.bg} ${comp.color} border ${comp.border} flex items-center justify-center mb-1.5 sm:mb-3`}
+                  >
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </div>
+                  <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-tight">
+                    {comp.title}
+                  </h3>
+                  <span className="text-[9px] sm:text-[10px] font-mono uppercase font-bold text-slate-500 dark:text-slate-400 block mt-0.5 truncate">
+                    {comp.tagline}
+                  </span>
+                  <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 mt-1 leading-snug line-clamp-3 sm:line-clamp-none">
+                    {comp.desc}
+                  </p>
+                </div>
 
-        {/* Interactive 4 Components Visualizer */}
-        <AgentArchitectureVisualizer />
+                <div className="mt-2 pt-1.5 border-t border-slate-100 dark:border-slate-800 text-[10px] sm:text-[11px] font-mono text-teal-600 dark:text-teal-400 flex items-center justify-between">
+                  <span>{isSelected ? "Active" : "Inspect"}</span>
+                  <span>→</span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
 
-        {/* Detailed Explanation Breakdown */}
-        <div className="space-y-4 pt-4">
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2">
-            <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <Brain className="w-4 h-4 text-violet-600 dark:text-violet-400" />
-              1. Reasoning Engine (LLM) — The Cognitive Brain
-            </h3>
-            <p className="text-xs md:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              The LLM acts as the cognitive engine. It does <strong>not</strong> just produce text; it performs <em>Context Synthesis</em> (interpreting user intent, retrieved documents, and past conversation) and <em>Decision Making</em> (evaluating which tool to invoke, when to ask for human help, and when the goal is achieved).
-            </p>
+        {/* Selected Component Code Deep-Dive Box */}
+        <div className="p-3 sm:p-5 rounded-2xl bg-slate-950 text-slate-100 border border-slate-800 shadow-xs space-y-2 sm:space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <span
+                className={`text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-md shrink-0 ${currentComp.bg} ${currentComp.color}`}
+              >
+                {currentComp.badge}
+              </span>
+              <h4 className="text-xs sm:text-sm font-bold text-white truncate">
+                Implementation: {currentComp.title}
+              </h4>
+            </div>
+            <span className="text-[10px] sm:text-[11px] font-mono text-slate-400 self-end sm:self-auto shrink-0">
+              Pure Python
+            </span>
           </div>
 
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2">
-            <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <Wrench className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              2. Tools (Actuators) — The Hands
-            </h3>
-            <p className="text-xs md:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              LLMs by themselves are trapped in a digital box with fixed weights. Tools are external APIs, code interpreters, database connectors, and web search engines that give the LLM superpowers to interact with external systems.
-            </p>
-          </div>
+          <pre className="p-3 sm:p-3.5 rounded-xl bg-slate-900 text-emerald-300 font-mono text-xs font-semibold overflow-x-auto border border-slate-800">
+            <code>{currentComp.codeSnippet}</code>
+          </pre>
+        </div>
 
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2">
-            <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <Database className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-              3. Memory Mechanisms — The Scratchpad & Archive
-            </h3>
-            <p className="text-xs md:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              Agents require two types of memory:
-              <br />
-              • <strong>Short-term memory</strong>: In-context message history and current execution state (the active scratchpad).
-              <br />
-              • <strong>Long-term memory</strong>: External vector databases or SQL stores to remember past user interactions, learned preferences, and enterprise domain knowledge across multiple days or sessions.
-            </p>
-          </div>
-
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 shadow-xs space-y-2">
-            <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-              <Eye className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-              4. Perception & Sensors — The Eyes & Ears
-            </h3>
-            <p className="text-xs md:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              How the agent receives information from its environment: user chat prompts, API webhooks, file uploads, and critically, the <strong>Observation</strong> returned by a tool after it finishes executing.
-            </p>
-          </div>
+        {/* Handwritten Mental Model Note */}
+        <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 p-3.5 rounded-2xl bg-teal-50/90 dark:bg-teal-500/10 border border-teal-200/80 dark:border-teal-500/30 text-teal-950 dark:text-teal-200 sm:rotate-0.5 shadow-2xs">
+          <span className="text-xl shrink-0 mt-0.5 sm:mt-0">💡</span>
+          <p className="font-handwriting text-base sm:text-lg leading-snug">
+            "Mental model: Brain = Reasoning, Hands = Tools, Notebook = Memory, Eyes = Perception!"
+          </p>
         </div>
       </section>
 
-      {/* ------------------------------------------------------------- */}
-      {/* SECTION 3: HOW COMPONENTS WORK TOGETHER (THE PERCEPTION-ACTION CYCLE) */}
-      {/* ------------------------------------------------------------- */}
-      <section className="space-y-5 pt-6 border-t border-slate-200 dark:border-slate-800/80">
-        <div className="flex items-center gap-2 text-sky-700 dark:text-sky-400 font-mono text-xs uppercase tracking-wider font-semibold">
-          <Layers className="w-4 h-4" />
-          <span>Part 3 • The Perception-Action Cycle</span>
-        </div>
-
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-          How the Components Work Together: The Feedback Loop
-        </h2>
-
-        <p className="text-sm md:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
-          Every autonomous agent operates on a continuous feedback loop that drives perception into action:
-        </p>
-
-        {/* Step-by-step cycle block */}
-        <div className="p-6 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-4 shadow-xs">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-            <div className="p-3.5 rounded-xl bg-sky-50/60 dark:bg-slate-900 border border-sky-200 dark:border-sky-500/30">
-              <span className="text-xs font-mono text-sky-700 dark:text-sky-400 font-bold block mb-1">
-                STEP 1: PERCEPTION
-              </span>
-              <p className="text-xs text-slate-600 dark:text-slate-300">
-                The agent perceives the user's objective and environmental state.
-              </p>
-            </div>
-
-            <div className="p-3.5 rounded-xl bg-violet-50/60 dark:bg-slate-900 border border-violet-200 dark:border-violet-500/30">
-              <span className="text-xs font-mono text-violet-700 dark:text-violet-400 font-bold block mb-1">
-                STEP 2: REASONING
-              </span>
-              <p className="text-xs text-slate-600 dark:text-slate-300">
-                The LLM evaluates the goal against available tools and chooses an action.
-              </p>
-            </div>
-
-            <div className="p-3.5 rounded-xl bg-emerald-50/60 dark:bg-slate-900 border border-emerald-200 dark:border-emerald-500/30">
-              <span className="text-xs font-mono text-emerald-700 dark:text-emerald-400 font-bold block mb-1">
-                STEP 3: ACTION
-              </span>
-              <p className="text-xs text-slate-600 dark:text-slate-300">
-                The agent issues a structured tool call (e.g. database query, API invocation).
-              </p>
-            </div>
-
-            <div className="p-3.5 rounded-xl bg-amber-50/60 dark:bg-slate-900 border border-amber-200 dark:border-amber-500/30">
-              <span className="text-xs font-mono text-amber-700 dark:text-amber-400 font-bold block mb-1">
-                STEP 4: OBSERVATION
-              </span>
-              <p className="text-xs text-slate-600 dark:text-slate-300">
-                The environment returns the result, feeding back into memory to repeat or conclude!
-              </p>
-            </div>
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* SECTION 3: THE AGENT LOOP                                     */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <section className="space-y-3.5 sm:space-y-4">
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              3. The Agent Loop
+            </h2>
+            <span className="text-[10px] font-mono text-teal-600 dark:text-teal-400 sm:hidden">
+              Swipe steps →
+            </span>
           </div>
+          <p className="text-xs sm:text-base text-slate-600 dark:text-slate-300">
+            The agent continuously loops through perception, reasoning, and action until its task is
+            solved:
+          </p>
         </div>
 
-        {/* Real-world Agentic Behaviors */}
-        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-850 space-y-3 shadow-xs">
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">
-            📌 Key Real-World Agentic Behaviors:
-          </h3>
-          <ul className="space-y-2 text-xs md:text-sm text-slate-600 dark:text-slate-300">
-            <li className="flex items-start gap-2">
-              <span className="text-teal-600 dark:text-teal-400 font-bold">•</span>
-              <span><strong>Routing:</strong> Dynamically deciding between different application paths depending on what the user asks.</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-teal-600 dark:text-teal-400 font-bold">•</span>
-              <span><strong>Tool Selection:</strong> Looking through a catalog of functions and picking the exact right tool with correct arguments.</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-teal-600 dark:text-teal-400 font-bold">•</span>
-              <span><strong>Planning & Sub-goals:</strong> Breaking a large, vague problem into concrete, sequential mini-goals.</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-teal-600 dark:text-teal-400 font-bold">•</span>
-              <span><strong>Self-Correction / Retry:</strong> Detecting if a tool failed, parsing the error message, and attempting an alternate strategy.</span>
-            </li>
-          </ul>
+        {/* Loop Interactive Step Badges (Mobile Touch Swipe) */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none snap-x touch-pan-x -mx-1 px-1">
+          {loopSteps.map((step, idx) => {
+            const Icon = step.icon;
+            const isSelected = activeLoopStep === step.id;
+
+            return (
+              <React.Fragment key={step.id}>
+                <button
+                  onClick={() => setActiveLoopStep(step.id)}
+                  className={`px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl text-xs font-mono font-medium flex items-center gap-1.5 shrink-0 transition-all cursor-pointer snap-start active:scale-95 touch-manipulation ${
+                    isSelected
+                      ? "bg-teal-600 text-white font-bold shadow-md shadow-teal-500/20"
+                      : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700"
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  <span>{step.title}</span>
+                </button>
+                {idx < loopSteps.length - 1 && (
+                  <span className="text-slate-300 dark:text-slate-600 shrink-0 font-bold">→</span>
+                )}
+              </React.Fragment>
+            );
+          })}
+        </div>
+
+        {/* Active Step Explainer Card */}
+        <div className="p-3 sm:p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm font-mono flex items-center gap-2.5 sm:gap-3">
+          <span className="font-bold text-teal-600 dark:text-teal-400 shrink-0">
+            Step {activeLoopStep}:
+          </span>
+          <span className="text-slate-700 dark:text-slate-300">
+            {loopSteps.find((s) => s.id === activeLoopStep)?.desc}
+          </span>
+        </div>
+
+        {/* Handwritten Loop Rule Note */}
+        <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 p-3.5 rounded-2xl bg-sky-50/80 dark:bg-sky-500/10 border border-sky-200/80 dark:border-sky-500/30 text-sky-950 dark:text-sky-200 sm:-rotate-0.5 shadow-2xs">
+          <span className="text-xl shrink-0 mt-0.5 sm:mt-0">📌</span>
+          <p className="font-handwriting text-base sm:text-lg leading-snug">
+            "Loop rule: The cycle repeats until the agent declares 'task complete' or hits a safe max turn safeguard."
+          </p>
         </div>
       </section>
 
-      {/* ------------------------------------------------------------- */}
-      {/* SECTION 4: PRACTICAL CODE IMPLEMENTATION */}
-      {/* ------------------------------------------------------------- */}
-      <section className="space-y-5 pt-6 border-t border-slate-200 dark:border-slate-800/80">
-        <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400 font-mono text-xs uppercase tracking-wider font-semibold">
-          <Code2 className="w-4 h-4" />
-          <span>Part 4 • Practical Implementation (Pure Python)</span>
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* SECTION 4: SEE IT IN ACTION (Interactive Simulation Right Here!)*/}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <section className="space-y-3.5 sm:space-y-4 pt-1 sm:pt-2">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <h2 className="text-xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+              <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-teal-600 dark:text-teal-400 shrink-0" />
+              <span>4. See It in Action (Live Simulation)</span>
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+              Watch the agent loop execute in real-time. Tap{" "}
+              <strong className="text-teal-600 dark:text-teal-400">Play Trace</strong> to step through:
+            </p>
+          </div>
         </div>
 
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-          Anatomy of an Agent: Pure Python Walkthrough
-        </h2>
+        <LiveAgentTraceVisualizer />
+      </section>
 
-        <p className="text-sm md:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
-          Before we jump into complex frameworks like LangGraph or CrewAI later in Level 2, let's understand how an agent actually works under the hood in pure Python:
-        </p>
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* SECTION 5: TRY IT YOURSELF (Live Hands-on Python Simulator)    */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <section className="space-y-3.5 sm:space-y-4 pt-1 sm:pt-2">
+        <div className="space-y-1">
+          <h2 className="text-xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <Code2 className="w-5 h-5 sm:w-6 sm:h-6 text-sky-600 dark:text-sky-400 shrink-0" />
+            <span>5. Try It Yourself (Interactive Code Runner)</span>
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+            Pure Python agent implementation. Choose target company and tap{" "}
+            <strong className="text-violet-600 dark:text-violet-400">Run</strong>:
+          </p>
+        </div>
 
-        {/* Interactive Code Execution Playground */}
         <InteractiveCodeExecutor />
 
-        {/* Code Architecture Breakdown Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 text-xs">
-          <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shadow-xs">
-            <span className="text-teal-700 dark:text-teal-400 font-bold font-mono block mb-1">
-              1. Tools Registry (Lines 13–30)
-            </span>
-            <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-              Standard Python functions decorated or registered in a dictionary. The agent accesses external capabilities through these callable definitions.
-            </p>
-          </div>
-
-          <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shadow-xs">
-            <span className="text-amber-700 dark:text-amber-400 font-bold font-mono block mb-1">
-              2. Memory Buffer (Lines 32–39)
-            </span>
-            <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-              Maintains working state across turns. Observations from tools get appended to context so the reasoning engine stays grounded.
-            </p>
-          </div>
-
-          <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 shadow-xs">
-            <span className="text-sky-700 dark:text-sky-400 font-bold font-mono block mb-1">
-              3. Perception-Action Loop (Lines 40–60)
-            </span>
-            <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-              Notice the sequence: Perception receives goal ➔ Reasoning identifies missing data ➔ Tool is executed ➔ Final answer is synthesized.
-            </p>
-          </div>
+        {/* Handwritten Note on Tools */}
+        <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 p-3.5 rounded-2xl bg-amber-50/80 dark:bg-amber-500/10 border border-amber-200/80 dark:border-amber-500/30 text-amber-950 dark:text-amber-200 sm:rotate-0.5 shadow-2xs">
+          <span className="text-xl shrink-0 mt-0.5 sm:mt-0">📝</span>
+          <p className="font-handwriting text-base sm:text-lg leading-snug">
+            "Notice: The agent never guessed or hallucinated the growth math — it invoked the calculator tool deterministically!"
+          </p>
         </div>
       </section>
 
-      {/* ------------------------------------------------------------- */}
-      {/* SECTION 5: COMMON GOTCHAS & PITFALLS */}
-      {/* ------------------------------------------------------------- */}
-      <section className="space-y-5 pt-6 border-t border-slate-200 dark:border-slate-800/80">
-        <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-mono text-xs uppercase tracking-wider font-semibold">
-          <AlertTriangle className="w-4 h-4" />
-          <span>Part 5 • Critical Gotchas & Common Pitfalls</span>
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* SECTION 6: COMMON MISCONCEPTIONS & CRITICAL GOTCHAS           */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <section className="space-y-3.5 sm:space-y-4 pt-1 sm:pt-2">
+        <div className="space-y-1">
+          <h2 className="text-xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500 shrink-0" />
+            <span>6. Common Misconceptions</span>
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+            Two traps that beginner AI engineers frequently fall into:
+          </p>
         </div>
 
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-          Watch Out! 3 Critical Misconceptions
-        </h2>
-
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           {/* Gotcha 1 */}
-          <div className="p-5 rounded-2xl bg-amber-50/80 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 space-y-2 shadow-xs">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-300/60 dark:border-amber-500/30">
-                Gotcha #1
-              </span>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                "Is a single API call an Agent?" — NO!
-              </h3>
-            </div>
-            <p className="text-xs md:text-sm text-amber-950 dark:text-amber-100/90 leading-relaxed font-medium">
-              <em>Core Rule:</em> "There is a tendency to label any LLM application an 'agent.' A single API call with a good prompt isn't an agent: it's just an LLM call."
-            </p>
-            <p className="text-xs text-slate-700 dark:text-slate-300 mt-1">
-              <strong>Rule of thumb:</strong> If there is no decision loop, no tool execution, and no observation feedback, it is simply <em>Prompt Engineering</em>, not an agent!
+          <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-amber-50/70 dark:bg-amber-500/10 border border-amber-200/80 dark:border-amber-500/30 space-y-1.5 sm:space-y-2">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 inline-block">
+              Trap #1
+            </span>
+            <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+              A single prompt is NOT an agent
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              A long system prompt in a single API call is just prompt engineering. An agent requires
+              an autonomous loop, tools, and observation feedback.
             </p>
           </div>
 
           {/* Gotcha 2 */}
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2 shadow-xs">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
-                Gotcha #2
-              </span>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                LLMs are Pattern Recognizers, NOT Omniscient Calculators
-              </h3>
-            </div>
-            <p className="text-xs md:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              LLMs generate text based on statistical probabilities learned during training. They do <strong>not</strong> possess intrinsic calculators or real-time internet connections. That is why giving them <strong>Tools</strong> is non-negotiable for mathematical accuracy and fresh data.
-            </p>
-          </div>
-
-          {/* Gotcha 3 */}
-          <div className="p-5 rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-2 shadow-xs">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-teal-50 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-500/30">
-                Key Capability
-              </span>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                What Has Emerged in Modern LLMs?
-              </h3>
-            </div>
-            <p className="text-xs md:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              Modern reasoning models have emerged with the ability to: (1) follow complex multi-step instructions, (2) chain information across long contexts, and (3) simulate step-by-step reasoning (Chain-of-Thought) before taking action.
+          <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1.5 sm:space-y-2 shadow-xs">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 inline-block">
+              Trap #2
+            </span>
+            <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+              LLMs are NOT calculators
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              LLMs predict text statistically. They cannot do exact math reliably. Equipping agents
+              with calculators or Python execution tools is non-negotiable.
             </p>
           </div>
         </div>
       </section>
 
-      {/* ------------------------------------------------------------- */}
-      {/* SECTION 6: INTERACTIVE KNOWLEDGE CHECK */}
-      {/* ------------------------------------------------------------- */}
-      <section className="space-y-5 pt-6 border-t border-slate-200 dark:border-slate-800/80">
-        <div className="flex items-center gap-2 text-teal-700 dark:text-teal-400 font-mono text-xs uppercase tracking-wider font-semibold">
-          <CheckCircle2 className="w-4 h-4" />
-          <span>Part 6 • Test Your Understanding</span>
-        </div>
-
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-          Module 1.1 Knowledge Check
-        </h2>
-
-        <Module1_1Quiz />
-      </section>
-
-      {/* ------------------------------------------------------------- */}
-      {/* SECTION 7: SUMMARY & BRIDGE TO MODULE 1.2 */}
-      {/* ------------------------------------------------------------- */}
-      <section className="p-6 md:p-8 rounded-2xl border border-teal-200 dark:border-teal-500/30 bg-teal-50/70 dark:bg-slate-900/90 space-y-4 shadow-xs">
-        <div className="flex items-center gap-2 text-teal-700 dark:text-teal-400 font-mono text-xs font-bold uppercase">
-          <Sparkles className="w-4 h-4" />
-          <span>Part 7 • Summary & Next Steps</span>
-        </div>
-
-        <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white">
-          Congratulations! You've Completed Module 1.1 🎉
-        </h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs md:text-sm text-slate-600 dark:text-slate-300">
-          <div>
-            <strong className="text-slate-900 dark:text-white block mb-1">What You Mastered:</strong>
-            <ul className="space-y-1 list-disc list-inside text-slate-600 dark:text-slate-300">
-              <li>The 3 Pillars of an Agent: Autonomous, Goal-directed, Adaptive.</li>
-              <li>The 4 Core Components: Reasoning Engine, Tools, Memory, Sensors.</li>
-              <li>The Perception-Action-Observation iterative loop.</li>
-              <li>The critical pitfall: A single API call is NOT an agent.</li>
-            </ul>
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* SECTION 7: KEY TAKEAWAYS & KNOWLEDGE CHECK                    */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <section className="space-y-3.5 sm:space-y-4 pt-1 sm:pt-2">
+        {/* Key Takeaways Card */}
+        <div className="p-4 sm:p-7 rounded-2xl sm:rounded-3xl bg-amber-50/80 dark:bg-amber-500/10 border border-amber-200/90 dark:border-amber-500/30 space-y-3 sm:space-y-3.5 shadow-xs">
+          <div className="flex items-center gap-2 text-amber-900 dark:text-amber-300">
+            <Lightbulb className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider font-mono">
+              Key Takeaways
+            </h3>
           </div>
+          <ul className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 text-xs sm:text-sm text-slate-700 dark:text-slate-200">
+            <li className="flex items-start gap-2 sm:gap-2.5">
+              <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+              <span>An agent is <strong>autonomous</strong>, <strong>goal-directed</strong>, and <strong>adaptive</strong>.</span>
+            </li>
+            <li className="flex items-start gap-2 sm:gap-2.5">
+              <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+              <span>It has 4 core components: reasoning, tools, memory, and perception.</span>
+            </li>
+            <li className="flex items-start gap-2 sm:gap-2.5">
+              <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+              <span>The <strong>agent loop</strong> drives the action-observation cycle to solve tasks.</span>
+            </li>
+          </ul>
 
-          <div>
-            <strong className="text-slate-900 dark:text-white block mb-1">Coming Next in Module 1.2:</strong>
-            <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-              In <strong>Module 1.2</strong>, we will explore the evolution from simple <em>Prompt Engineering</em> to <em>Chain-of-Thought</em>, <em>Prompt Chaining</em>, and <em>Context Engineering</em> for agents!
+          {/* Handwritten Pro Tip Note */}
+          <div className="pt-2.5 sm:pt-3 border-t border-amber-200/80 dark:border-amber-500/20">
+            <p className="font-handwriting text-base sm:text-lg text-amber-950 dark:text-amber-200 leading-snug">
+              "Pro tip: Always write automated unit tests for your tools before handing them over to an autonomous LLM loop!"
             </p>
           </div>
         </div>
 
-        <div className="pt-4 flex items-center justify-between border-t border-teal-200/80 dark:border-slate-800">
-          <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
-            Next: Module 1.2 (Prompt & Context Engineering)
+        {/* Knowledge Check Card */}
+        <div className="p-4 sm:p-7 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3 sm:space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400 flex items-center justify-center shrink-0">
+                <HelpCircle className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                  Knowledge Check Quiz
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                  Quick 3-question check to test what you learned in Module 1.1.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowQuiz(!showQuiz)}
+              className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-mono text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-95 touch-manipulation"
+            >
+              <span>{showQuiz ? "Hide Quiz" : "Start Quiz"}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <AnimatePresence>
+            {showQuiz && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.25 }}
+                className="pt-3 sm:pt-4 border-t border-slate-200 dark:border-slate-800 overflow-hidden"
+              >
+                <Module1_1Quiz />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </section>
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* SECTION 8: BRIDGE TO NEXT MODULE                              */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-teal-500/10 via-emerald-500/10 to-teal-500/10 border border-teal-500/30 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 shadow-xs">
+        <div>
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400">
+            Ready to Level Up?
           </span>
-
-          <Link
-            href="/learn/level-1/module-1-2"
-            className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs font-mono flex items-center gap-1.5 transition shadow-sm"
-          >
-            <span>Proceed to Module 1.2</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+          <h3 className="text-sm sm:text-lg font-bold text-slate-900 dark:text-white mt-0.5">
+            Next: Module 1.2 • The Agent Loop & Prompt Engineering
+          </h3>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            Learn how prompt chaining and Chain-of-Thought unlock structured agent reasoning.
+          </p>
         </div>
-      </section>
-    </article>
+
+        <Link
+          href="/learn/level-1/module-1-2"
+          className="w-full sm:w-auto justify-center px-5 py-3 sm:py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs font-mono flex items-center gap-1.5 shadow-md shadow-teal-500/20 transition-all hover:scale-[1.02] active:scale-95 shrink-0"
+        >
+          <span>Next Module</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
+    </div>
   );
 }

@@ -211,55 +211,54 @@ export default function InteractiveCodeExecutor() {
   };
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-950 overflow-hidden shadow-2xl transition-all">
+    <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-slate-950 overflow-hidden shadow-xl transition-all">
       {/* IDE Top Navigation Bar */}
-      <div className="flex flex-wrap items-center justify-between px-4 py-3 bg-slate-900/90 border-b border-slate-800 gap-3">
+      <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 bg-slate-900 border-b border-slate-800 gap-2">
         {/* Left: Window Controls & Active File Tab */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-red-500/80 border border-red-600/40 inline-block" />
-            <span className="w-3 h-3 rounded-full bg-amber-500/80 border border-amber-600/40 inline-block" />
-            <span className="w-3 h-3 rounded-full bg-emerald-500/80 border border-emerald-600/40 inline-block" />
+        <div className="flex items-center gap-2 sm:gap-2.5">
+          <div className="hidden sm:flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-red-500/80 inline-block" />
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80 inline-block" />
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block" />
           </div>
 
-          <div className="h-4 w-[1px] bg-slate-800" />
+          <div className="hidden sm:block h-3.5 w-[1px] bg-slate-800" />
 
           {/* Tab Selector */}
-          <div className="flex items-center gap-1 bg-slate-950/80 border border-slate-800 rounded-lg p-1 text-xs font-mono">
+          <div className="flex items-center gap-0.5 sm:gap-1 bg-slate-950 rounded-lg p-0.5 text-xs font-mono border border-slate-800/80">
             <button
               onClick={() => setActiveTab("code")}
-              className={`px-3 py-1 rounded-md transition flex items-center gap-1.5 ${
+              className={`px-2 sm:px-2.5 py-1 rounded-md transition flex items-center gap-1 sm:gap-1.5 cursor-pointer text-[11px] sm:text-xs ${
                 activeTab === "code"
                   ? "bg-slate-800 text-teal-300 font-bold"
                   : "text-slate-400 hover:text-slate-200"
               }`}
             >
-              <Code2 className="w-3.5 h-3.5 text-teal-400" />
-              <span>basic_agent_anatomy.py</span>
+              <Code2 className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-teal-400" />
+              <span>Python</span>
             </button>
 
             <button
               onClick={() => setActiveTab("terminal")}
-              className={`px-3 py-1 rounded-md transition flex items-center gap-1.5 ${
+              className={`px-2 sm:px-2.5 py-1 rounded-md transition flex items-center gap-1 sm:gap-1.5 cursor-pointer text-[11px] sm:text-xs ${
                 activeTab === "terminal"
                   ? "bg-slate-800 text-sky-300 font-bold"
                   : "text-slate-400 hover:text-slate-200"
               }`}
             >
-              <Terminal className="w-3.5 h-3.5 text-sky-400" />
-              <span>Live Terminal</span>
+              <Terminal className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-sky-400" />
+              <span>Output</span>
               {hasExecuted && (
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
               )}
             </button>
           </div>
         </div>
 
         {/* Right: Parameter Controls & Action Buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {/* Target Company Parameter Selector */}
-          <div className="hidden sm:flex items-center gap-1.5 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1 text-xs font-mono">
-            <Settings2 className="w-3.5 h-3.5 text-slate-500" />
+          <div className="flex items-center gap-1 bg-slate-950 border border-slate-800 rounded-lg px-1.5 sm:px-2 py-1 text-[10px] sm:text-[11px] font-mono">
             <span className="text-slate-400">Target:</span>
             <select
               value={selectedTicker}
@@ -268,181 +267,179 @@ export default function InteractiveCodeExecutor() {
               className="bg-transparent text-teal-300 font-bold focus:outline-none cursor-pointer"
             >
               <option value="TECH" className="bg-slate-900 text-white">
-                TECH ($14.2B)
+                TECH
               </option>
               <option value="AUTO" className="bg-slate-900 text-white">
-                AUTO ($9.1B)
+                AUTO
               </option>
             </select>
           </div>
-
-          {/* Copy Button */}
-          <button
-            onClick={handleCopy}
-            className="p-1.5 sm:px-2.5 sm:py-1 rounded-lg bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-white text-xs font-mono flex items-center gap-1.5 transition border border-slate-700/60"
-            title="Copy Source Code"
-          >
-            {copied ? (
-              <>
-                <Check className="w-3.5 h-3.5 text-emerald-400" />
-                <span className="text-emerald-400 font-bold hidden sm:inline">Copied!</span>
-              </>
-            ) : (
-              <>
-                <Copy className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Copy</span>
-              </>
-            )}
-          </button>
 
           {/* Run Code Button */}
           <button
             onClick={runSimulation}
             disabled={isRunning}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold flex items-center gap-1.5 transition shadow-md ${
+            className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1 sm:gap-1.5 transition shadow-md cursor-pointer ${
               isRunning
                 ? "bg-slate-800 text-slate-400 border border-slate-700 cursor-not-allowed"
-                : "bg-gradient-to-r from-teal-500 to-emerald-500 text-slate-950 hover:from-teal-400 hover:to-emerald-400 shadow-teal-500/20 hover:scale-[1.02]"
+                : "bg-gradient-to-r from-violet-500 to-indigo-600 text-white hover:from-violet-400 hover:to-indigo-500 shadow-violet-500/20 hover:scale-[1.02]"
             }`}
           >
             <Play className={`w-3.5 h-3.5 fill-current ${isRunning ? "animate-spin" : ""}`} />
-            <span>{isRunning ? "Running Agent..." : "Run Simulation"}</span>
+            <span>{isRunning ? "Running..." : "Run"}</span>
           </button>
         </div>
       </div>
 
-      {/* Main Content Area: Split View or Active Tab View */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[460px]">
-        {/* LEFT / CODE VIEW: Code lines with syntax styling */}
-        <div
-          className={`${
-            activeTab === "code" ? "block" : "hidden lg:block"
-          } lg:col-span-7 border-r border-slate-800/80 bg-slate-950/70 p-4 font-mono text-xs overflow-x-auto`}
-        >
-          <div className="space-y-0.5 select-text">
-            {PYTHON_CODE_LINES.map((line) => {
-              let textClass = "text-slate-300";
-              if (line.type === "comment") textClass = "text-slate-500 italic";
-              if (line.type === "import") textClass = "text-violet-400 font-semibold";
-              if (line.type === "func") textClass = "text-sky-300 font-semibold";
-              if (line.type === "class") textClass = "text-amber-300 font-bold";
-
-              return (
-                <div key={line.num} className="flex items-start hover:bg-slate-900/50 rounded px-1 group">
-                  <span className="w-8 shrink-0 text-slate-600 select-none text-[11px] text-right pr-3 font-mono group-hover:text-slate-400">
-                    {line.num}
-                  </span>
-                  <span className={`whitespace-pre leading-relaxed ${textClass}`}>
-                    {line.text}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* RIGHT / TERMINAL VIEW: Live streaming execution terminal */}
-        <div
-          className={`${
-            activeTab === "terminal" ? "block" : "hidden lg:block"
-          } lg:col-span-5 bg-[#070b12] p-4 font-mono flex flex-col justify-between`}
-        >
-          <div>
-            <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-850 text-xs">
-              <span className="text-slate-400 flex items-center gap-1.5">
-                <Terminal className="w-3.5 h-3.5 text-teal-400" />
-                <span>Console Output</span>
-              </span>
-
-              <div className="flex items-center gap-2 text-[11px]">
-                {isRunning ? (
-                  <span className="text-amber-400 flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-                    Executing...
-                  </span>
-                ) : hasExecuted ? (
-                  <span className="text-emerald-400 flex items-center gap-1 font-mono">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    Exit 0 ({executionTime}ms)
-                  </span>
+      {/* Main Content Area: Tabbed Full-Width View */}
+      <div className="min-h-[320px] max-h-[420px] flex flex-col overflow-hidden">
+        {/* CODE VIEW */}
+        {activeTab === "code" && (
+          <div className="relative flex-1 bg-slate-950 p-3 sm:p-4 font-mono text-xs overflow-y-auto max-h-[380px] scrollbar-thin">
+            {/* Quick Copy Button */}
+            <div className="sticky top-0 float-right -mt-0.5 -mr-0.5 z-10">
+              <button
+                onClick={handleCopy}
+                className="px-2 py-1 rounded-lg bg-slate-850/90 hover:bg-slate-750 text-slate-300 border border-slate-750 text-[10px] font-mono flex items-center gap-1 backdrop-blur-xs transition shadow-xs active:scale-95 cursor-pointer"
+                title="Copy Python Code"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-3 h-3 text-emerald-400" />
+                    <span className="text-emerald-400 font-bold">Copied</span>
+                  </>
                 ) : (
-                  <span className="text-slate-500 font-mono">Status: Ready</span>
+                  <>
+                    <Copy className="w-3 h-3" />
+                    <span>Copy</span>
+                  </>
                 )}
+              </button>
+            </div>
+
+            <div className="space-y-0.5 select-text clear-both sm:clear-none">
+              {PYTHON_CODE_LINES.map((line) => {
+                let textClass = "text-slate-300";
+                if (line.type === "comment") textClass = "text-slate-500 italic";
+                if (line.type === "import") textClass = "text-violet-400 font-semibold";
+                if (line.type === "func") textClass = "text-sky-300 font-semibold";
+                if (line.type === "class") textClass = "text-amber-300 font-bold";
+
+                return (
+                  <div key={line.num} className="flex items-start hover:bg-slate-900/50 rounded px-1 group">
+                    <span className="w-6 shrink-0 text-slate-600 select-none text-[11px] text-right pr-2 font-mono group-hover:text-slate-400">
+                      {line.num}
+                    </span>
+                    <span className={`whitespace-pre leading-relaxed text-[11px] sm:text-xs ${textClass}`}>
+                      {line.text}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* TERMINAL VIEW */}
+        {activeTab === "terminal" && (
+          <div className="flex-1 bg-[#070b12] p-3 sm:p-4 font-mono flex flex-col justify-between overflow-y-auto max-h-[380px]">
+            <div>
+              <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-850 text-xs">
+                <span className="text-slate-400 flex items-center gap-1.5">
+                  <Terminal className="w-3.5 h-3.5 text-teal-400" />
+                  <span>Output</span>
+                </span>
+
+                <div className="flex items-center gap-2 text-[11px]">
+                  {isRunning ? (
+                    <span className="text-amber-400 flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+                      Executing...
+                    </span>
+                  ) : hasExecuted ? (
+                    <span className="text-emerald-400 flex items-center gap-1 font-mono">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      Exit 0 ({executionTime}ms)
+                    </span>
+                  ) : (
+                    <span className="text-slate-500 font-mono">Status: Ready</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Terminal Logs */}
+              <div className="space-y-2 text-xs overflow-y-auto max-h-[260px] sm:max-h-[300px] pr-1 scrollbar-thin">
+                {logs.length === 0 ? (
+                  <div className="p-6 text-center text-slate-500 space-y-2.5">
+                    <Cpu className="w-7 h-7 mx-auto text-slate-700" />
+                    <p className="text-xs">
+                      No active run. Tap{" "}
+                      <strong className="text-teal-400">Run</strong> above to execute this
+                      agent step-by-step!
+                    </p>
+                  </div>
+                ) : (
+                  logs.map((log) => {
+                    let badgeColor = "text-slate-400";
+                    let borderColor = "border-slate-850";
+                    let bgColor = "bg-slate-900/30";
+
+                    if (log.type === "system") {
+                      badgeColor = "text-slate-400";
+                    } else if (log.type === "perceive") {
+                      badgeColor = "text-sky-300";
+                      borderColor = "border-sky-500/20";
+                      bgColor = "bg-sky-500/5";
+                    } else if (log.type === "reason") {
+                      badgeColor = "text-violet-300";
+                      borderColor = "border-violet-500/20";
+                      bgColor = "bg-violet-500/5";
+                    } else if (log.type === "act") {
+                      badgeColor = "text-emerald-300";
+                      borderColor = "border-emerald-500/20";
+                      bgColor = "bg-emerald-500/5";
+                    } else if (log.type === "observe") {
+                      badgeColor = "text-amber-300";
+                      borderColor = "border-amber-500/20";
+                      bgColor = "bg-amber-500/5";
+                    } else if (log.type === "complete") {
+                      badgeColor = "text-teal-300 font-bold";
+                      borderColor = "border-teal-500/40";
+                      bgColor = "bg-teal-500/10";
+                    }
+
+                    return (
+                      <div
+                        key={log.id}
+                        className={`p-2 sm:p-2.5 rounded-lg border ${borderColor} ${bgColor} text-xs leading-relaxed`}
+                      >
+                        <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono mb-1">
+                          <span className="uppercase">{log.type}</span>
+                          <span>+{log.timestamp}</span>
+                        </div>
+                        <div className={`${badgeColor} font-mono break-words`}>{log.text}</div>
+                      </div>
+                    );
+                  })
+                )}
+                <div ref={terminalEndRef} />
               </div>
             </div>
 
-            {/* Terminal Logs */}
-            <div className="space-y-2.5 text-xs overflow-y-auto max-h-[380px] pr-1 scrollbar-thin">
-              {logs.length === 0 ? (
-                <div className="p-6 text-center text-slate-500 space-y-3">
-                  <Cpu className="w-8 h-8 mx-auto text-slate-700" />
-                  <p className="text-xs">
-                    No active run. Click{" "}
-                    <strong className="text-teal-400">Run Simulation</strong> above to watch this
-                    agent perceive, reason, and invoke tools step-by-step!
-                  </p>
-                </div>
-              ) : (
-                logs.map((log) => {
-                  let badgeColor = "text-slate-400";
-                  let borderColor = "border-slate-850";
-                  let bgColor = "bg-slate-900/30";
-
-                  if (log.type === "system") {
-                    badgeColor = "text-slate-400";
-                  } else if (log.type === "perceive") {
-                    badgeColor = "text-sky-300";
-                    borderColor = "border-sky-500/20";
-                    bgColor = "bg-sky-500/5";
-                  } else if (log.type === "reason") {
-                    badgeColor = "text-violet-300";
-                    borderColor = "border-violet-500/20";
-                    bgColor = "bg-violet-500/5";
-                  } else if (log.type === "act") {
-                    badgeColor = "text-emerald-300";
-                    borderColor = "border-emerald-500/20";
-                    bgColor = "bg-emerald-500/5";
-                  } else if (log.type === "observe") {
-                    badgeColor = "text-amber-300";
-                    borderColor = "border-amber-500/20";
-                    bgColor = "bg-amber-500/5";
-                  } else if (log.type === "complete") {
-                    badgeColor = "text-teal-300 font-bold";
-                    borderColor = "border-teal-500/40";
-                    bgColor = "bg-teal-500/10";
-                  }
-
-                  return (
-                    <div
-                      key={log.id}
-                      className={`p-2.5 rounded-lg border ${borderColor} ${bgColor} text-xs leading-relaxed`}
-                    >
-                      <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono mb-1">
-                        <span className="uppercase">{log.type}</span>
-                        <span>+{log.timestamp}</span>
-                      </div>
-                      <div className={`${badgeColor} font-mono break-words`}>{log.text}</div>
-                    </div>
-                  );
-                })
+            {/* Terminal Footer Strip */}
+            <div className="pt-2 sm:pt-3 mt-2 sm:mt-3 border-t border-slate-850 flex items-center justify-between text-[10px] sm:text-[11px] text-slate-500 font-mono">
+              <span>Python 3.12 (Simulated)</span>
+              {hasExecuted && (
+                <button
+                  onClick={() => setLogs([])}
+                  className="text-slate-400 hover:text-white flex items-center gap-1 transition active:scale-95 cursor-pointer"
+                >
+                  <RotateCcw className="w-3 h-3" /> Clear Console
+                </button>
               )}
-              <div ref={terminalEndRef} />
             </div>
           </div>
-
-          {/* Terminal Footer Strip */}
-          <div className="pt-3 mt-3 border-t border-slate-850 flex items-center justify-between text-[11px] text-slate-500 font-mono">
-            <span>Runtime: Python 3.12 (Simulated)</span>
-            {hasExecuted && (
-              <button
-                onClick={() => setLogs([])}
-                className="text-slate-400 hover:text-white flex items-center gap-1 transition"
-              >
-                <RotateCcw className="w-3 h-3" /> Clear Console
-              </button>
-            )}
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

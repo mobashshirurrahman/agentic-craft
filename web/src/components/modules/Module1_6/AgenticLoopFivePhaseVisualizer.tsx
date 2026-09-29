@@ -15,8 +15,6 @@ import {
   Cpu,
   Terminal,
   Activity,
-  ShieldAlert,
-  HelpCircle,
 } from "lucide-react";
 
 interface LoopPhase {
@@ -35,8 +33,8 @@ const PHASES: LoopPhase[] = [
     name: "Perception",
     phaseNum: 1,
     icon: Eye,
-    color: "text-sky-400",
-    badgeBg: "bg-sky-500/20 text-sky-300 border-sky-500/40",
+    color: "text-sky-700 dark:text-sky-400",
+    badgeBg: "bg-sky-50 dark:bg-sky-500/20 text-sky-800 dark:text-sky-300 border-sky-200 dark:border-sky-500/40",
     summary: "Ingest current environment state, interaction history, user inputs, and available tools.",
   },
   {
@@ -44,8 +42,8 @@ const PHASES: LoopPhase[] = [
     name: "Reasoning",
     phaseNum: 2,
     icon: Brain,
-    color: "text-purple-400",
-    badgeBg: "bg-purple-500/20 text-purple-300 border-purple-500/40",
+    color: "text-purple-700 dark:text-purple-400",
+    badgeBg: "bg-purple-50 dark:bg-purple-500/20 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-500/40",
     summary: "Evaluate goal, analyze what is known vs. missing, formulate a strategy, and decide next action.",
   },
   {
@@ -53,8 +51,8 @@ const PHASES: LoopPhase[] = [
     name: "Action",
     phaseNum: 3,
     icon: Zap,
-    color: "text-amber-400",
-    badgeBg: "bg-amber-500/20 text-amber-300 border-amber-500/40",
+    color: "text-amber-700 dark:text-amber-400",
+    badgeBg: "bg-amber-50 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-500/40",
     summary: "Execute the chosen action: trigger a tool call, run sandboxed code, or update state.",
   },
   {
@@ -62,18 +60,18 @@ const PHASES: LoopPhase[] = [
     name: "Observation",
     phaseNum: 4,
     icon: Activity,
-    color: "text-emerald-400",
-    badgeBg: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
-    summary: "Examine tool outputs, HTTP status codes, error messages, and newly acquired data.",
+    color: "text-teal-700 dark:text-teal-400",
+    badgeBg: "bg-teal-50 dark:bg-teal-500/20 text-teal-800 dark:text-teal-300 border-teal-200 dark:border-teal-500/40",
+    summary: "Capture the raw tool response or environment feedback and append it into the conversation history.",
   },
   {
     id: "iterate",
-    name: "Iteration & Termination",
+    name: "Iterate / Stop",
     phaseNum: 5,
     icon: RotateCw,
-    color: "text-teal-400",
-    badgeBg: "bg-teal-500/20 text-teal-300 border-teal-500/40",
-    summary: "Evaluate completion criteria: Is goal satisfied? Need another loop cycle? Or terminate?",
+    color: "text-emerald-700 dark:text-emerald-400",
+    badgeBg: "bg-emerald-50 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/40",
+    summary: "Evaluate if objective is satisfied. If yes, generate final response; if not, loop back to Phase 1.",
   },
 ];
 
@@ -86,50 +84,48 @@ interface SimulationStep {
   stateBadge: string;
 }
 
-// Scenario A: Multi-turn computation & report generation
+// Scenario A: Standard 2-Cycle Compound Task
 const SCENARIO_A: SimulationStep[] = [
   // Cycle 1
   {
     cycle: 1,
     phaseId: "perceive",
-    title: "Cycle 1 • Perceive Prompt & Environment",
-    details: "User requests: 'Calculate 18% GST on a 140,000 INR order and generate receipt rec_401.pdf'.",
+    title: "Cycle 1 • Perceive: Ingest User Request",
+    details: "Agent receives user goal: 'Calculate 18% GST tax on 140,000 INR and generate customer receipt PDF.'",
     payload: `[Perception Input]:
-User Prompt: "Calculate 18% GST on 140,000 INR and generate receipt rec_401.pdf"
-Available Tools: [calculate_tax, generate_pdf_receipt, send_email]
-History: None (fresh session)`,
+Prompt: "Calculate 18% GST on 140,000 INR and generate customer receipt PDF"
+Available Tools: [calculate_gst, generate_pdf_invoice]
+History: None (Initial Turn)`,
     stateBadge: "Cycle 1 / Step 1",
   },
   {
     cycle: 1,
     phaseId: "reason",
-    title: "Cycle 1 • Reason Strategy & Missing Data",
-    details: "Decompose into two requirements: (1) accurate tax math, (2) PDF generation. Must calculate tax first.",
+    title: "Cycle 1 • Reason: Determine Subtask 1",
+    details: "Agent analyzes requirements: Cannot generate PDF before computing tax amount.",
     payload: `[Reasoning Engine]:
-• Goal: Final receipt PDF with exact amounts.
-• What I know: Base amount = 140,000 INR, Rate = 18%.
-• What is missing: Exact calculated tax & grand total.
-• Next Action: Call tool 'calculate_tax(amount=140000, rate=0.18)'.`,
+• Objective: Compute tax first, then pass total to PDF generator.
+• Missing Info: exact 18% GST amount for 140,000 INR.
+• Action Decision: Call calculate_gst(amount=140000, rate=18).`,
     stateBadge: "Cycle 1 / Step 2",
   },
   {
     cycle: 1,
     phaseId: "act",
-    title: "Cycle 1 • Act: Dispatch Tool Call",
-    details: "Agent emits structured JSON tool call to runtime for deterministic calculation.",
+    title: "Cycle 1 • Act: Emit Tool Call",
+    details: "Agent emits structured tool call to calculate tax.",
     payload: `[Action Dispatched]:
-Tool: calculate_tax
-Arguments: {"amount": 140000, "rate": 0.18}`,
+Tool: calculate_gst
+Arguments: {"base_amount": 140000, "rate_percent": 18}`,
     stateBadge: "Cycle 1 / Step 3",
   },
   {
     cycle: 1,
     phaseId: "observe",
     title: "Cycle 1 • Observe: Ingest Calculation Result",
-    details: "Runtime returns exact math: tax = 25,200 INR, total = 165,200 INR.",
+    details: "Host runtime runs calculator tool and returns result.",
     payload: `[Observation Ingested]:
 {
-  "status": "success",
   "base_amount": 140000,
   "tax_amount": 25200,
   "total_amount": 165200,
@@ -140,12 +136,11 @@ Arguments: {"amount": 140000, "rate": 0.18}`,
   {
     cycle: 1,
     phaseId: "iterate",
-    title: "Cycle 1 • Iterate: Goal Check",
-    details: "Tax is calculated, but receipt PDF is NOT yet created. Loop MUST continue to Cycle 2!",
+    title: "Cycle 1 • Iterate: Check Goal Completion",
+    details: "Tax is calculated, but PDF is not generated yet! Loop decides to continue to Cycle 2.",
     payload: `[Iteration Evaluation]:
-• Is total goal achieved? NO.
-• PDF receipt still pending.
-• Decision: CONTINUE LOOP -> Proceed to Cycle 2.`,
+• Is total goal achieved? NO. (PDF invoice still pending).
+• Decision: CONTINUE LOOP -> Re-enter Perception with updated context.`,
     stateBadge: "Cycle 1 / Step 5",
   },
 
@@ -153,49 +148,43 @@ Arguments: {"amount": 140000, "rate": 0.18}`,
   {
     cycle: 2,
     phaseId: "perceive",
-    title: "Cycle 2 • Perceive Updated State",
-    details: "Perception now includes previous calculation observation in message memory.",
+    title: "Cycle 2 • Perceive: Ingest Updated Memory",
+    details: "Agent context now includes the tax calculation result from Cycle 1.",
     payload: `[Perception Input]:
-Current Memory: Base=140,000, Tax=25,200, Total=165,200 INR.
-Pending Subtask: Generate PDF 'rec_401.pdf'.`,
+Context Buffer: Tax calculated (Total: 165,200 INR).
+Remaining Subtask: Generate PDF receipt.`,
     stateBadge: "Cycle 2 / Step 1",
   },
   {
     cycle: 2,
     phaseId: "reason",
-    title: "Cycle 2 • Reason Next Action",
-    details: "All parameters for PDF generator tool are now verified and ready in context.",
+    title: "Cycle 2 • Reason: Formulate PDF Generation",
+    details: "Agent recognizes all parameters for PDF invoice are now available.",
     payload: `[Reasoning Engine]:
-• Now have all required data.
-• Next Action: Call tool 'generate_pdf_receipt(order_id='rec_401', total=165200, tax=25200)'.`,
+• Needed for PDF: base_amount (140,000), tax (25,200), total (165,200).
+• Action Decision: Call generate_pdf_invoice(...) with computed values.`,
     stateBadge: "Cycle 2 / Step 2",
   },
   {
     cycle: 2,
     phaseId: "act",
-    title: "Cycle 2 • Act: Dispatch PDF Generator",
-    details: "Agent calls PDF generation service tool.",
+    title: "Cycle 2 • Act: Dispatch PDF Generator Tool",
+    details: "Agent executes the second tool.",
     payload: `[Action Dispatched]:
-Tool: generate_pdf_receipt
-Arguments: {
-  "order_id": "rec_401",
-  "base_amount": 140000,
-  "tax_amount": 25200,
-  "total_amount": 165200
-}`,
+Tool: generate_pdf_invoice
+Arguments: {"customer": "Client Corp", "total": 165200, "tax": 25200}`,
     stateBadge: "Cycle 2 / Step 3",
   },
   {
     cycle: 2,
     phaseId: "observe",
-    title: "Cycle 2 • Observe: PDF File Created",
-    details: "External service confirms document creation on storage bucket.",
+    title: "Cycle 2 • Observe: Ingest PDF Receipt URL",
+    details: "PDF generator returns cloud storage link for receipt.",
     payload: `[Observation Ingested]:
 {
-  "status": "created",
-  "file_url": "https://storage.acme.corp/receipts/rec_401.pdf",
-  "bytes": 48291,
-  "sha256": "8f3b...12c0"
+  "status": "success",
+  "receipt_id": "rec_401",
+  "download_url": "https://s3.aws.com/receipts/rec_401.pdf"
 }`,
     stateBadge: "Cycle 2 / Step 4",
   },
@@ -352,26 +341,22 @@ SQL: SELECT SUM(amount) FROM orders WHERE client_name = 'Acme Corp';`,
   {
     cycle: 3,
     phaseId: "observe",
-    title: "Cycle 3 • Observe: Clean Data Result",
-    details: "Query returns: total sales = $428,500.",
+    title: "Cycle 3 • Observe: Sales Data Returned",
+    details: "Database query succeeds! Returns total sales volume.",
     payload: `[Observation Ingested]:
-{
-  "total_sales_usd": 428500,
-  "transaction_count": 14,
-  "status": "success"
-}`,
+{"sum": 284500.00}`,
     stateBadge: "Cycle 3 / Step 4",
   },
   {
     cycle: 3,
     phaseId: "iterate",
-    title: "Cycle 3 • Iterate: Goal Complete -> Terminate",
-    details: "Goal fulfilled through autonomous self-healing and error recovery!",
+    title: "Cycle 3 • Iterate: Goal Satisfied -> Terminate",
+    details: "Goal achieved via autonomous error recovery!",
     payload: `[Iteration Evaluation]:
-• Is goal achieved? YES ($428,500 retrieved).
+• Is goal achieved? YES! Total sales retrieved.
 • Decision: TERMINATE LOOP.
-• Final Answer: "The total sales for Acme Corp across 14 transactions is $428,500."`,
-    stateBadge: "Cycle 3 / Step 5 (Success)",
+• Final Answer: "Total sales for Acme Corp are $284,500.00."`,
+    stateBadge: "Cycle 3 / Step 5 (Resolved)",
   },
 ];
 
@@ -381,20 +366,19 @@ export default function AgenticLoopFivePhaseVisualizer() {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
   const steps = scenario === "standard" ? SCENARIO_A : SCENARIO_B;
-  const currentStep = steps[currentStepIndex];
-  const activePhase = PHASES.find((p) => p.id === currentStep.phaseId)!;
+  const currentStep = steps[currentStepIndex] || steps[0];
+  const activePhase = PHASES.find((p) => p.id === currentStep.phaseId) || PHASES[0];
 
-  // Auto-play timer
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (isPlaying) {
-      timer = setTimeout(() => {
-        if (currentStepIndex < steps.length - 1) {
+      if (currentStepIndex < steps.length - 1) {
+        timer = setTimeout(() => {
           setCurrentStepIndex((prev) => prev + 1);
-        } else {
-          setIsPlaying(false);
-        }
-      }, 2600);
+        }, 1900);
+      } else {
+        setIsPlaying(false);
+      }
     }
     return () => clearTimeout(timer);
   }, [isPlaying, currentStepIndex, steps.length]);
@@ -411,39 +395,39 @@ export default function AgenticLoopFivePhaseVisualizer() {
   };
 
   return (
-    <div className="rounded-2xl border border-slate-700/60 bg-slate-900/90 dark:bg-slate-900/90 light:bg-white light:border-slate-300 shadow-xl overflow-hidden my-8">
+    <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-sm dark:shadow-2xl overflow-hidden space-y-0">
       {/* Header bar */}
-      <div className="border-b border-slate-700/60 dark:border-slate-700/60 light:border-slate-200 px-5 py-4 bg-slate-800/50 dark:bg-slate-800/50 light:bg-slate-50 flex flex-wrap items-center justify-between gap-4">
+      <div className="border-b border-slate-100 dark:border-slate-800 p-4 sm:p-5 bg-slate-50 dark:bg-slate-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="flex h-2.5 w-2.5 rounded-full bg-teal-400 animate-pulse" />
-            <h3 className="font-bold text-base md:text-lg text-white dark:text-white light:text-slate-900">
+            <span className="flex h-2.5 w-2.5 rounded-full bg-teal-500 animate-pulse" />
+            <h3 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white">
               Interactive 5-Phase Agentic Loop Simulator
             </h3>
           </div>
-          <p className="text-xs text-slate-400 dark:text-slate-400 light:text-slate-600 mt-0.5">
-            Perceive ➔ Reason ➔ Act ➔ Observe ➔ Iterate: See how autonomous intelligence cycles until completion.
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Perceive ➔ Reason ➔ Act ➔ Observe ➔ Iterate: See how autonomous intelligence cycles until completion
           </p>
         </div>
 
         {/* Scenario Selector */}
-        <div className="flex items-center bg-slate-900/80 dark:bg-slate-900/80 light:bg-slate-200 p-1 rounded-xl border border-slate-700/80 dark:border-slate-700/80 light:border-slate-300">
+        <div className="flex items-center bg-white dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-mono self-start sm:self-center shadow-sm">
           <button
             onClick={() => handleScenarioChange("standard")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`px-3 py-1.5 rounded-lg transition-all touch-manipulation active:scale-95 ${
               scenario === "standard"
-                ? "bg-teal-500 text-slate-950 font-bold shadow-sm"
-                : "text-slate-400 dark:text-slate-400 light:text-slate-700 hover:text-white dark:hover:text-white"
+                ? "bg-teal-600 text-white font-bold shadow-sm"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
           >
             <span>Scenario A: Multi-Cycle Task</span>
           </button>
           <button
             onClick={() => handleScenarioChange("error_recovery")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`px-3 py-1.5 rounded-lg transition-all touch-manipulation active:scale-95 ${
               scenario === "error_recovery"
-                ? "bg-teal-500 text-slate-950 font-bold shadow-sm"
-                : "text-slate-400 dark:text-slate-400 light:text-slate-700 hover:text-white dark:hover:text-white"
+                ? "bg-teal-600 text-white font-bold shadow-sm"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
           >
             <span>Scenario B: Error Self-Healing</span>
@@ -451,9 +435,9 @@ export default function AgenticLoopFivePhaseVisualizer() {
         </div>
       </div>
 
-      {/* 5-Phase Circular/Linear Diagram Strip */}
-      <div className="px-5 py-4 bg-slate-950/60 dark:bg-slate-950/60 light:bg-slate-100/70 border-b border-slate-800/80 dark:border-slate-800/80 light:border-slate-200 overflow-x-auto">
-        <div className="flex items-center min-w-[650px] justify-between gap-2">
+      {/* 5-Phase Linear Diagram Strip */}
+      <div className="p-3 sm:p-4 bg-slate-50/60 dark:bg-slate-900/40 border-b border-slate-100 dark:border-slate-800 overflow-x-auto">
+        <div className="flex items-center min-w-[550px] justify-between gap-2">
           {PHASES.map((phase) => {
             const isActive = phase.id === currentStep.phaseId;
             const Icon = phase.icon;
@@ -461,26 +445,26 @@ export default function AgenticLoopFivePhaseVisualizer() {
             return (
               <div
                 key={phase.id}
-                className={`flex-1 p-3 rounded-xl border flex flex-col items-center transition-all ${
+                className={`flex-1 p-2.5 rounded-xl border flex flex-col items-center transition-all ${
                   isActive
-                    ? "border-teal-400 bg-teal-500/15 shadow-md scale-102"
-                    : "border-slate-800 dark:border-slate-800 light:border-slate-200 bg-slate-900/40 dark:bg-slate-900/40 light:bg-white opacity-60"
+                    ? "border-teal-500 bg-teal-50 dark:bg-teal-500/15 shadow-sm scale-[1.02] ring-1 ring-teal-500/30"
+                    : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 opacity-60"
                 }`}
               >
                 <div
-                  className={`w-7 h-7 rounded-lg flex items-center justify-center mb-1.5 ${
-                    isActive ? "bg-teal-400 text-slate-950 font-bold" : "bg-slate-800 text-slate-400"
+                  className={`w-7 h-7 rounded-lg flex items-center justify-center mb-1 ${
+                    isActive ? "bg-teal-600 text-white font-bold" : "bg-slate-100 dark:bg-slate-800 text-slate-500"
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-3.5 h-3.5" />
                 </div>
                 <div className="text-center">
-                  <span className="text-[10px] font-mono uppercase tracking-wider block text-slate-400">
+                  <span className="text-[9px] font-mono uppercase tracking-wider block text-slate-400">
                     Phase {phase.phaseNum}
                   </span>
                   <span
                     className={`text-xs font-bold ${
-                      isActive ? "text-teal-300 dark:text-teal-300 light:text-teal-700" : "text-slate-300 dark:text-slate-300 light:text-slate-700"
+                      isActive ? "text-teal-900 dark:text-teal-300" : "text-slate-600 dark:text-slate-400"
                     }`}
                   >
                     {phase.name}
@@ -493,42 +477,42 @@ export default function AgenticLoopFivePhaseVisualizer() {
       </div>
 
       {/* Main Simulation Stage */}
-      <div className="p-5 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="p-4 sm:p-5 grid grid-cols-1 lg:grid-cols-12 gap-5">
         {/* Left Column: Phase Card & Loop Status */}
         <div className="lg:col-span-5 flex flex-col justify-between gap-4">
-          <div className="bg-slate-800/40 dark:bg-slate-800/40 light:bg-slate-50 border border-slate-700/50 dark:border-slate-700/50 light:border-slate-200 rounded-xl p-4">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-teal-400">
+          <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-teal-700 dark:text-teal-400">
                 Active Phase Focus
               </span>
-              <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-slate-900 dark:bg-slate-900 light:bg-slate-200 text-slate-300 dark:text-slate-300 light:text-slate-800 border border-slate-700 dark:border-slate-700 light:border-slate-300">
+              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 shadow-sm">
                 {currentStep.stateBadge}
               </span>
             </div>
 
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400 flex-shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-teal-100 dark:bg-teal-500/20 text-teal-700 dark:text-teal-400 flex items-center justify-center shrink-0">
                 {React.createElement(activePhase.icon, { className: "w-5 h-5" })}
               </div>
               <div>
-                <h4 className="font-bold text-base text-white dark:text-white light:text-slate-900">
+                <h4 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white">
                   Phase {activePhase.phaseNum}: {activePhase.name}
                 </h4>
-                <p className="text-xs text-slate-300 dark:text-slate-300 light:text-slate-600 mt-1 leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
                   {activePhase.summary}
                 </p>
               </div>
             </div>
 
             {/* Loop progress metrics */}
-            <div className="mt-4 pt-4 border-t border-slate-700/50 dark:border-slate-700/50 light:border-slate-200 grid grid-cols-2 gap-2 text-xs font-mono">
-              <div className="p-2 rounded bg-slate-900/60 dark:bg-slate-900/60 light:bg-white border border-slate-800 dark:border-slate-800 light:border-slate-200">
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 grid grid-cols-2 gap-2 text-xs font-mono">
+              <div className="p-2 rounded bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm">
                 <span className="text-slate-400 block text-[10px]">Current Loop Cycle:</span>
-                <span className="font-bold text-teal-400 text-sm">Cycle {currentStep.cycle}</span>
+                <span className="font-bold text-teal-700 dark:text-teal-400 text-sm">Cycle {currentStep.cycle}</span>
               </div>
-              <div className="p-2 rounded bg-slate-900/60 dark:bg-slate-900/60 light:bg-white border border-slate-800 dark:border-slate-800 light:border-slate-200">
+              <div className="p-2 rounded bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-sm">
                 <span className="text-slate-400 block text-[10px]">Total Steps Trace:</span>
-                <span className="font-bold text-slate-200 dark:text-slate-200 light:text-slate-800 text-sm">
+                <span className="font-bold text-slate-800 dark:text-slate-200 text-sm">
                   {currentStepIndex + 1} / {steps.length}
                 </span>
               </div>
@@ -536,23 +520,23 @@ export default function AgenticLoopFivePhaseVisualizer() {
           </div>
 
           {/* Teacher Insight Box */}
-          <div className="bg-slate-950/60 dark:bg-slate-950/60 light:bg-slate-50 border border-slate-800 dark:border-slate-800 light:border-slate-200 rounded-xl p-4 text-xs leading-relaxed text-slate-300 dark:text-slate-300 light:text-slate-700">
-            <span className="font-bold text-teal-400 dark:text-teal-400 light:text-teal-600 block mb-1">
-              💡 Teacher Note: What makes this an "Agent"?
+          <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-xl p-3.5 text-xs leading-relaxed text-slate-600 dark:text-slate-300 shadow-sm">
+            <span className="font-bold text-teal-700 dark:text-teal-400 font-mono text-[11px] block mb-1">
+              💡 What Makes this an &quot;Agent&quot;?
             </span>
-            A standard script executes step 1, step 2, step 3 and finishes blindly. An <strong>Agent</strong> runs an ongoing loop: after every Action, it pauses to <em>Observe the real outcome</em>. If something failed or was missing, the Reasoner pivots and tries a new strategy. That dynamic closed loop is the entire secret to autonomous systems!
+            A standard script executes step 1, 2, 3 blindly. An <strong>Agent</strong> runs an ongoing closed loop: after every Action, it pauses to <em>Observe the real outcome</em>. If something failed, the Reasoner pivots and tries a new strategy.
           </div>
         </div>
 
         {/* Right Column: Step Inspector & Wire Output */}
         <div className="lg:col-span-7 flex flex-col justify-between gap-4">
-          <div className="bg-slate-950 dark:bg-slate-950 light:bg-white border border-slate-800 dark:border-slate-800 light:border-slate-200 rounded-xl p-5 shadow-inner">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800 dark:border-slate-800 light:border-slate-200">
-              <h4 className="font-bold text-white dark:text-white light:text-slate-900 text-sm md:text-base">
+          <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 shadow-sm space-y-3">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <h4 className="font-bold text-slate-900 dark:text-white text-sm sm:text-base">
                 {currentStep.title}
               </h4>
               <span
-                className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded ${
+                className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded border ${
                   activePhase.badgeBg
                 }`}
               >
@@ -560,34 +544,34 @@ export default function AgenticLoopFivePhaseVisualizer() {
               </span>
             </div>
 
-            <p className="text-xs md:text-sm text-slate-300 dark:text-slate-300 light:text-slate-600 mt-3 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
               {currentStep.details}
             </p>
 
             {/* Terminal payload */}
-            <div className="mt-4">
-              <div className="flex items-center justify-between px-3 py-1.5 bg-slate-900 dark:bg-slate-900 light:bg-slate-100 rounded-t-lg border-t border-x border-slate-800 dark:border-slate-800 light:border-slate-200 text-xs font-mono text-slate-400">
+            <div>
+              <div className="flex items-center justify-between px-3 py-1.5 bg-slate-900 rounded-t-lg border-t border-x border-slate-800 text-[11px] font-mono text-slate-400">
                 <div className="flex items-center gap-1.5">
                   <Terminal className="w-3.5 h-3.5 text-teal-400" />
-                  <span>Agent State & Payload Stream</span>
+                  <span>Agent State &amp; Payload Stream</span>
                 </div>
                 <span>Step {currentStepIndex + 1} of {steps.length}</span>
               </div>
-              <pre className="p-3.5 bg-slate-900/90 dark:bg-slate-900/90 light:bg-slate-50 border border-slate-800 dark:border-slate-800 light:border-slate-200 rounded-b-lg font-mono text-xs text-teal-300 dark:text-teal-300 light:text-teal-800 whitespace-pre-wrap overflow-x-auto leading-relaxed max-h-56">
+              <pre className="p-3.5 bg-slate-950 border border-slate-800 rounded-b-lg font-mono text-xs text-teal-300 whitespace-pre-wrap overflow-x-auto leading-relaxed max-h-56">
                 {currentStep.payload}
               </pre>
             </div>
           </div>
 
           {/* Stepper Controls */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setIsPlaying(!isPlaying)}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-md ${
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-sm touch-manipulation active:scale-95 ${
                   isPlaying
-                    ? "bg-rose-500 hover:bg-rose-400 text-white"
-                    : "bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold"
+                    ? "bg-rose-600 hover:bg-rose-500 text-white"
+                    : "bg-teal-600 hover:bg-teal-500 text-white shadow-teal-500/20"
                 }`}
               >
                 {isPlaying ? (
@@ -605,7 +589,7 @@ export default function AgenticLoopFivePhaseVisualizer() {
 
               <button
                 onClick={handleReset}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border border-slate-700 dark:border-slate-700 light:border-slate-300 text-slate-300 dark:text-slate-300 light:text-slate-700 hover:bg-slate-800 dark:hover:bg-slate-800 light:hover:bg-slate-100 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 transition touch-manipulation active:scale-95"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>Reset</span>
@@ -616,14 +600,14 @@ export default function AgenticLoopFivePhaseVisualizer() {
               <button
                 onClick={() => setCurrentStepIndex((prev) => Math.max(prev - 1, 0))}
                 disabled={currentStepIndex === 0}
-                className="px-3 py-2 rounded-xl text-xs font-medium border border-slate-700 dark:border-slate-700 light:border-slate-300 text-slate-300 dark:text-slate-300 light:text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-800 dark:hover:bg-slate-800 light:hover:bg-slate-100"
+                className="px-3 py-2 rounded-xl text-xs font-medium border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-900 transition touch-manipulation active:scale-95"
               >
                 Previous Step
               </button>
               <button
                 onClick={() => setCurrentStepIndex((prev) => Math.min(prev + 1, steps.length - 1))}
                 disabled={currentStepIndex === steps.length - 1}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 light:bg-slate-200 light:hover:bg-slate-300 text-white dark:text-white light:text-slate-900 disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white disabled:opacity-40 disabled:cursor-not-allowed transition touch-manipulation active:scale-95 shadow-sm"
               >
                 <span>Next Step</span>
                 <ArrowRight className="w-3.5 h-3.5" />

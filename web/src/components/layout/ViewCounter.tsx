@@ -51,8 +51,8 @@ export default function ViewCounter() {
       </div>
 
       <div className="flex items-center gap-1 text-[11px] sm:text-xs font-mono">
-        <span className="text-slate-500 dark:text-slate-400 font-sans text-[10px] sm:text-[11px] font-medium tracking-wide shrink-0">
-          <span className="hidden sm:inline">Total </span>Visitors:
+        <span className="hidden sm:inline text-slate-500 dark:text-slate-400 font-sans text-[10px] sm:text-[11px] font-medium tracking-wide shrink-0">
+          Visitors:
         </span>
         {views !== null ? (
           <span className="text-teal-700 dark:text-teal-300 font-bold tracking-tight font-mono">

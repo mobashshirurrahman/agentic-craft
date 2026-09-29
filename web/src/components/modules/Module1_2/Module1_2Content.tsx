@@ -2,603 +2,526 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  Sparkles,
-  BookOpen,
-  Brain,
-  Wrench,
-  Database,
-  Layers,
-  AlertTriangle,
-  Lightbulb,
-  CheckCircle2,
-  Copy,
+  Target,
   Check,
   ArrowRight,
+  Sparkles,
+  Brain,
+  Layers,
+  Zap,
+  HelpCircle,
+  AlertTriangle,
+  Lightbulb,
   Code2,
   Cpu,
-  Terminal,
-  Zap,
-  Clock,
-  ShieldCheck,
-  FileCode,
+  Factory,
   Compass,
+  FileText,
 } from "lucide-react";
 import EvolutionComparisonVisualizer from "./EvolutionComparisonVisualizer";
 import Module1_2CodeExecutor from "./Module1_2CodeExecutor";
 import Module1_2Quiz from "./Module1_2Quiz";
 
 export default function Module1_2Content() {
-  const [copiedContextSnippet, setCopiedContextSnippet] = useState(false);
+  const [selectedParadigm, setSelectedParadigm] = useState<string>("chains");
+  const [showQuiz, setShowQuiz] = useState<boolean>(false);
 
-  const contextEngineeringSnippet = `# Production Context Engineering for a Customer Service AI Agent
-context = f"""
-[ROLE & PERSONA]
-You are a helpful customer service agent for TechCorp.
+  const paradigms = [
+    {
+      id: "prompts",
+      title: "1. Prompts",
+      tagline: "Single Call (Static)",
+      desc: "One input creates one output. Best for classification and fast summaries.",
+      icon: Sparkles,
+      color: "text-emerald-600 dark:text-emerald-400",
+      bg: "bg-emerald-50 dark:bg-emerald-500/10",
+      border: "border-emerald-200 dark:border-emerald-500/30",
+      badge: "Prompt Engineering",
+      codeSnippet: `# Single Input -> Single Output pass
+response = llm.generate("Classify support ticket: 'Cannot reset password'")`,
+    },
+    {
+      id: "cot",
+      title: "2. CoT",
+      tagline: "Guided Reasoning",
+      desc: "Prompts the LLM to output step-by-step thinking before final answer.",
+      icon: Brain,
+      color: "text-sky-600 dark:text-sky-400",
+      bg: "bg-sky-50 dark:bg-sky-500/10",
+      border: "border-sky-200 dark:border-sky-500/30",
+      badge: "Chain of Thought",
+      codeSnippet: `# Generates internal scratchpad reasoning tokens
+prompt = "Think step-by-step: If item costs $50 with 8% tax, what is total?"`,
+    },
+    {
+      id: "chains",
+      title: "3. Chains",
+      tagline: "Deterministic Pipeline",
+      desc: "Output of step A feeds input of step B in a fixed, predictable sequence.",
+      icon: Layers,
+      color: "text-violet-600 dark:text-violet-400",
+      bg: "bg-violet-50 dark:bg-violet-500/10",
+      border: "border-violet-200 dark:border-violet-500/30",
+      badge: "Prompt Chaining",
+      codeSnippet: `# Fixed sequential stations (Linear & Low Latency)
+outline = llm.generate(f"Create outline for {topic}")
+draft = llm.generate(f"Write draft based on outline: {outline}")`,
+    },
+    {
+      id: "agents",
+      title: "4. Agents",
+      tagline: "Autonomous Loop",
+      desc: "Dynamic decision loop that chooses tools, evaluates feedback, and adapts.",
+      icon: Zap,
+      color: "text-amber-600 dark:text-amber-400",
+      bg: "bg-amber-50 dark:bg-amber-500/10",
+      border: "border-amber-200 dark:border-amber-500/30",
+      badge: "Autonomous Agent",
+      codeSnippet: `# Dynamic execution path decided at runtime by LLM
+while not goal_satisfied:
+    action = llm.decide(history, tools)
+    observation = execute(action)`,
+    },
+  ];
 
-[CUSTOMER INFORMATION]
-- Name: {customer.name}
-- Account Type: {customer.account_type}
-- Recent Orders: {format_orders(customer.recent_orders)}
-
-[CONVERSATION HISTORY]
-{format_conversation_history(conversation_history)}
-
-[COMPANY POLICIES & CONSTRAINTS]
-- Return window: 30 days from delivery
-- Shipping: Free for orders over $50
-- SLA: All issues must be acknowledged within 24 hours
-
-[AVAILABLE TOOLS]
-1. check_order_status(order_id)
-2. process_refund(order_id, reason)
-3. escalate_to_human(issue_summary)
-
-[CURRENT USER QUERY]
-{query}
-"""`;
-
-  const handleCopyContext = () => {
-    navigator.clipboard.writeText(contextEngineeringSnippet);
-    setCopiedContextSnippet(true);
-    setTimeout(() => setCopiedContextSnippet(false), 2000);
-  };
+  const currentParadigm =
+    paradigms.find((p) => p.id === selectedParadigm) || paradigms[2];
 
   return (
-    <div className="space-y-12">
-      {/* Friendly Tutor Introduction */}
-      <section className="rounded-2xl border border-slate-800 bg-gradient-to-b from-slate-900/80 to-slate-950/80 p-6 md:p-8 backdrop-blur-sm relative overflow-hidden shadow-xl">
-        <div className="flex flex-col sm:flex-row items-start gap-4">
-          <div className="p-3 rounded-2xl bg-teal-500/10 border border-teal-500/30 text-teal-400 shrink-0">
-            <Compass className="w-6 h-6" />
+    <div className="space-y-10 text-slate-800 dark:text-slate-200 pb-12">
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* TOP LEARNING OBJECTIVE CARD                                   */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <div className="rounded-2xl sm:rounded-3xl border border-sky-200/90 dark:border-sky-500/30 bg-sky-50/70 dark:bg-sky-500/10 p-4 sm:p-7 shadow-xs">
+        <div className="flex items-start gap-3 sm:gap-4">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-sky-500/15 border border-sky-500/30 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 shadow-xs">
+            <Target className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-teal-400">
-                Core Architectural Lesson
-              </span>
-              <span className="text-slate-600">•</span>
-              <span className="text-xs font-mono text-slate-400">
-                Foundations &amp; Evolution
-              </span>
-            </div>
-
-            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-              Hello and welcome! In this lesson, we will master the evolution from Prompts to Chains and Autonomous Agents.
+          <div className="space-y-2 sm:space-y-2.5 flex-1 min-w-0">
+            <h2 className="text-sm sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">
+              By the end of this module, you will:
             </h2>
-
-            <p className="text-sm md:text-base text-slate-300 leading-relaxed">
-              When building with LLMs, one of the most common mistakes engineering teams make is
-              <strong className="text-amber-300"> jumping straight to autonomous agents</strong> when a simple deterministic chain or prompt would work better, faster, and cheaper.
-            </p>
-
-            <p className="text-sm md:text-base text-slate-300 leading-relaxed">
-              In this module, we will explore the 4 evolutionary paradigms of LLM applications, understand the architectural trade-offs between prompt chains and autonomous loops, and master <strong>Context Engineering</strong>—the discipline that makes agents reliable in production.
-            </p>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm text-slate-700 dark:text-slate-200">
+              <li className="flex items-start gap-2">
+                <Check className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
+                <span>Differentiate the 4 LLM paradigms: Prompts, CoT, Chains, and Agents</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
+                <span>Understand the engineering trade-offs: When to chain vs when to loop</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
+                <span>Master Context Windows and avoid the "Lost in the Middle" trap</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
+                <span>Compare live Chain vs Agent execution in interactive simulator</span>
+              </li>
+            </ul>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Part 1: The 4-Stage Evolution */}
-      <section className="space-y-6">
-        <div className="flex items-center gap-3">
-          <span className="px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/30 text-teal-400 font-mono text-xs font-bold">
-            Part 1 • The Evolutionary Ladder
-          </span>
-          <div className="h-px bg-slate-800 flex-1" />
-        </div>
-
-        <div className="space-y-3">
-          <h3 className="text-2xl font-extrabold text-white tracking-tight">
-            How LLM Systems Evolved: 4 Key Paradigms
-          </h3>
-          <p className="text-slate-300 text-sm md:text-base leading-relaxed">
-            Every step up this evolutionary ladder provides greater control over model behavior and allows systems to handle increasingly complex real-world tasks.
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* SECTION 1: HOW LLMS EVOLVED                                   */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <section className="space-y-3.5 sm:space-y-4">
+        <div className="space-y-1.5">
+          <h2 className="text-xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            1. The Evolution of LLM Applications
+          </h2>
+          <p className="text-xs sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+            Not every problem requires an autonomous agent. Production AI engineering is about choosing
+            the simplest architecture that solves the problem reliably:
           </p>
         </div>
 
-        {/* 4 Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Stage 1: Prompt Engineering */}
-          <div className="p-5 rounded-2xl border border-slate-800 bg-slate-900/50 space-y-3 hover:border-slate-700 transition">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-mono font-bold text-emerald-400 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
-                Stage 1
-              </span>
-              <span className="text-xs font-mono text-slate-500">Single Input ➔ Single Output</span>
+        {/* Visual Analogy Card: Factory Conveyor vs Autonomous Detective */}
+        <div className="p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-5 transition hover:shadow-sm">
+          {/* Prompt Chains */}
+          <div className="flex items-center gap-3.5 sm:gap-4 flex-1 w-full p-3 sm:p-0 rounded-xl sm:rounded-none bg-violet-50/50 dark:bg-violet-500/10 sm:bg-transparent sm:dark:bg-transparent border border-violet-100 dark:border-violet-500/20 sm:border-0">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400 flex items-center justify-center shrink-0 border border-violet-200 dark:border-violet-500/30">
+              <Factory className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <h4 className="text-lg font-bold text-white flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-emerald-400" />
-              Prompt Engineering
-            </h4>
-            <p className="text-xs md:text-sm text-slate-300 leading-relaxed">
-              Crafting instructions to guide LLM outputs for a specific task using a single API call.
-            </p>
-            <div className="text-xs font-mono bg-slate-950 p-2.5 rounded-lg border border-slate-850 text-slate-400 space-y-1">
-              <div><strong className="text-slate-200">Simple:</strong> &quot;Summarize this article in 3 bullets.&quot;</div>
-              <div><strong className="text-slate-200">Complex:</strong> Multiple constraints, persona, negative keywords, and exact JSON output schema.</div>
+            <div>
+              <h3 className="text-xs sm:text-base font-bold text-slate-900 dark:text-white">
+                Prompt Chain = Conveyor Belt
+              </h3>
+              <p className="text-[11px] sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
+                Fixed assembly stations. Fast, deterministic, and low cost.
+              </p>
             </div>
           </div>
 
-          {/* Stage 2: Chain of Thought */}
-          <div className="p-5 rounded-2xl border border-slate-800 bg-slate-900/50 space-y-3 hover:border-slate-700 transition">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-mono font-bold text-sky-400 px-2 py-0.5 rounded bg-sky-500/10 border border-sky-500/20">
-                Stage 2
-              </span>
-              <span className="text-xs font-mono text-slate-500">Internal Deliberation</span>
-            </div>
-            <h4 className="text-lg font-bold text-white flex items-center gap-2">
-              <Brain className="w-4 h-4 text-sky-400" />
-              Chain of Thought (CoT)
-            </h4>
-            <p className="text-xs md:text-sm text-slate-300 leading-relaxed">
-              Induces the model to output intermediate reasoning steps before delivering the final answer.
-            </p>
-            <div className="text-xs font-mono bg-slate-950 p-2.5 rounded-lg border border-slate-850 text-slate-400 space-y-1">
-              <div><strong className="text-slate-200">Technique:</strong> &quot;Think step by step before answering...&quot;</div>
-              <div className="text-sky-300/80">Now integrated natively into modern frontier reasoning models (&apos;thinking mode&apos;).</div>
-            </div>
+          {/* Center Divider / Arrow */}
+          <div className="text-slate-300 dark:text-slate-600 shrink-0 hidden sm:block">
+            <ArrowRight className="w-6 h-6" />
+          </div>
+          <div className="text-slate-400 dark:text-slate-500 shrink-0 block sm:hidden py-0.5">
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 uppercase font-bold">
+              vs
+            </span>
           </div>
 
-          {/* Stage 3: Chains / Prompt Chaining */}
-          <div className="p-5 rounded-2xl border border-slate-800 bg-slate-900/50 space-y-3 hover:border-slate-700 transition">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-mono font-bold text-violet-400 px-2 py-0.5 rounded bg-violet-500/10 border border-violet-500/20">
-                Stage 3
-              </span>
-              <span className="text-xs font-mono text-slate-500">Sequential Pipeline</span>
+          {/* AI Agent */}
+          <div className="flex items-center gap-3.5 sm:gap-4 flex-1 w-full p-3 sm:p-0 rounded-xl sm:rounded-none bg-amber-50/50 dark:bg-amber-500/10 sm:bg-transparent sm:dark:bg-transparent border border-amber-100 dark:border-amber-500/20 sm:border-0">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 border border-amber-200 dark:border-amber-500/30">
+              <Compass className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <h4 className="text-lg font-bold text-white flex items-center gap-2">
-              <Layers className="w-4 h-4 text-violet-400" />
-              Chains (Prompt Chaining)
-            </h4>
-            <p className="text-xs md:text-sm text-slate-300 leading-relaxed">
-              A fixed sequence of LLM invocations and programmatic transformations where Output A feeds Input B.
-            </p>
-            <div className="text-xs font-mono bg-slate-950 p-2.5 rounded-lg border border-slate-850 text-slate-400 space-y-1">
-              <div><strong className="text-slate-200">Nature:</strong> Linear and deterministic.</div>
-              <div><strong className="text-slate-200">Classic Example:</strong> RAG (Retrieve documents ➔ Format context ➔ Generate response).</div>
-            </div>
-          </div>
-
-          {/* Stage 4: AI Agents */}
-          <div className="p-5 rounded-2xl border border-slate-800 bg-slate-900/50 space-y-3 hover:border-slate-700 transition">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-mono font-bold text-amber-400 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">
-                Stage 4
-              </span>
-              <span className="text-xs font-mono text-slate-500">Autonomous Feedback Loop</span>
-            </div>
-            <h4 className="text-lg font-bold text-white flex items-center gap-2">
-              <Zap className="w-4 h-4 text-amber-400" />
-              Autonomous AI Agents
-            </h4>
-            <p className="text-xs md:text-sm text-slate-300 leading-relaxed">
-              The model actively evaluates state, chooses external tools, executes actions, and loops until the goal is satisfied.
-            </p>
-            <div className="text-xs font-mono bg-slate-950 p-2.5 rounded-lg border border-slate-850 text-slate-400 space-y-1">
-              <div><strong className="text-slate-200">Key Feature:</strong> Dynamic decision-making with self-correction loops.</div>
-              <div><strong className="text-slate-200">Tool Use:</strong> Read and write access to APIs, databases, and environments.</div>
+            <div>
+              <h3 className="text-xs sm:text-base font-bold text-slate-900 dark:text-white">
+                Agent = Field Investigator
+              </h3>
+              <p className="text-[11px] sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
+                Chooses own tools, inspects clues, self-corrects, and stops when finished.
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Real-World Case: The Content Writing Evolution */}
-        <div className="p-6 rounded-2xl border border-slate-800 bg-slate-900/30 space-y-4">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-teal-400">
-              Comparative Walkthrough
-            </span>
-            <span className="text-slate-600">•</span>
-            <span className="text-xs text-slate-400">Case Study: Generating a Technical Blog Post</span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-            {/* Approach A */}
-            <div className="p-4 rounded-xl bg-slate-950 border border-slate-850 space-y-2">
-              <div className="flex items-center justify-between text-slate-500 font-mono text-[10px]">
-                <span>Approach 1</span>
-                <span className="text-emerald-400">Prompt Only</span>
-              </div>
-              <h5 className="font-bold text-white text-sm">Single Prompt</h5>
-              <p className="text-slate-400">
-                &quot;Write a blog post about machine learning.&quot; ➔ LLM generates the entire article in one single pass.
-              </p>
-              <div className="text-[11px] text-slate-500 font-mono pt-2 border-t border-slate-900">
-                Outcome: Fast, but generic; cannot verify citations or structure beforehand.
-              </div>
-            </div>
-
-            {/* Approach B */}
-            <div className="p-4 rounded-xl bg-slate-950 border border-slate-850 space-y-2">
-              <div className="flex items-center justify-between text-slate-500 font-mono text-[10px]">
-                <span>Approach 2</span>
-                <span className="text-violet-400">Prompt Chain</span>
-              </div>
-              <h5 className="font-bold text-white text-sm">Prompt Chaining</h5>
-              <p className="text-slate-400">
-                Step 1: &quot;Generate outline&quot; ➔ Output: Outline.
-                <br />
-                Step 2: &quot;Based on this outline, write the blog post.&quot; ➔ Finished Post.
-              </p>
-              <div className="text-[11px] text-slate-500 font-mono pt-2 border-t border-slate-900">
-                Outcome: High quality, structured, predictable cost, zero loop overhead.
-              </div>
-            </div>
-
-            {/* Approach C */}
-            <div className="p-4 rounded-xl bg-slate-950 border border-slate-850 space-y-2">
-              <div className="flex items-center justify-between text-slate-500 font-mono text-[10px]">
-                <span>Approach 3</span>
-                <span className="text-amber-400">AI Agent</span>
-              </div>
-              <h5 className="font-bold text-white text-sm">Autonomous Agent</h5>
-              <p className="text-slate-400">
-                Goal: &quot;Publish top-tier ML post&quot; ➔ Loops dynamically: Researches web ➔ Outlines ➔ Drafts sections ➔ Tests code snippets ➔ Refines weak parts ➔ Publishes.
-              </p>
-              <div className="text-[11px] text-slate-500 font-mono pt-2 border-t border-slate-900">
-                Outcome: Deepest quality, self-healing, but higher latency and variable token cost.
-              </div>
-            </div>
-          </div>
+        {/* Handwritten Teacher Note */}
+        <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 p-3.5 sm:p-4 rounded-2xl bg-amber-50/90 dark:bg-amber-500/10 border border-amber-300/80 dark:border-amber-500/30 text-amber-950 dark:text-amber-200 sm:-rotate-0.5 shadow-2xs">
+          <span className="text-xl sm:text-2xl shrink-0 mt-0.5 sm:mt-0">✍️</span>
+          <p className="font-handwriting text-base sm:text-xl leading-snug">
+            "Instructor note: Don't use a bulldozer to plant a flower! If your task is linear and predictable, a simple Prompt Chain beats an Agent in cost, speed, and reliability every single time."
+          </p>
         </div>
       </section>
 
-      {/* Part 2: Interactive Decision Matrix */}
-      <section className="space-y-6">
-        <div className="flex items-center gap-3">
-          <span className="px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/30 text-teal-400 font-mono text-xs font-bold">
-            Part 2 • Interactive Comparison
-          </span>
-          <div className="h-px bg-slate-800 flex-1" />
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* SECTION 2: THE 4 PARADIGMS INTERACTIVE GRID                    */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <section className="space-y-3.5 sm:space-y-4">
+        <div className="space-y-1.5">
+          <h2 className="text-xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            2. The 4 Key Paradigms
+          </h2>
+          <p className="text-xs sm:text-base text-slate-600 dark:text-slate-300">
+            Tap any paradigm to inspect its code pattern and architecture:
+          </p>
+        </div>
+
+        {/* 4 Interactive Cards (2x2 Grid on Mobile, 4 Cols on Desktop) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3.5">
+          {paradigms.map((p) => {
+            const Icon = p.icon;
+            const isSelected = selectedParadigm === p.id;
+
+            return (
+              <button
+                key={p.id}
+                onClick={() => setSelectedParadigm(p.id)}
+                className={`p-2.5 sm:p-4 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between min-h-[145px] sm:min-h-[160px] active:scale-[0.98] touch-manipulation ${
+                  isSelected
+                    ? `${p.border} ${p.bg} ring-2 ring-teal-500/40 shadow-xs`
+                    : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
+                }`}
+              >
+                <div>
+                  <div
+                    className={`w-7 h-7 sm:w-9 sm:h-9 rounded-xl ${p.bg} ${p.color} border ${p.border} flex items-center justify-center mb-1.5 sm:mb-3`}
+                  >
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </div>
+                  <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-tight">
+                    {p.title}
+                  </h3>
+                  <span className="text-[9px] sm:text-[10px] font-mono uppercase font-bold text-slate-500 dark:text-slate-400 block mt-0.5 truncate">
+                    {p.tagline}
+                  </span>
+                  <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 mt-1 leading-snug line-clamp-3 sm:line-clamp-none">
+                    {p.desc}
+                  </p>
+                </div>
+
+                <div className="mt-2 pt-1.5 border-t border-slate-100 dark:border-slate-800 text-[10px] sm:text-[11px] font-mono text-teal-600 dark:text-teal-400 flex items-center justify-between">
+                  <span>{isSelected ? "Active" : "Inspect"}</span>
+                  <span>→</span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Selected Paradigm Code Deep-Dive Box */}
+        <div className="p-3 sm:p-5 rounded-2xl bg-slate-950 text-slate-100 border border-slate-800 shadow-xs space-y-2 sm:space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <span
+                className={`text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-md shrink-0 ${currentParadigm.bg} ${currentParadigm.color}`}
+              >
+                {currentParadigm.badge}
+              </span>
+              <h4 className="text-xs sm:text-sm font-bold text-white truncate">
+                Architecture: {currentParadigm.title}
+              </h4>
+            </div>
+            <span className="text-[10px] sm:text-[11px] font-mono text-slate-400 self-end sm:self-auto shrink-0">
+              Python Pattern
+            </span>
+          </div>
+
+          <pre className="p-3 sm:p-3.5 rounded-xl bg-slate-900 text-emerald-300 font-mono text-xs font-semibold overflow-x-auto border border-slate-800">
+            <code>{currentParadigm.codeSnippet}</code>
+          </pre>
+        </div>
+
+        {/* Handwritten Mental Model Note */}
+        <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 p-3.5 rounded-2xl bg-teal-50/90 dark:bg-teal-500/10 border border-teal-200/80 dark:border-teal-500/30 text-teal-950 dark:text-teal-200 sm:rotate-0.5 shadow-2xs">
+          <span className="text-xl shrink-0 mt-0.5 sm:mt-0">💡</span>
+          <p className="font-handwriting text-base sm:text-lg leading-snug">
+            "Mental model: Prompt = One question. Chain = Fixed conveyor belt. Agent = Worker who chooses their own tools."
+          </p>
+        </div>
+      </section>
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* SECTION 3: CONTEXT WINDOWS & ATTENTION TRAP                   */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <section className="space-y-3.5 sm:space-y-4">
+        <div className="space-y-1.5">
+          <h2 className="text-xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            3. Context Engineering & The "Lost in the Middle" Trap
+          </h2>
+          <p className="text-xs sm:text-base text-slate-600 dark:text-slate-300">
+            Even models with 1M+ token windows suffer from retrieval degradation in the center of their prompt:
+          </p>
+        </div>
+
+        {/* Attention Curve Visualizer Card */}
+        <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3.5">
+          <div className="flex items-center justify-between text-xs font-mono text-slate-500">
+            <span>U-Shaped Attention Curve</span>
+            <span className="text-teal-600 dark:text-teal-400 font-bold">Research Proven</span>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 text-center text-xs font-mono">
+            {/* Top */}
+            <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 text-emerald-950 dark:text-emerald-300">
+              <span className="font-bold block text-sm">95%+ Recall</span>
+              <span className="text-[10px] text-emerald-700 dark:text-emerald-400">Prompt Start</span>
+              <p className="text-[10px] mt-1 text-slate-600 dark:text-slate-400">System Role & Core Rules</p>
+            </div>
+
+            {/* Middle */}
+            <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 text-amber-950 dark:text-amber-300">
+              <span className="font-bold block text-sm">50%-70% Recall</span>
+              <span className="text-[10px] text-amber-700 dark:text-amber-400">Middle 50%</span>
+              <p className="text-[10px] mt-1 text-slate-600 dark:text-slate-400">History & Background Docs</p>
+            </div>
+
+            {/* Bottom */}
+            <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 text-emerald-950 dark:text-emerald-300">
+              <span className="font-bold block text-sm">95%+ Recall</span>
+              <span className="text-[10px] text-emerald-700 dark:text-emerald-400">Prompt End</span>
+              <p className="text-[10px] mt-1 text-slate-600 dark:text-slate-400">User Query & JSON Schema</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Handwritten Rule Note */}
+        <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 p-3.5 rounded-2xl bg-sky-50/80 dark:bg-sky-500/10 border border-sky-200/80 dark:border-sky-500/30 text-sky-950 dark:text-sky-200 sm:-rotate-0.5 shadow-2xs">
+          <span className="text-xl shrink-0 mt-0.5 sm:mt-0">📌</span>
+          <p className="font-handwriting text-base sm:text-lg leading-snug">
+            "Context rule: Put critical system constraints and output schema at the very top or bottom of your prompt — models pay the least attention to the middle 50%!"
+          </p>
+        </div>
+      </section>
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* SECTION 4: SEE IT IN ACTION (Evolution Decision Matrix)       */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <section className="space-y-3.5 sm:space-y-4 pt-1 sm:pt-2">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <h2 className="text-xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+              <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-teal-600 dark:text-teal-400 shrink-0" />
+              <span>4. See It in Action (Evolutionary Decision Matrix)</span>
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+              Inspect latency, cost, and best-use cases across each architectural tier:
+            </p>
+          </div>
         </div>
 
         <EvolutionComparisonVisualizer />
-
-        {/* Feature Comparison Table */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-950 overflow-hidden">
-          <div className="p-4 border-b border-slate-800 bg-slate-900/50">
-            <h4 className="text-sm font-bold text-white">
-              Direct Feature Comparison Matrix
-            </h4>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-slate-900/80 text-slate-400 font-mono text-[11px] uppercase tracking-wider">
-                <tr>
-                  <th className="p-3.5 border-b border-slate-800">Feature</th>
-                  <th className="p-3.5 border-b border-slate-800 text-emerald-400">Prompt Engineering</th>
-                  <th className="p-3.5 border-b border-slate-800 text-violet-400">Prompt Chains</th>
-                  <th className="p-3.5 border-b border-slate-800 text-amber-400">AI Agents</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-850 font-mono">
-                <tr>
-                  <td className="p-3.5 font-bold text-white">Interaction</td>
-                  <td className="p-3.5">Single Call</td>
-                  <td className="p-3.5">Sequential Pipeline</td>
-                  <td className="p-3.5">Dynamic Feedback Loop</td>
-                </tr>
-                <tr>
-                  <td className="p-3.5 font-bold text-white">Decision Making</td>
-                  <td className="p-3.5">Predefined</td>
-                  <td className="p-3.5">Hardcoded in Code</td>
-                  <td className="p-3.5 text-amber-300 font-semibold">LLM-Driven Runtime Choice</td>
-                </tr>
-                <tr>
-                  <td className="p-3.5 font-bold text-white">Tool Use</td>
-                  <td className="p-3.5 text-slate-500">None</td>
-                  <td className="p-3.5">Limited (Pre-wired)</td>
-                  <td className="p-3.5 text-teal-400 font-semibold">Extensive (Dynamic selection)</td>
-                </tr>
-                <tr>
-                  <td className="p-3.5 font-bold text-white">Iteration / Loops</td>
-                  <td className="p-3.5 text-slate-500">No</td>
-                  <td className="p-3.5 text-slate-500">No (Linear)</td>
-                  <td className="p-3.5 text-amber-300 font-semibold">Yes (Adaptive retry &amp; reflect)</td>
-                </tr>
-                <tr>
-                  <td className="p-3.5 font-bold text-white">Cost &amp; Latency</td>
-                  <td className="p-3.5 text-emerald-400 font-bold">Lowest ($)</td>
-                  <td className="p-3.5 text-violet-300 font-medium">Predictable ($$)</td>
-                  <td className="p-3.5 text-amber-400 font-medium">Variable ($$$ to $$$$)</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
       </section>
 
-      {/* Part 3: The Golden Rule & The Common Pitfall */}
-      <section className="space-y-6">
-        <div className="flex items-center gap-3">
-          <span className="px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/30 text-teal-400 font-mono text-xs font-bold">
-            Part 3 • The Golden Architectural Rule
-          </span>
-          <div className="h-px bg-slate-800 flex-1" />
-        </div>
-
-        {/* Warning Callout Card */}
-        <div className="p-6 rounded-2xl border border-amber-500/30 bg-amber-500/5 relative overflow-hidden space-y-4">
-          <div className="flex items-start gap-4">
-            <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-300 shrink-0">
-              <AlertTriangle className="w-6 h-6" />
-            </div>
-            <div className="space-y-2">
-              <span className="text-xs font-mono font-bold text-amber-400 uppercase tracking-wider">
-                Common Production Pitfall: Jumping Straight to Agents
-              </span>
-              <h3 className="text-lg md:text-xl font-bold text-white">
-                Never build an autonomous agent when a simple chain suffices.
-              </h3>
-              <p className="text-sm text-slate-300 leading-relaxed">
-                Autonomous agents add <strong className="text-white">latency</strong>, <strong className="text-white">token cost</strong>, and <strong className="text-white">unpredictability</strong>. When an agent enters a self-directed loop, it might take 1 loop or 8 loops, drastically changing the user response time and API bill.
-              </p>
-            </div>
-          </div>
-
-          <div className="p-4 rounded-xl bg-slate-950/80 border border-amber-500/20 text-xs md:text-sm font-mono text-slate-300">
-            <span className="text-teal-400 font-bold block mb-1">💡 The Golden Heuristic Question:</span>
-            &quot;Do I actually need the LLM to make runtime decisions about what to do next, or do I just need multiple steps?
-            <br />
-            <strong className="text-emerald-400">If the steps are known upfront ➔ USE A CHAIN.</strong>
-            <br />
-            <strong className="text-amber-400">If the sequence of actions depends unpredictably on external feedback ➔ USE AN AGENT.&quot;</strong>
-          </div>
-        </div>
-
-        {/* Decision Criteria Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
-            <span className="text-xs font-mono font-bold text-emerald-400">Choose Prompts When:</span>
-            <ul className="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
-              <li>Task is simple &amp; self-contained</li>
-              <li>A single LLM call is sufficient</li>
-              <li>No external live data or tools needed</li>
-            </ul>
-          </div>
-
-          <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
-            <span className="text-xs font-mono font-bold text-violet-400">Choose Chains When:</span>
-            <ul className="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
-              <li>Task requires multiple sequential stages</li>
-              <li>The workflow steps are fixed &amp; predictable</li>
-              <li>Combining RAG retrieval with synthesis</li>
-            </ul>
-          </div>
-
-          <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
-            <span className="text-xs font-mono font-bold text-amber-400">Choose Agents When:</span>
-            <ul className="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
-              <li>Unknown number of steps required</li>
-              <li>Multiple tools or APIs must be dynamically orchestrated</li>
-              <li>Task requires self-correction and validation</li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      {/* Part 4: Context Engineering */}
-      <section className="space-y-6">
-        <div className="flex items-center gap-3">
-          <span className="px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/30 text-teal-400 font-mono text-xs font-bold">
-            Part 4 • Context Engineering
-          </span>
-          <div className="h-px bg-slate-800 flex-1" />
-        </div>
-
-        <div className="space-y-3">
-          <h3 className="text-2xl font-extrabold text-white tracking-tight">
-            Context Engineering: The Heart of Agent Reliability
-          </h3>
-          <p className="text-slate-300 text-sm md:text-base leading-relaxed">
-            While <strong className="text-slate-100">prompt engineering</strong> focuses on crafting the right words, <strong className="text-teal-400">context engineering</strong> is the engineering practice of systematically organizing, filtering, and updating all the information presented in the model&apos;s context window at any given moment.
-          </p>
-        </div>
-
-        {/* 4 Pillars of Context Engineering */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <div className="p-4 rounded-xl bg-slate-950 border border-slate-850 space-y-2">
-            <Database className="w-5 h-5 text-teal-400" />
-            <h5 className="font-bold text-white text-sm">State &amp; Memory</h5>
-            <p className="text-xs text-slate-400">
-              Maintaining user attributes, session variables, and past tool results across turns without exceeding token budgets.
-            </p>
-          </div>
-
-          <div className="p-4 rounded-xl bg-slate-950 border border-slate-850 space-y-2">
-            <Wrench className="w-5 h-5 text-sky-400" />
-            <h5 className="font-bold text-white text-sm">Tool Schemas</h5>
-            <p className="text-xs text-slate-400">
-              Describing available tools cleanly with strict JSON types so the LLM invokes the right tool with exact arguments.
-            </p>
-          </div>
-
-          <div className="p-4 rounded-xl bg-slate-950 border border-slate-850 space-y-2">
-            <ShieldCheck className="w-5 h-5 text-amber-400" />
-            <h5 className="font-bold text-white text-sm">Policy Constraints</h5>
-            <p className="text-xs text-slate-400">
-              Explicit guardrails (e.g., 30-day return window, max transaction limit) to prevent unauthorized agent actions.
-            </p>
-          </div>
-
-          <div className="p-4 rounded-xl bg-slate-950 border border-slate-850 space-y-2">
-            <Clock className="w-5 h-5 text-emerald-400" />
-            <h5 className="font-bold text-white text-sm">Window Optimization</h5>
-            <p className="text-xs text-slate-400">
-              Summarizing older history and pruning irrelevant data to keep the context window compact and prevent attention degradation.
-            </p>
-          </div>
-        </div>
-
-        {/* The Concrete Code Architecture Pattern */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-950 overflow-hidden shadow-xl">
-          <div className="p-4 border-b border-slate-800 bg-slate-900/60 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs font-mono text-slate-300">
-              <FileCode className="w-4 h-4 text-teal-400" />
-              <span>production_agent_context_template.py</span>
-            </div>
-
-            <button
-              onClick={handleCopyContext}
-              className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white px-2.5 py-1 rounded bg-slate-800 border border-slate-700 transition"
-            >
-              {copiedContextSnippet ? (
-                <>
-                  <Check className="w-3.5 h-3.5 text-teal-400" />
-                  <span className="text-teal-400 font-bold">Copied!</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-3.5 h-3.5" />
-                  <span>Copy Snippet</span>
-                </>
-              )}
-            </button>
-          </div>
-
-          <div className="p-4 md:p-5 overflow-x-auto font-mono text-xs text-slate-300 leading-relaxed bg-slate-950">
-            <pre>
-              <code>{contextEngineeringSnippet}</code>
-            </pre>
-          </div>
-
-          <div className="p-4 border-t border-slate-800 bg-slate-900/30 text-xs text-slate-400 flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-teal-400 shrink-0" />
-            <span>Notice how the prompt cleanly segregates persona, state, history, policies, and tools. This eliminates tool confusion and keeps agent decision-making deterministic and auditable.</span>
-          </div>
-        </div>
-      </section>
-
-      {/* Part 5: Interactive Code Execution Studio */}
-      <section className="space-y-6">
-        <div className="flex items-center gap-3">
-          <span className="px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/30 text-teal-400 font-mono text-xs font-bold">
-            Part 5 • Hands-On Code Studio
-          </span>
-          <div className="h-px bg-slate-800 flex-1" />
-        </div>
-
-        <div className="space-y-2">
-          <h3 className="text-2xl font-extrabold text-white tracking-tight">
-            Run the Comparison: Chain vs. Autonomous Agent Loop
-          </h3>
-          <p className="text-slate-300 text-sm md:text-base leading-relaxed">
-            Switch between the deterministic Prompt Chain and the Autonomous Agent Loop below. Click <strong>Run</strong> to observe how each pattern behaves, consumes tokens, and logs execution steps.
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* SECTION 5: TRY IT YOURSELF (Live Hands-on Simulator)          */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <section className="space-y-3.5 sm:space-y-4 pt-1 sm:pt-2">
+        <div className="space-y-1">
+          <h2 className="text-xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <Code2 className="w-5 h-5 sm:w-6 sm:h-6 text-sky-600 dark:text-sky-400 shrink-0" />
+            <span>5. Try It Yourself (Interactive Code Runner)</span>
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+            Toggle between Prompt Chaining and Autonomous Agent Loop, then tap{" "}
+            <strong className="text-violet-600 dark:text-violet-400">Run</strong>:
           </p>
         </div>
 
         <Module1_2CodeExecutor />
+
+        {/* Handwritten Note on Tools */}
+        <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 p-3.5 rounded-2xl bg-amber-50/80 dark:bg-amber-500/10 border border-amber-200/80 dark:border-amber-500/30 text-amber-950 dark:text-amber-200 sm:rotate-0.5 shadow-2xs">
+          <span className="text-xl shrink-0 mt-0.5 sm:mt-0">📝</span>
+          <p className="font-handwriting text-base sm:text-lg leading-snug">
+            "Pro tip: High-performance production systems combine both: Chains handle predictable subtasks, while Agents handle dynamic decisions."
+          </p>
+        </div>
       </section>
 
-      {/* Part 6: Interactive Knowledge Check */}
-      <section className="space-y-6">
-        <div className="flex items-center gap-3">
-          <span className="px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/30 text-teal-400 font-mono text-xs font-bold">
-            Part 6 • Knowledge Check
-          </span>
-          <div className="h-px bg-slate-800 flex-1" />
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* SECTION 6: COMMON MISCONCEPTIONS                              */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <section className="space-y-3.5 sm:space-y-4 pt-1 sm:pt-2">
+        <div className="space-y-1">
+          <h2 className="text-xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500 shrink-0" />
+            <span>6. Common Misconceptions</span>
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+            Two traps engineers face when moving from prompts to agent systems:
+          </p>
         </div>
 
-        <Module1_2Quiz />
-      </section>
-
-      {/* Part 7: Summary & What's Next */}
-      <section className="rounded-2xl border border-slate-800 bg-slate-900/40 p-6 md:p-8 space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-teal-500/10 border border-teal-500/30 text-teal-400">
-            <CheckCircle2 className="w-5 h-5" />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-white">
-              Module 1.2 Summary: Key Takeaways
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          {/* Gotcha 1 */}
+          <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-amber-50/70 dark:bg-amber-500/10 border border-amber-200/80 dark:border-amber-500/30 space-y-1.5 sm:space-y-2">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 inline-block">
+              Trap #1
+            </span>
+            <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+              Everything needs to be an autonomous agent
             </h3>
-            <p className="text-xs text-slate-400">
-              The four foundational principles to remember as you build production AI systems
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs md:text-sm">
-          <div className="p-4 rounded-xl bg-slate-950 border border-slate-850 space-y-1">
-            <span className="font-bold text-teal-400 block font-mono text-xs">
-              1. 4 Evolutionary Paradigms
-            </span>
-            <p className="text-slate-300">
-              Prompts provide immediate answers; CoT induces internal reasoning; Chains connect deterministic steps; Agents add dynamic runtime decision loops and tool actuation.
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              Premature agentification causes nondeterminism, infinite loops, and high token costs.
+              Use prompt chaining whenever steps are known in advance.
             </p>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-950 border border-slate-850 space-y-1">
-            <span className="font-bold text-teal-400 block font-mono text-xs">
-              2. Avoid Premature Complexity
+          {/* Gotcha 2 */}
+          <div className="p-4 sm:p-5 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1.5 sm:space-y-2 shadow-xs">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 inline-block">
+              Trap #2
             </span>
-            <p className="text-slate-300">
-              If the workflow steps are predictable and known upfront, build a Prompt Chain. Only deploy an autonomous agent loop when runtime branching or dynamic tool orchestration is truly required.
+            <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+              Huge context windows eliminate the need for filtering
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              Dumping raw unformatted documents into context causes attention dilution. Careful
+              context curation directly correlates with agent decision accuracy.
             </p>
           </div>
-
-          <div className="p-4 rounded-xl bg-slate-950 border border-slate-850 space-y-1">
-            <span className="font-bold text-teal-400 block font-mono text-xs">
-              3. Context Engineering is Critical
-            </span>
-            <p className="text-slate-300">
-              Agents live and die by their context window. Carefully structuring persona, user state, history, policies, and tool schemas prevents hallucinations and keeps agent trajectories on track.
-            </p>
-          </div>
-
-          <div className="p-4 rounded-xl bg-slate-950 border border-slate-850 space-y-1">
-            <span className="font-bold text-teal-400 block font-mono text-xs">
-              4. Cost &amp; Latency Awareness
-            </span>
-            <p className="text-slate-300">
-              Chains have predictable cost and near-instant turnaround. Agents incur variable token usage and higher latency across multi-turn reasoning loops.
-            </p>
-          </div>
-        </div>
-
-        {/* Bridge to Module 1.3 */}
-        <div className="pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>
-            <span className="text-[11px] font-mono text-slate-500 uppercase tracking-wider block">
-              Up Next • Module 1.3
-            </span>
-            <h4 className="text-sm font-bold text-white">
-              Tackling Complex Tasks with AI Systems (Task Decomposition &amp; Workflows vs. Agents)
-            </h4>
-          </div>
-
-          <Link
-            href="/learn/level-1/module-1-3"
-            className="w-full sm:w-auto px-4 py-2 rounded-xl bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-teal-500/20"
-          >
-            <span>Continue to Module 1.3</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
         </div>
       </section>
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* SECTION 7: KEY TAKEAWAYS & KNOWLEDGE CHECK                    */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <section className="space-y-3.5 sm:space-y-4 pt-1 sm:pt-2">
+        {/* Key Takeaways Card */}
+        <div className="p-4 sm:p-7 rounded-2xl sm:rounded-3xl bg-amber-50/80 dark:bg-amber-500/10 border border-amber-200/90 dark:border-amber-500/30 space-y-3 sm:space-y-3.5 shadow-xs">
+          <div className="flex items-center gap-2 text-amber-900 dark:text-amber-300">
+            <Lightbulb className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider font-mono">
+              Key Takeaways
+            </h3>
+          </div>
+          <ul className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 text-xs sm:text-sm text-slate-700 dark:text-slate-200">
+            <li className="flex items-start gap-2 sm:gap-2.5">
+              <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+              <span>Prompt chains are <strong>fixed & deterministic</strong>; agents are <strong>dynamic & self-directed</strong>.</span>
+            </li>
+            <li className="flex items-start gap-2 sm:gap-2.5">
+              <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+              <span>Always place critical instructions at the <strong>start or end</strong> of the context window.</span>
+            </li>
+            <li className="flex items-start gap-2 sm:gap-2.5">
+              <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+              <span>Production architectures pair <strong>chains for pipelines</strong> with <strong>agents for exploratory steps</strong>.</span>
+            </li>
+          </ul>
+
+          {/* Handwritten Pro Tip Note */}
+          <div className="pt-2.5 sm:pt-3 border-t border-amber-200/80 dark:border-amber-500/20">
+            <p className="font-handwriting text-base sm:text-lg text-amber-950 dark:text-amber-200 leading-snug">
+              "Pro tip: Before writing a single line of agent code, ask: 'Can this be solved with a 2-step prompt chain?' If yes, do not build an agent!"
+            </p>
+          </div>
+        </div>
+
+        {/* Knowledge Check Card */}
+        <div className="p-4 sm:p-7 rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs space-y-3 sm:space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-violet-100 dark:bg-violet-500/20 text-violet-600 dark:text-violet-400 flex items-center justify-center shrink-0">
+                <HelpCircle className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                  Knowledge Check Quiz
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                  Quick 3-question check to test what you learned in Module 1.2.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowQuiz(!showQuiz)}
+              className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-mono text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-95 touch-manipulation"
+            >
+              <span>{showQuiz ? "Hide Quiz" : "Start Quiz"}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <AnimatePresence>
+            {showQuiz && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.25 }}
+                className="pt-3 sm:pt-4 border-t border-slate-200 dark:border-slate-800 overflow-hidden"
+              >
+                <Module1_2Quiz />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </section>
+
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* SECTION 8: BRIDGE TO NEXT MODULE                              */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-teal-500/10 via-emerald-500/10 to-teal-500/10 border border-teal-500/30 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 shadow-xs">
+        <div>
+          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400">
+            Ready to Level Up?
+          </span>
+          <h3 className="text-sm sm:text-lg font-bold text-slate-900 dark:text-white mt-0.5">
+            Next: Module 1.3 • Tackling Complex Tasks with AI Agent Workflows
+          </h3>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            Discover routing, parallelization, and evaluator-optimizer patterns for complex agent workflows.
+          </p>
+        </div>
+
+        <Link
+          href="/learn/level-1/module-1-3"
+          className="w-full sm:w-auto justify-center px-5 py-3 sm:py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs font-mono flex items-center gap-1.5 shadow-md shadow-teal-500/20 transition-all hover:scale-[1.02] active:scale-95 shrink-0"
+        >
+          <span>Next Module</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
+      </div>
     </div>
   );
 }

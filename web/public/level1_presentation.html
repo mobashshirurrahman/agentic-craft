@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Level 1: Foundations of Agentic AI • Video Lecture Deck</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Google Fonts: Outfit, Plus Jakarta Sans, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            heading: ['"Outfit"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              400: '#34d399',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+            },
+            dark: {
+              bg: '#070b12',
+              card: 'rgba(15, 23, 42, 0.75)',
+              border: 'rgba(255, 255, 255, 0.08)',
+            }
+          },
+          animation: {
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float': 'float 6s ease-in-out infinite',
+            'glow': 'glow 3s ease-in-out infinite alternate',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-10px)' },
+            },
+            glow: {
+              '0%': { opacity: '0.4', filter: 'blur(20px)' },
+              '100%': { opacity: '0.8', filter: 'blur(30px)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #070b12;
+      color: #f1f5f9;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    .slide {
+      display: none;
+      opacity: 0;
+      transform: scale(0.98) translateY(12px);
+      transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .slide.active {
+      display: flex;
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+
+    .glass-card {
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .glass-pill {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .text-gradient-emerald {
+      background: linear-gradient(135deg, #34d399 0%, #10b981 50%, #06b6d4 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .text-gradient-gold {
+      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .grid-bg {
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    }
+
+    /* Custom slide scrollbar if needed */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+
+<body class="h-screen w-screen grid-bg relative flex flex-col justify-between">
+  <!-- Glowing Background Orbs -->
+  <div class="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-emerald-600/15 pointer-events-none animate-glow"></div>
+  <div class="fixed bottom-[-15%] right-[-10%] w-[600px] h-[600px] rounded-full bg-cyan-600/10 pointer-events-none animate-glow" style="animation-delay: 1.5s;"></div>
+  <div class="fixed top-[40%] right-[20%] w-[350px] h-[350px] rounded-full bg-teal-500/10 pointer-events-none animate-glow" style="animation-delay: 3s;"></div>
+
+  <!-- TOP BAR: Course Meta & Progress Indicator -->
+  <header class="h-14 px-8 border-b border-white/5 flex items-center justify-between z-20 shrink-0 bg-dark-bg/60 backdrop-blur-md">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-sm shadow-inner">
+        🤖
+      </div>
+      <div>
+        <span class="text-xs font-mono font-bold tracking-wider uppercase text-emerald-400">AgenticCraft • Video Course</span>
+        <span class="text-xs text-slate-500 ml-2 hidden sm:inline">Level 1: Foundations of Agentic AI</span>
+      </div>
+    </div>
+
+    <!-- Progress Meter -->
+    <div class="flex items-center gap-4">
+      <div class="flex items-center gap-2">
+        <div class="w-36 h-2 rounded-full bg-slate-800/80 overflow-hidden border border-white/5 p-0.5">
+          <div id="progressBar" class="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-300" style="width: 5%;"></div>
+        </div>
+        <span id="slideCounter" class="text-xs font-mono text-slate-400 font-bold w-12 text-right">01 / 17</span>
+      </div>
+
+      <!-- Action Buttons -->
+      <button onclick="toggleFullscreen()" class="w-8 h-8 rounded-lg glass-pill hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-all" title="Toggle Fullscreen (F)">
+        <i class="fa-solid fa-expand text-xs"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN SLIDES CONTAINER -->
+  <main class="flex-1 w-full max-w-7xl mx-auto px-6 py-4 flex items-center justify-center z-10 overflow-hidden">
+
+    <!-- ==================== SLIDE 1: TITLE HERO ==================== -->
+    <section class="slide active flex-col items-center justify-center text-center max-w-4xl space-y-8" data-title="Title Slide">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold uppercase tracking-widest shadow-sm">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+        Curriculum Level 1 • 13 Core Modules
+      </div>
+
+      <div class="space-y-4">
+        <h1 class="text-5xl sm:text-6xl md:text-7xl font-extrabold font-heading tracking-tight leading-tight">
+          Foundations of <br />
+          <span class="text-gradient-emerald">Agentic AI</span> Systems
+        </h1>
+        <p class="text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto font-light leading-relaxed">
+          From passive prompt responders to <strong class="text-white font-semibold">autonomous cognitive agents</strong> that reason, call tools, reflect, and complete multi-step goals.
+        </p>
+      </div>
+
+      <!-- Hero Visual Badges -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-3xl pt-2">
+        <div class="glass-card p-4 rounded-xl border border-white/5 space-y-1">
+          <div class="text-2xl">🧠</div>
+          <div class="text-xs font-mono font-bold text-slate-300">Cognitive Brain</div>
+          <div class="text-[11px] text-slate-500">Autonomous Reasoning</div>
+        </div>
+        <div class="glass-card p-4 rounded-xl border border-white/5 space-y-1">
+          <div class="text-2xl">⚡</div>
+          <div class="text-xs font-mono font-bold text-slate-300">Tool Execution</div>
+          <div class="text-[11px] text-slate-500">Action in the Real World</div>
+        </div>
+        <div class="glass-card p-4 rounded-xl border border-white/5 space-y-1">
+          <div class="text-2xl">💾</div>
+          <div class="text-xs font-mono font-bold text-slate-300">State Memory</div>
+          <div class="text-[11px] text-slate-500">Short & Long-Term</div>
+        </div>
+        <div class="glass-card p-4 rounded-xl border border-white/5 space-y-1">
+          <div class="text-2xl">🔄</div>
+          <div class="text-xs font-mono font-bold text-slate-300">Self-Correction</div>
+          <div class="text-[11px] text-slate-500">Reflection & Loops</div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 pt-2">
+        <button onclick="nextSlide()" class="px-7 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-sm flex items-center gap-2 shadow-lg shadow-emerald-500/20 cursor-pointer transition-all hover:scale-105">
+          <span>Start Masterclass</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+        <span class="text-xs font-mono text-slate-500">Press Space or &rarr; to advance</span>
+      </div>
+    </section>
+
+    <!-- ==================== SLIDE 2: AGENDA ROADMAP ==================== -->
+    <section class="slide flex-col w-full max-w-5xl space-y-6" data-title="Curriculum Roadmap">
+      <div class="space-y-1">
+        <span class="text-xs font-mono uppercase text-emerald-400 font-bold tracking-wider">🗺️ Roadmap</span>
+        <h2 class="text-3xl font-extrabold font-heading text-white">Level 1 Masterclass Curriculum</h2>
+        <p class="text-sm text-slate-400">The 4-stage journey from zero to production-grade agent understanding.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2">
+        <!-- Stage 1 -->
+        <div class="glass-card p-5 rounded-2xl border-emerald-500/30 flex flex-col justify-between space-y-4">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">Phase 1</span>
+              <span class="text-xl">🐣</span>
+            </div>
+            <h3 class="text-base font-bold text-white">The Agent Mindset</h3>
+            <ul class="text-xs text-slate-400 space-y-1.5 font-mono">
+              <li>• 1.1 What is an AI Agent?</li>
+              <li>• 1.2 The 4 Agent Organs</li>
+              <li>• 1.3 Task Decomposition</li>
+              <li>• 1.4 Levels of Autonomy</li>
+            </ul>
+          </div>
+          <span class="text-[10px] text-emerald-400 uppercase font-bold tracking-wider">Foundation Stones</span>
+        </div>
+
+        <!-- Stage 2 -->
+        <div class="glass-card p-5 rounded-2xl border-cyan-500/30 flex flex-col justify-between space-y-4">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold">Phase 2</span>
+              <span class="text-xl">⚙️</span>
+            </div>
+            <h3 class="text-base font-bold text-white">Execution Engine</h3>
+            <ul class="text-xs text-slate-400 space-y-1.5 font-mono">
+              <li>• 1.5 Tool Calling Mechanics</li>
+              <li>• 1.6 The 5-Phase Loop</li>
+              <li>• 1.7 Design Patterns (ReAct)</li>
+            </ul>
+          </div>
+          <span class="text-[10px] text-cyan-400 uppercase font-bold tracking-wider">Action & Reasoning</span>
+        </div>
+
+        <!-- Stage 3 -->
+        <div class="glass-card p-5 rounded-2xl border-indigo-500/30 flex flex-col justify-between space-y-4">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold">Phase 3</span>
+              <span class="text-xl">💾</span>
+            </div>
+            <h3 class="text-base font-bold text-white">State & Multi-Agent</h3>
+            <ul class="text-xs text-slate-400 space-y-1.5 font-mono">
+              <li>• 1.8 4 Memory Architectures</li>
+              <li>• 1.9 Solo vs Multi-Agent</li>
+              <li>• 1.10 RAG vs Dynamic Tools</li>
+            </ul>
+          </div>
+          <span class="text-[10px] text-indigo-400 uppercase font-bold tracking-wider">Cognitive Retention</span>
+        </div>
+
+        <!-- Stage 4 -->
+        <div class="glass-card p-5 rounded-2xl border-amber-500/30 flex flex-col justify-between space-y-4">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold">Phase 4</span>
+              <span class="text-xl">🛡️</span>
+            </div>
+            <h3 class="text-base font-bold text-white">Production Guardrails</h3>
+            <ul class="text-xs text-slate-400 space-y-1.5 font-mono">
+              <li>• 1.11 Framework Landscape</li>
+              <li>• 1.12 5 Silent Killer Traps</li>
+              <li>• 1.13 First Python Agent</li>
+            </ul>
+          </div>
+          <span class="text-[10px] text-amber-400 uppercase font-bold tracking-wider">Architecture Blueprint</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SLIDE 3: 1.1 WHAT IS AN AI AGENT ==================== -->
+    <section class="slide flex-col w-full max-w-5xl space-y-6" data-title="Module 1.1: What is an AI Agent?">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-xs font-mono uppercase text-emerald-400 font-bold tracking-wider">Module 1.1 • Core Concept</span>
+          <h2 class="text-3xl font-extrabold font-heading text-white">The Evolutionary Leap to Agentic AI</h2>
+        </div>
+        <span class="text-xs font-mono px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">From Passive to Active</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Traditional Software -->
+        <div class="glass-card p-5 rounded-2xl border-white/5 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-slate-300 text-lg">
+            💻
+          </div>
+          <h3 class="text-base font-bold text-slate-200">1. Traditional Code</h3>
+          <div class="text-xs font-mono text-slate-400 bg-slate-950/60 p-2.5 rounded-lg border border-white/5">
+            deterministic: if/else, hardcoded logic
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Rigid workflows. If an unforeseen edge case arrives, the program crashes with an unhandled exception.
+          </p>
+          <span class="inline-block text-[10px] font-mono text-slate-500 uppercase font-bold">🚫 Zero Adaptability</span>
+        </div>
+
+        <!-- Raw LLMs -->
+        <div class="glass-card p-5 rounded-2xl border-blue-500/20 space-y-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 text-lg">
+            💬
+          </div>
+          <h3 class="text-base font-bold text-blue-300">2. Raw LLMs (Chatbots)</h3>
+          <div class="text-xs font-mono text-blue-300 bg-slate-950/60 p-2.5 rounded-lg border border-blue-500/20">
+            passive: prompt in &rarr; text out
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Single-shot completion. Cannot execute code, check external APIs, or autonomously verify truth.
+          </p>
+          <span class="inline-block text-[10px] font-mono text-blue-400 uppercase font-bold">⚠️ Brain in a Jar</span>
+        </div>
+
+        <!-- Autonomous Agent -->
+        <div class="glass-card p-5 rounded-2xl border-emerald-500/40 bg-emerald-500/5 space-y-3 relative overflow-hidden">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-lg">
+            🤖
+          </div>
+          <h3 class="text-base font-bold text-emerald-400">3. Autonomous Agent</h3>
+          <div class="text-xs font-mono text-emerald-300 bg-slate-950/80 p-2.5 rounded-lg border border-emerald-500/30">
+            goal-driven: perceive &rarr; act &rarr; verify
+          </div>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Maintains state, calls external tools, observes results, and re-plans until the high-level goal is achieved!
+          </p>
+          <span class="inline-block text-[10px] font-mono text-emerald-400 uppercase font-bold">✅ Autonomous Agency</span>
+        </div>
+      </div>
+
+      <!-- Visual Equation Banner -->
+      <div class="glass-card p-4 rounded-xl border-emerald-500/30 flex items-center justify-between text-xs font-mono">
+        <span class="text-slate-400">The Agent Formula:</span>
+        <span class="text-emerald-300 font-bold text-sm tracking-wide">
+          Agent = Reasoning Model (LLM) + Memory (State) + Tools (APIs) + Control Loop
+        </span>
+      </div>
+    </section>
+
+    <!-- ==================== SLIDE 4: 1.2 THE 4 AGENT ORGANS ==================== -->
+    <section class="slide flex-col w-full max-w-5xl space-y-6" data-title="Module 1.2: The 4 Core Organs">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-xs font-mono uppercase text-emerald-400 font-bold tracking-wider">Module 1.2 • Anatomy</span>
+          <h2 class="text-3xl font-extrabold font-heading text-white">The 4 Core Organs of an AI Agent</h2>
+        </div>
+        <span class="text-xs font-mono px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Cognitive Framework</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Organ 1: Perception -->
+        <div class="glass-card p-5 rounded-2xl border-white/5 flex gap-4 items-start">
+          <div class="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-2xl shrink-0">
+            👁️
+          </div>
+          <div class="space-y-1">
+            <div class="flex items-center justify-between">
+              <h3 class="text-base font-bold text-white">1. Perception (Sensors)</h3>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300">Inputs</span>
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Converts raw environment signals into cognitive tokens: user prompts, tool returns, webhooks, and multimodal camera/audio feeds.
+            </p>
+          </div>
+        </div>
+
+        <!-- Organ 2: The Brain -->
+        <div class="glass-card p-5 rounded-2xl border-white/5 flex gap-4 items-start">
+          <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 text-2xl shrink-0">
+            🧠
+          </div>
+          <div class="space-y-1">
+            <div class="flex items-center justify-between">
+              <h3 class="text-base font-bold text-white">2. The Brain (Reasoning)</h3>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/20 text-purple-300">Cognition</span>
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              The LLM core. Formulates plans, decomposes complex instructions, selects tools, and performs self-critique over intermediate failures.
+            </p>
+          </div>
+        </div>
+
+        <!-- Organ 3: Action -->
+        <div class="glass-card p-5 rounded-2xl border-white/5 flex gap-4 items-start">
+          <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-2xl shrink-0">
+            🦾
+          </div>
+          <div class="space-y-1">
+            <div class="flex items-center justify-between">
+              <h3 class="text-base font-bold text-white">3. Action (Effectors)</h3>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Tools</span>
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Executes side-effects: calling REST APIs, querying databases, running sandbox Python code, writing files, and dispatching webhooks.
+            </p>
+          </div>
+        </div>
+
+        <!-- Organ 4: Memory -->
+        <div class="glass-card p-5 rounded-2xl border-white/5 flex gap-4 items-start">
+          <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-2xl shrink-0">
+            💾
+          </div>
+          <div class="space-y-1">
+            <div class="flex items-center justify-between">
+              <h3 class="text-base font-bold text-white">4. Memory (Persistence)</h3>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">State</span>
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Maintains working context in RAM, durable state checkpoints in Postgres, and long-term semantic knowledge in vector stores.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Human vs Agent Comparison -->
+      <div class="glass-card p-3 rounded-xl border-white/5 flex items-center justify-around text-center text-xs font-mono text-slate-400">
+        <div>Eyes & Ears &rarr; <span class="text-cyan-300 font-bold">Perception</span></div>
+        <div class="text-slate-600">|</div>
+        <div>Cerebral Cortex &rarr; <span class="text-purple-300 font-bold">LLM Brain</span></div>
+        <div class="text-slate-600">|</div>
+        <div>Hands & Feet &rarr; <span class="text-emerald-300 font-bold">Tool Execution</span></div>
+        <div class="text-slate-600">|</div>
+        <div>Hippocampus &rarr; <span class="text-amber-300 font-bold">Memory State</span></div>
+      </div>
+    </section>
+
+    <!-- ==================== SLIDE 5: 1.3 TASK DECOMPOSITION ==================== -->
+    <section class="slide flex-col w-full max-w-5xl space-y-6" data-title="Module 1.3: Task Decomposition">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-xs font-mono uppercase text-emerald-400 font-bold tracking-wider">Module 1.3 • Planning</span>
+          <h2 class="text-3xl font-extrabold font-heading text-white">Task Decomposition & Planning</h2>
+        </div>
+        <span class="text-xs font-mono px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Divide & Conquer</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+        <!-- Visual Tree -->
+        <div class="glass-card p-6 rounded-2xl border-white/5 space-y-4">
+          <div class="text-xs font-mono text-slate-400 uppercase font-bold tracking-wider">Decomposition Flow</div>
+          
+          <div class="p-3.5 rounded-xl bg-purple-500/10 border border-purple-500/30 text-center font-bold text-sm text-purple-300">
+            🎯 High-Level Objective: &quot;Launch Q3 Competitor Audit&quot;
+          </div>
+
+          <div class="flex justify-center text-slate-500"><i class="fa-solid fa-arrow-down"></i></div>
+
+          <div class="space-y-2 font-mono text-xs">
+            <div class="p-2.5 rounded-lg bg-slate-900 border border-white/5 flex items-center justify-between">
+              <span class="text-emerald-400 font-bold">Step 1: Scrape Pricing</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Tool: search()</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-900 border border-white/5 flex items-center justify-between">
+              <span class="text-cyan-400 font-bold">Step 2: Calculate Delta</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300">Tool: python()</span>
+            </div>
+            <div class="p-2.5 rounded-lg bg-slate-900 border border-white/5 flex items-center justify-between">
+              <span class="text-amber-400 font-bold">Step 3: Compile Report</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">LLM Synthesis</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Key Engineering Insights -->
+        <div class="space-y-4">
+          <div class="glass-card p-4 rounded-xl border-white/5 space-y-1">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <span>⚡</span> Single-Shot Fallacy
+            </h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Asking an LLM to solve a 20-step engineering task in one prompt causes cognitive collapse. Planning turns complex goals into deterministic micro-steps.
+            </p>
+          </div>
+
+          <div class="glass-card p-4 rounded-xl border-white/5 space-y-1">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <span>🔄</span> Dynamic Re-Planning
+            </h3>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              If Step 2 encounters an unexpected 404 error, the agent doesn&apos;t crash — it updates the plan dynamically and switches to an alternate data source.
+            </p>
+          </div>
+
+          <div class="glass-card p-4 rounded-xl border-emerald-500/30 bg-emerald-500/5 space-y-1">
+            <h3 class="text-sm font-bold text-emerald-400 flex items-center gap-2">
+              <span>💡</span> Production Rule
+            </h3>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Every sub-goal must produce a verifiable deliverable before downstream steps execute.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SLIDE 6: 1.4 LEVELS OF AUTONOMY ==================== -->
+    <section class="slide flex-col w-full max-w-5xl space-y-6" data-title="Module 1.4: Levels of Autonomy">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-xs font-mono uppercase text-emerald-400 font-bold tracking-wider">Module 1.4 • Autonomy Spectrum</span>
+          <h2 class="text-3xl font-extrabold font-heading text-white">The 5 Levels of Agent Autonomy</h2>
+        </div>
+        <span class="text-xs font-mono px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">SAE Automation Scale</span>
+      </div>
+
+      <div class="space-y-2.5">
+        <!-- Level 0 -->
+        <div class="glass-card p-3 rounded-xl border-white/5 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-400">Level 0</span>
+            <span class="text-xs font-bold text-slate-300">Manual / Scripted</span>
+          </div>
+          <span class="text-xs text-slate-400">Zero AI. Pure if/else conditions.</span>
+          <span class="text-[10px] font-mono text-slate-500">Human 100%</span>
+        </div>
+
+        <!-- Level 1 -->
+        <div class="glass-card p-3 rounded-xl border-white/5 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300">Level 1</span>
+            <span class="text-xs font-bold text-white">AI Assistant (Copilot)</span>
+          </div>
+          <span class="text-xs text-slate-400">Human asks question &rarr; LLM suggests code/text.</span>
+          <span class="text-[10px] font-mono text-blue-400">Human Approves Every Step</span>
+        </div>
+
+        <!-- Level 2 -->
+        <div class="glass-card p-3 rounded-xl border-white/5 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300">Level 2</span>
+            <span class="text-xs font-bold text-white">Conditional Agent</span>
+          </div>
+          <span class="text-xs text-slate-400">Executes single tools within tight pre-approved scopes.</span>
+          <span class="text-[10px] font-mono text-cyan-400">Human in the Loop</span>
+        </div>
+
+        <!-- Level 3 -->
+        <div class="glass-card p-3 rounded-xl border-emerald-500/30 bg-emerald-500/5 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Level 3</span>
+            <span class="text-xs font-bold text-emerald-400">Autonomous Workflow Agent</span>
+          </div>
+          <span class="text-xs text-slate-300">Executes multi-step plans autonomously; escalates only on error.</span>
+          <span class="text-[10px] font-mono text-emerald-400 font-bold">Production Standard ⭐</span>
+        </div>
+
+        <!-- Level 4 & 5 -->
+        <div class="glass-card p-3 rounded-xl border-purple-500/30 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-purple-500/20 text-purple-300">Level 4-5</span>
+            <span class="text-xs font-bold text-purple-300">Self-Directed Swarms</span>
+          </div>
+          <span class="text-xs text-slate-400">Autonomous goal-setting, tool creation, and multi-agent coordination.</span>
+          <span class="text-[10px] font-mono text-purple-400">Research Frontier</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SLIDE 7: 1.5 TOOL CALLING MECHANICS ==================== -->
+    <section class="slide flex-col w-full max-w-5xl space-y-6" data-title="Module 1.5: Tool Calling Mechanics">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-xs font-mono uppercase text-emerald-400 font-bold tracking-wider">Module 1.5 • Tool Mechanics</span>
+          <h2 class="text-3xl font-extrabold font-heading text-white">How LLMs Call Real-World Tools</h2>
+        </div>
+        <span class="text-xs font-mono px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">JSON Schema Contract</span>
+      </div>
+
+      <!-- 4-Step Tool Lifecycle Flow -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+        <div class="glass-card p-4 rounded-xl border-white/5 space-y-2">
+          <div class="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 w-fit">Step 1</div>
+          <h3 class="text-sm font-bold text-white">Schema Definition</h3>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            Developer registers Python function as JSON schema with argument types and docstring rules.
+          </p>
+          <div class="text-[10px] font-mono text-emerald-400 bg-slate-950 p-2 rounded">@tool def search(q: str):</div>
+        </div>
+
+        <div class="glass-card p-4 rounded-xl border-blue-500/30 space-y-2">
+          <div class="text-xs font-mono px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 w-fit">Step 2</div>
+          <h3 class="text-sm font-bold text-blue-300">Model Tool Call</h3>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            LLM decides to invoke tool. Emits structured JSON payload containing exact function name &amp; kwargs.
+          </p>
+          <div class="text-[10px] font-mono text-blue-300 bg-slate-950 p-2 rounded">{&quot;name&quot;: &quot;search&quot;, &quot;q&quot;: &quot;...&quot;}</div>
+        </div>
+
+        <div class="glass-card p-4 rounded-xl border-amber-500/30 space-y-2">
+          <div class="text-xs font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 w-fit">Step 3</div>
+          <h3 class="text-sm font-bold text-amber-300">Runtime Execution</h3>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            Your application intercepts JSON, calls the real API / database, and captures return string.
+          </p>
+          <div class="text-[10px] font-mono text-amber-300 bg-slate-950 p-2 rounded">result = search(q=&quot;...&quot;)</div>
+        </div>
+
+        <div class="glass-card p-4 rounded-xl border-emerald-500/30 space-y-2">
+          <div class="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 w-fit">Step 4</div>
+          <h3 class="text-sm font-bold text-emerald-400">Observation Ingestion</h3>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            Observation string is appended to message history. LLM reads result and synthesizes the next answer!
+          </p>
+          <div class="text-[10px] font-mono text-emerald-300 bg-slate-950 p-2 rounded">ToolMessage(content=&quot;...&quot;)</div>
+        </div>
+      </div>
+
+      <!-- Critical Production Takeaway -->
+      <div class="glass-card p-4 rounded-xl border-emerald-500/40 bg-emerald-500/5 flex items-center justify-between text-xs">
+        <span class="text-emerald-300 font-bold">📌 Golden Rule:</span>
+        <span class="text-slate-300">The LLM never runs code itself — it produces structured JSON requests for your host runtime to execute!</span>
+      </div>
+    </section>
+
+    <!-- ==================== SLIDE 8: 1.6 THE AGENTIC LOOP ==================== -->
+    <section class="slide flex-col w-full max-w-5xl space-y-6" data-title="Module 1.6: The Agentic Loop">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-xs font-mono uppercase text-emerald-400 font-bold tracking-wider">Module 1.6 • Execution Core</span>
+          <h2 class="text-3xl font-extrabold font-heading text-white">The 5-Phase Agentic Execution Loop</h2>
+        </div>
+        <span class="text-xs font-mono px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">O-R-P-A-R Cycle</span>
+      </div>
+
+      <!-- Cycle Graphic -->
+      <div class="grid grid-cols-5 gap-2 pt-2">
+        <div class="glass-card p-3 rounded-xl border-white/5 text-center space-y-1.5">
+          <div class="text-2xl">1️⃣</div>
+          <div class="text-xs font-bold text-cyan-400">Observe</div>
+          <p class="text-[10px] text-slate-400">Ingest prompt &amp; environment state</p>
+        </div>
+        <div class="glass-card p-3 rounded-xl border-white/5 text-center space-y-1.5">
+          <div class="text-2xl">2️⃣</div>
+          <div class="text-xs font-bold text-purple-400">Reason</div>
+          <p class="text-[10px] text-slate-400">Analyze gap between current state &amp; goal</p>
+        </div>
+        <div class="glass-card p-3 rounded-xl border-white/5 text-center space-y-1.5">
+          <div class="text-2xl">3️⃣</div>
+          <div class="text-xs font-bold text-blue-400">Plan</div>
+          <p class="text-[10px] text-slate-400">Select specific tool &amp; construct arguments</p>
+        </div>
+        <div class="glass-card p-3 rounded-xl border-white/5 text-center space-y-1.5">
+          <div class="text-2xl">4️⃣</div>
+          <div class="text-xs font-bold text-emerald-400">Act</div>
+          <p class="text-[10px] text-slate-400">Execute tool and capture raw return</p>
+        </div>
+        <div class="glass-card p-3 rounded-xl border-white/5 text-center space-y-1.5">
+          <div class="text-2xl">5️⃣</div>
+          <div class="text-xs font-bold text-amber-400">Reflect</div>
+          <p class="text-[10px] text-slate-400">Did the action work? Loop or terminate?</p>
+        </div>
+      </div>
+
+      <!-- Loop State Machine Box -->
+      <div class="glass-card p-5 rounded-2xl border-white/5 space-y-3 font-mono text-xs">
+        <div class="text-slate-400 uppercase text-[11px] font-bold">Execution Loop Termination Conditions:</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-slate-300">
+          <div class="p-3 rounded-lg bg-slate-950 border border-emerald-500/30">
+            <span class="text-emerald-400 font-bold">✅ Goal Satisfied:</span>
+            <p class="text-[11px] text-slate-400 mt-1">LLM emits final synthesis text with zero pending tool calls.</p>
+          </div>
+          <div class="p-3 rounded-lg bg-slate-950 border border-rose-500/30">
+            <span class="text-rose-400 font-bold">🛑 Guardrail Breached:</span>
+            <p class="text-[11px] text-slate-400 mt-1">Hits recursion_limit (e.g. 15 turns) to prevent infinite billing.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SLIDE 9: 1.7 AGENTIC DESIGN PATTERNS ==================== -->
+    <section class="slide flex-col w-full max-w-5xl space-y-6" data-title="Module 1.7: Design Patterns">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-xs font-mono uppercase text-emerald-400 font-bold tracking-wider">Module 1.7 • Architecture Patterns</span>
+          <h2 class="text-3xl font-extrabold font-heading text-white">The Big 3 Agentic Design Patterns</h2>
+        </div>
+        <span class="text-xs font-mono px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">ReAct • Plan-and-Solve • Reflection</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Pattern 1: ReAct -->
+        <div class="glass-card p-5 rounded-2xl border-emerald-500/30 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-2xl">⚡</span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">Dynamic</span>
+          </div>
+          <h3 class="text-base font-bold text-white">1. ReAct Pattern</h3>
+          <p class="text-xs font-mono text-emerald-400">Reason &rarr; Act &rarr; Observe</p>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Step-by-step interleaving. The agent thinks out loud before every single tool action. Best for open exploration and real-time search.
+          </p>
+        </div>
+
+        <!-- Pattern 2: Plan and Solve -->
+        <div class="glass-card p-5 rounded-2xl border-cyan-500/30 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-2xl">📋</span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold">Structured</span>
+          </div>
+          <h3 class="text-base font-bold text-white">2. Plan &amp; Solve</h3>
+          <p class="text-xs font-mono text-cyan-400">Plan Ahead &rarr; Execute Batch</p>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Planner agent produces an explicit N-step checklist. Worker agents execute each step sequentially. Cuts tool hallucinations by 40%.
+          </p>
+        </div>
+
+        <!-- Pattern 3: Self-Reflection -->
+        <div class="glass-card p-5 rounded-2xl border-purple-500/30 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-2xl">🪞</span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold">Evaluative</span>
+          </div>
+          <h3 class="text-base font-bold text-white">3. Reflection (Critic)</h3>
+          <p class="text-xs font-mono text-purple-400">Draft &rarr; Critique &rarr; Refine</p>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Actor generates candidate response. Critic agent inspects output for logical flaws and forces iterative revisions before delivery.
+          </p>
+        </div>
+      </div>
+
+      <div class="glass-card p-3 rounded-xl border-white/5 flex items-center justify-center text-xs font-mono text-slate-400">
+        Industry Standard: LangGraph and AutoGen blend ReAct execution inside structured Plan-and-Solve graphs!
+      </div>
+    </section>
+
+    <!-- ==================== SLIDE 10: 1.8 MEMORY ARCHITECTURES ==================== -->
+    <section class="slide flex-col w-full max-w-5xl space-y-6" data-title="Module 1.8: Memory Systems">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-xs font-mono uppercase text-emerald-400 font-bold tracking-wider">Module 1.8 • State Retention</span>
+          <h2 class="text-3xl font-extrabold font-heading text-white">The 4 Agent Memory Architectures</h2>
+        </div>
+        <span class="text-xs font-mono px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Working vs Long-Term</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Short-Term Buffer -->
+        <div class="glass-card p-4 rounded-xl border-white/5 flex gap-3.5">
+          <div class="text-2xl">💬</div>
+          <div class="space-y-1">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-white">1. Short-Term Working Memory</h3>
+              <span class="text-[10px] font-mono text-cyan-400">RAM / Context</span>
+            </div>
+            <p class="text-xs text-slate-400">
+              In-memory conversation history of the active session. Pruned automatically with token-aware windowing.
+            </p>
+          </div>
+        </div>
+
+        <!-- Checkpoint State -->
+        <div class="glass-card p-4 rounded-xl border-white/5 flex gap-3.5">
+          <div class="text-2xl">📌</div>
+          <div class="space-y-1">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-white">2. Checkpoint State History</h3>
+              <span class="text-[10px] font-mono text-emerald-400">Postgres / Redis</span>
+            </div>
+            <p class="text-xs text-slate-400">
+              Immutable snapshots saved at every graph node. Enables human-in-the-loop pausing and time-travel rewinds.
+            </p>
+          </div>
+        </div>
+
+        <!-- Semantic Vector -->
+        <div class="glass-card p-4 rounded-xl border-white/5 flex gap-3.5">
+          <div class="text-2xl">🔍</div>
+          <div class="space-y-1">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-white">3. Semantic Memory (Vector DB)</h3>
+              <span class="text-[10px] font-mono text-purple-400">pgvector / Pinecone</span>
+            </div>
+            <p class="text-xs text-slate-400">
+              Long-term recall. Embeds previous conversations and user preferences for semantic nearest-neighbor retrieval.
+            </p>
+          </div>
+        </div>
+
+        <!-- Episodic Memory -->
+        <div class="glass-card p-4 rounded-xl border-white/5 flex gap-3.5">
+          <div class="text-2xl">📖</div>
+          <div class="space-y-1">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-white">4. Episodic Memory</h3>
+              <span class="text-[10px] font-mono text-amber-400">Audit Logs</span>
+            </div>
+            <p class="text-xs text-slate-400">
+              Chronological log of past agent decisions: &quot;Last Tuesday we tried scraping Site X and failed due to Cloudflare captcha.&quot;
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card p-3 rounded-xl border-white/5 text-center text-xs font-mono text-slate-400">
+        💡 Rule of Thumb: Working memory handles the current turn; Checkpoints guarantee crash recovery; Vector stores provide years of context!
+      </div>
+    </section>
+
+    <!-- ==================== SLIDE 11: 1.9 SINGLE VS MULTI-AGENT ==================== -->
+    <section class="slide flex-col w-full max-w-5xl space-y-6" data-title="Module 1.9: Single vs Multi-Agent">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-xs font-mono uppercase text-emerald-400 font-bold tracking-wider">Module 1.9 • System Topology</span>
+          <h2 class="text-3xl font-extrabold font-heading text-white">Single-Agent vs Multi-Agent Systems</h2>
+        </div>
+        <span class="text-xs font-mono px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">When to Scale</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Single Agent -->
+        <div class="glass-card p-5 rounded-2xl border-white/5 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <span>👤</span> Single Solo Agent
+            </h3>
+            <span class="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400">Simple &amp; Fast</span>
+          </div>
+          <ul class="text-xs text-slate-300 space-y-2">
+            <li>✅ Easy to debug and trace in single terminal</li>
+            <li>✅ Low latency and minimal token overhead</li>
+            <li>❌ Suffers context bloat if given &gt; 10 tools</li>
+            <li>❌ Fails on conflicting roles (e.g. Creator vs Auditor)</li>
+          </ul>
+          <div class="text-[11px] font-mono text-slate-400 bg-slate-950 p-2.5 rounded-lg border border-white/5">
+            Best for: Focused tasks with 1–5 tools (e.g. SQL query bot, customer FAQ router)
+          </div>
+        </div>
+
+        <!-- Multi-Agent -->
+        <div class="glass-card p-5 rounded-2xl border-emerald-500/30 bg-emerald-500/5 space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-bold text-emerald-400 flex items-center gap-2">
+              <span>👥</span> Multi-Agent Swarm / Supervisor
+            </h3>
+            <span class="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">Enterprise Grade</span>
+          </div>
+          <ul class="text-xs text-slate-300 space-y-2">
+            <li>✅ Isolated context windows per specialist</li>
+            <li>✅ True parallel execution across sub-tasks</li>
+            <li>✅ Natural adversarial critique and validation</li>
+            <li>❌ Higher token costs and orchestration complexity</li>
+          </ul>
+          <div class="text-[11px] font-mono text-emerald-300 bg-slate-950 p-2.5 rounded-lg border border-emerald-500/20">
+            Best for: Complex workflows (e.g. Deep research, full-stack software development)
+          </div>
+        </div>
+      </div>
+
+      <!-- Decision Matrix Line -->
+      <div class="glass-card p-3 rounded-xl border-white/5 flex items-center justify-between text-xs font-mono text-slate-400">
+        <span>Architectural Heuristic:</span>
+        <span class="text-emerald-300 font-bold">Start with 1 agent until tools exceed 8 or roles directly conflict!</span>
+      </div>
+    </section>
+
+    <!-- ==================== SLIDE 12: 1.10 RAG VS AGENT TOOLS ==================== -->
+    <section class="slide flex-col w-full max-w-5xl space-y-6" data-title="Module 1.10: RAG vs Agent Tools">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-xs font-mono uppercase text-emerald-400 font-bold tracking-wider">Module 1.10 • Information Retrieval</span>
+          <h2 class="text-3xl font-extrabold font-heading text-white">Classic RAG vs Dynamic Agent Tools</h2>
+        </div>
+        <span class="text-xs font-mono px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Passive vs Active</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Classic RAG -->
+        <div class="glass-card p-5 rounded-2xl border-white/5 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xl">📚</span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-bold">Read-Only</span>
+          </div>
+          <h3 class="text-base font-bold text-white">Classic RAG Pipeline</h3>
+          <p class="text-xs font-mono text-cyan-400">Embed &rarr; Vector Match &rarr; Inject &rarr; Answer</p>
+          <ul class="text-xs text-slate-400 space-y-1.5 leading-relaxed">
+            <li>• Retrieves static text chunks from vector index</li>
+            <li>• Cannot verify whether the chunk is up to date</li>
+            <li>• Cannot trigger actions or mutate databases</li>
+            <li>• Fixed 1-shot pipeline: no retry if wrong chunk found</li>
+          </ul>
+        </div>
+
+        <!-- Dynamic Agent Tools -->
+        <div class="glass-card p-5 rounded-2xl border-emerald-500/30 bg-emerald-500/5 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xl">⚡</span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">Read-Write-Verify</span>
+          </div>
+          <h3 class="text-base font-bold text-emerald-400">Agentic Tool Actions</h3>
+          <p class="text-xs font-mono text-emerald-300">Decide &rarr; Query &rarr; Inspect &rarr; Fallback</p>
+          <ul class="text-xs text-slate-300 space-y-1.5 leading-relaxed">
+            <li>• Agent chooses WHEN to search and WHAT to query</li>
+            <li>• Evaluates if retrieved result is sufficient; re-queries if poor</li>
+            <li>• Executes live mutations: POST API calls, DB updates, sandboxes</li>
+            <li>• Full agency over multiple heterogenous data sources</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Modern Synthesis Banner -->
+      <div class="glass-card p-3 rounded-xl border-white/5 text-center text-xs font-mono text-slate-300">
+        💡 Agentic RAG: Wrap vector retrieval inside an agent tool — the agent can rewrite queries and verify relevance!
+      </div>
+    </section>
+
+    <!-- ==================== SLIDE 13: 1.11 FRAMEWORK LANDSCAPE ==================== -->
+    <section class="slide flex-col w-full max-w-5xl space-y-6" data-title="Module 1.11: Framework Landscape">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-xs font-mono uppercase text-emerald-400 font-bold tracking-wider">Module 1.11 • Tech Stack</span>
+          <h2 class="text-3xl font-extrabold font-heading text-white">The Modern Agent Framework Landscape</h2>
+        </div>
+        <span class="text-xs font-mono px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Picking Your Stack</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <!-- LangGraph -->
+        <div class="glass-card p-4 rounded-xl border-emerald-500/40 bg-emerald-500/5 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-emerald-400">LangGraph</span>
+            <span class="text-base">🕸️</span>
+          </div>
+          <div class="text-[11px] font-mono text-slate-400">Cyclic State Machine</div>
+          <p class="text-[11px] text-slate-300 leading-relaxed">
+            Low-level control, native checkpointing, time-travel debugging, and production HITL workflows.
+          </p>
+          <span class="inline-block text-[10px] font-mono text-emerald-400 font-bold">⭐ Industry Standard</span>
+        </div>
+
+        <!-- CrewAI -->
+        <div class="glass-card p-4 rounded-xl border-white/5 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-indigo-400">CrewAI</span>
+            <span class="text-base">👥</span>
+          </div>
+          <div class="text-[11px] font-mono text-slate-400">Role-Playing Swarms</div>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            High-level abstraction for role-based multi-agent teams (Researcher, Writer, Editor).
+          </p>
+          <span class="inline-block text-[10px] font-mono text-indigo-400">🚀 Rapid Prototyping</span>
+        </div>
+
+        <!-- AutoGen -->
+        <div class="glass-card p-4 rounded-xl border-white/5 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-blue-400">AutoGen (MS)</span>
+            <span class="text-base">🤖</span>
+          </div>
+          <div class="text-[11px] font-mono text-slate-400">Conversational Swarms</div>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            Multi-agent dialogue choreography and event-driven distributed actor systems.
+          </p>
+          <span class="inline-block text-[10px] font-mono text-blue-400">🔬 Research Focused</span>
+        </div>
+
+        <!-- LlamaIndex -->
+        <div class="glass-card p-4 rounded-xl border-white/5 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-purple-400">LlamaIndex</span>
+            <span class="text-base">🦙</span>
+          </div>
+          <div class="text-[11px] font-mono text-slate-400">Data-Centric Agents</div>
+          <p class="text-[11px] text-slate-400 leading-relaxed">
+            Deep document retrieval, knowledge graph traversal, and structured data querying.
+          </p>
+          <span class="inline-block text-[10px] font-mono text-purple-400">📊 Enterprise Data</span>
+        </div>
+      </div>
+
+      <div class="glass-card p-3 rounded-xl border-emerald-500/20 text-center text-xs font-mono text-slate-300">
+        This tutorial series builds with <strong class="text-emerald-400">LangGraph</strong> because it treats agents as deterministic state-machine graphs.
+      </div>
+    </section>
+
+    <!-- ==================== SLIDE 14: 1.12 COMMON PITFALLS ==================== -->
+    <section class="slide flex-col w-full max-w-5xl space-y-6" data-title="Module 1.12: Common Pitfalls">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-xs font-mono uppercase text-emerald-400 font-bold tracking-wider">Module 1.12 • Failure Modes</span>
+          <h2 class="text-3xl font-extrabold font-heading text-white">The 5 Silent Killer Traps in Production</h2>
+        </div>
+        <span class="text-xs font-mono px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">Hard-Won Lessons</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        <!-- Trap 1 -->
+        <div class="glass-card p-3.5 rounded-xl border-rose-500/30 bg-rose-500/5 space-y-1">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-rose-400">1. The Infinite Tool Death Loop</span>
+            <span class="text-sm">🔁</span>
+          </div>
+          <p class="text-xs text-slate-300">
+            A tool throws a 400 error. The agent re-runs the exact same command 100 times, burning $50 in API credits.
+          </p>
+          <span class="text-[10px] font-mono text-emerald-400">Fix: recursion_limit = 15 + circuit breaker</span>
+        </div>
+
+        <!-- Trap 2 -->
+        <div class="glass-card p-3.5 rounded-xl border-rose-500/30 bg-rose-500/5 space-y-1">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-rose-400">2. Tool Docstring Ambiguity</span>
+            <span class="text-sm">🌫️</span>
+          </div>
+          <p class="text-xs text-slate-300">
+            Docstrings written in 5 seconds like &quot;Searches data&quot;. The LLM hallucinates arguments and misroutes calls.
+          </p>
+          <span class="text-[10px] font-mono text-emerald-400">Fix: Explicit WHEN TO USE &amp; WHEN NOT TO USE</span>
+        </div>
+
+        <!-- Trap 3 -->
+        <div class="glass-card p-3.5 rounded-xl border-rose-500/30 bg-rose-500/5 space-y-1">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-rose-400">3. Context Window Poisoning</span>
+            <span class="text-sm">☣️</span>
+          </div>
+          <p class="text-xs text-slate-300">
+            Injecting 500-row raw SQL returns into state. Future turns suffer attention dilution and massive token costs.
+          </p>
+          <span class="text-[10px] font-mono text-emerald-400">Fix: Summarize or strip raw payloads after turn</span>
+        </div>
+
+        <!-- Trap 4 -->
+        <div class="glass-card p-3.5 rounded-xl border-rose-500/30 bg-rose-500/5 space-y-1">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-rose-400">4. Irreversible Side-Effects</span>
+            <span class="text-sm">💥</span>
+          </div>
+          <p class="text-xs text-slate-300">
+            Allowing autonomous agents to execute destructive actions (DELETE SQL, sending emails) without human confirmation.
+          </p>
+          <span class="text-[10px] font-mono text-emerald-400">Fix: Human-in-the-loop interrupt breakpoints</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SLIDE 15: 1.13 FIRST AGENT BLUEPRINT ==================== -->
+    <section class="slide flex-col w-full max-w-5xl space-y-5" data-title="Module 1.13: Your First Agent Blueprint">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-xs font-mono uppercase text-emerald-400 font-bold tracking-wider">Module 1.13 • Implementation</span>
+          <h2 class="text-3xl font-extrabold font-heading text-white">Anatomy of a Minimal Python Agent</h2>
+        </div>
+        <span class="text-xs font-mono px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Hands-on Skeleton</span>
+      </div>
+
+      <!-- Code Inspector Mockup -->
+      <div class="glass-card rounded-2xl border-white/10 overflow-hidden font-mono text-xs shadow-2xl">
+        <div class="px-4 py-2 border-b border-white/5 bg-slate-950/80 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-500/80 inline-block"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80 inline-block"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block"></span>
+            <span class="text-slate-400 text-[11px] ml-2">minimal_agent.py</span>
+          </div>
+          <span class="text-[10px] text-emerald-400">LangGraph &amp; LangChain</span>
+        </div>
+        <div class="p-4 bg-slate-950 text-slate-300 overflow-x-auto leading-relaxed">
+<pre><code class="text-slate-300"><span class="text-purple-400">from</span> langgraph.prebuilt <span class="text-purple-400">import</span> create_react_agent
+<span class="text-purple-400">from</span> langchain_openai <span class="text-purple-400">import</span> ChatOpenAI
+<span class="text-purple-400">from</span> langchain_core.tools <span class="text-purple-400">import</span> tool
+
+<span class="text-emerald-400">@tool</span>
+<span class="text-blue-400">def</span> <span class="text-yellow-300">get_live_stock_quote</span>(ticker: <span class="text-cyan-300">str</span>) -> <span class="text-cyan-300">str</span>:
+    <span class="text-slate-500">"""Fetch live pricing. Use ONLY for current market quote requests."""</span>
+    <span class="text-purple-400">return</span> <span class="text-green-300">f"{ticker}: $182.40 (+1.4%)"</span>
+
+model = ChatOpenAI(model=<span class="text-green-300">"gpt-4o"</span>, temperature=<span class="text-amber-300">0.0</span>)
+tools = [get_live_stock_quote]
+
+<span class="text-slate-500"># Compiles cyclic state graph with model + tool-calling node:</span>
+agent = create_react_agent(model, tools)
+
+response = agent.invoke({<span class="text-green-300">"messages"</span>: [(<span class="text-green-300">"user"</span>, <span class="text-green-300">"What is Apple trading at?"</span>)]})
+<span class="text-blue-400">print</span>(response[<span class="text-green-300">"messages"</span>][-<span class="text-amber-300">1</span>].content)</code></pre>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+        <span>Lines of code: <strong class="text-emerald-400">14 lines</strong></span>
+        <span>Result: Fully autonomous tool-calling cognitive loop</span>
+      </div>
+    </section>
+
+    <!-- ==================== SLIDE 16: SUMMARY & KEY TAKEAWAYS ==================== -->
+    <section class="slide flex-col w-full max-w-5xl space-y-6" data-title="Summary & Key Takeaways">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-xs font-mono uppercase text-emerald-400 font-bold tracking-wider">Mastery Checklist</span>
+          <h2 class="text-3xl font-extrabold font-heading text-white">6 Golden Rules of Agentic AI</h2>
+        </div>
+        <span class="text-xs font-mono px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Level 1 Recap</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+        <div class="glass-card p-3.5 rounded-xl border-white/5 flex items-start gap-3">
+          <div class="text-emerald-400 text-lg">✅</div>
+          <div>
+            <h3 class="text-xs font-bold text-white">1. Agents are Not Chatbots</h3>
+            <p class="text-[11px] text-slate-400">They possess sensory perception, external tools, memory state, and autonomous control loops.</p>
+          </div>
+        </div>
+
+        <div class="glass-card p-3.5 rounded-xl border-white/5 flex items-start gap-3">
+          <div class="text-emerald-400 text-lg">✅</div>
+          <div>
+            <h3 class="text-xs font-bold text-white">2. Tool Docstrings are Code</h3>
+            <p class="text-[11px] text-slate-400">The LLM reads your docstrings to pick tools. Vague docstrings cause 90% of routing errors.</p>
+          </div>
+        </div>
+
+        <div class="glass-card p-3.5 rounded-xl border-white/5 flex items-start gap-3">
+          <div class="text-emerald-400 text-lg">✅</div>
+          <div>
+            <h3 class="text-xs font-bold text-white">3. Decompose Before Executing</h3>
+            <p class="text-[11px] text-slate-400">Break high-level goals into small, verifiable sub-tasks rather than gambling on a single prompt.</p>
+          </div>
+        </div>
+
+        <div class="glass-card p-3.5 rounded-xl border-white/5 flex items-start gap-3">
+          <div class="text-emerald-400 text-lg">✅</div>
+          <div>
+            <h3 class="text-xs font-bold text-white">4. Keep Context Windows Trim</h3>
+            <p class="text-[11px] text-slate-400">Strip raw tool dumps after synthesis; bloated context destroys attention and spikes costs.</p>
+          </div>
+        </div>
+
+        <div class="glass-card p-3.5 rounded-xl border-white/5 flex items-start gap-3">
+          <div class="text-emerald-400 text-lg">✅</div>
+          <div>
+            <h3 class="text-xs font-bold text-white">5. Always Set Circuit Breakers</h3>
+            <p class="text-[11px] text-slate-400">Enforce maximum step limits (recursion_limit) and timeout caps on every autonomous run.</p>
+          </div>
+        </div>
+
+        <div class="glass-card p-3.5 rounded-xl border-white/5 flex items-start gap-3">
+          <div class="text-emerald-400 text-lg">✅</div>
+          <div>
+            <h3 class="text-xs font-bold text-white">6. Protect Dangerous Mutations</h3>
+            <p class="text-[11px] text-slate-400">Use Human-in-the-Loop interrupts for destructive actions like payments, emails, and DB drops.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== SLIDE 17: OUTRO / NEXT LEVEL ==================== -->
+    <section class="slide flex-col items-center justify-center text-center max-w-3xl space-y-8" data-title="Final Slide: Level 1 Complete">
+      <div class="w-20 h-20 rounded-3xl bg-gradient-to-tr from-emerald-500 to-teal-400 p-0.5 shadow-2xl shadow-emerald-500/30 mx-auto">
+        <div class="w-full h-full bg-slate-950 rounded-[22px] flex items-center justify-center text-3xl">
+          🎓
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-mono font-bold uppercase tracking-wider">
+          Level 1 Certified
+        </div>
+        <h2 class="text-4xl sm:text-5xl font-extrabold font-heading text-white tracking-tight">
+          You Mastered the Foundations!
+        </h2>
+        <p class="text-sm sm:text-base text-slate-400 font-light leading-relaxed max-w-xl mx-auto">
+          You now understand the cognitive organs, tool mechanics, loops, and memory architectures behind world-class autonomous AI.
+        </p>
+      </div>
+
+      <!-- Up Next Card -->
+      <div class="glass-card p-5 rounded-2xl border-indigo-500/30 w-full text-left space-y-2 relative overflow-hidden">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-mono uppercase text-indigo-400 font-bold tracking-wider">Coming Up Next</span>
+          <span class="text-xs font-mono px-2.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300">Level 2</span>
+        </div>
+        <h3 class="text-lg font-bold text-white">Level 2: LangGraph Core Architectures</h3>
+        <p class="text-xs text-slate-400 leading-relaxed">
+          StateGraph compilation, conditional edge routing, cyclical loops, checkpointers, and production-grade state persistence.
+        </p>
+      </div>
+
+      <!-- Footer Info -->
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-6 pt-2 text-xs text-slate-500 font-mono">
+        <div class="flex items-center gap-2">
+          <span>💻 AgenticCraft Tutorial</span>
+        </div>
+        <div>•</div>
+        <div class="flex items-center gap-2">
+          <span>🎥 Video Teaching Deck</span>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- BOTTOM CONTROLS & NAVIGATION BAR -->
+  <footer class="h-16 px-8 border-t border-white/5 flex items-center justify-between z-20 shrink-0 bg-dark-bg/60 backdrop-blur-md">
+    <div class="flex items-center gap-2">
+      <span class="text-xs font-mono text-slate-500 hidden sm:inline">Use Arrow keys &larr; / &rarr; or Space</span>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="flex items-center gap-3">
+      <button onclick="prevSlide()" class="px-4 py-2 rounded-xl glass-pill hover:bg-white/10 text-xs font-bold text-slate-300 hover:text-white transition-all flex items-center gap-2 cursor-pointer active:scale-95">
+        <i class="fa-solid fa-chevron-left text-[10px]"></i>
+        <span>Previous</span>
+      </button>
+
+      <!-- Slide Jump Dropdown -->
+      <select id="slideSelect" onchange="goToSlide(parseInt(this.value))" class="bg-slate-900 border border-white/10 rounded-xl px-3 py-1.5 text-xs font-mono text-slate-300 focus:outline-none focus:border-emerald-500 cursor-pointer">
+        <!-- Generated by JS -->
+      </select>
+
+      <button onclick="nextSlide()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white transition-all flex items-center gap-2 shadow-sm cursor-pointer active:scale-95">
+        <span>Next</span>
+        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+      </button>
+    </div>
+  </footer>
+
+  <!-- PRESENTATION SCRIPT -->
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    let currentSlide = 0;
+
+    const progressBar = document.getElementById('progressBar');
+    const slideCounter = document.getElementById('slideCounter');
+    const slideSelect = document.getElementById('slideSelect');
+
+    // Populate Slide Dropdown
+    slides.forEach((slide, index) => {
+      const title = slide.getAttribute('data-title') || `Slide ${index + 1}`;
+      const option = document.createElement('option');
+      option.value = index;
+      option.textContent = `${String(index + 1).padStart(2, '0')}. ${title}`;
+      slideSelect.appendChild(option);
+    });
+
+    function updatePresentation() {
+      slides.forEach((slide, index) => {
+        if (index === currentSlide) {
+          slide.classList.add('active');
+        } else {
+          slide.classList.remove('active');
+        }
+      });
+
+      // Update Meter & Counter
+      const progressPercent = ((currentSlide + 1) / totalSlides) * 100;
+      progressBar.style.width = `${progressPercent}%`;
+      slideCounter.textContent = `${String(currentSlide + 1).padStart(2, '0')} / ${String(totalSlides).padStart(2, '0')}`;
+      slideSelect.value = currentSlide;
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        currentSlide++;
+        updatePresentation();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updatePresentation();
+      }
+    }
+
+    function goToSlide(index) {
+      if (index >= 0 && index < totalSlides) {
+        currentSlide = index;
+        updatePresentation();
+      }
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+          console.warn(`Error attempting to enable fullscreen: ${err.message}`);
+        });
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    // Keyboard Shortcuts
+    document.addEventListener('keydown', (e) => {
+      switch(e.key) {
+        case 'ArrowRight':
+        case ' ':
+        case 'PageDown':
+          e.preventDefault();
+          nextSlide();
+          break;
+        case 'ArrowLeft':
+        case 'Backspace':
+        case 'PageUp':
+          e.preventDefault();
+          prevSlide();
+          break;
+        case 'Home':
+          e.preventDefault();
+          goToSlide(0);
+          break;
+        case 'End':
+          e.preventDefault();
+          goToSlide(totalSlides - 1);
+          break;
+        case 'f':
+        case 'F':
+          e.preventDefault();
+          toggleFullscreen();
+          break;
+      }
+    });
+
+    // Touch / Swipe Support
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+
+    document.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      if (touchStartX - touchEndX > 50) {
+        nextSlide();
+      }
+      if (touchEndX - touchStartX > 50) {
+        prevSlide();
+      }
+    });
+
+    // Initialize
+    updatePresentation();
+  </script>
+</body>
+</html>

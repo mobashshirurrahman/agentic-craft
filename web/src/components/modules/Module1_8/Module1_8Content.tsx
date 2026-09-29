@@ -1,24 +1,25 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import {
+  Target,
+  Check,
+  ArrowRight,
   Brain,
   HardDrive,
   Cpu,
   Database,
-  ArrowRight,
-  CheckCircle2,
+  HelpCircle,
   AlertTriangle,
+  Lightbulb,
   Sparkles,
-  BookOpen,
-  Terminal,
   Zap,
   Layers,
   History,
   Clock,
   KeyRound,
-  Network,
   Search,
 } from "lucide-react";
 import AgentMemoryArchitectureVisualizer from "./AgentMemoryArchitectureVisualizer";
@@ -26,372 +27,499 @@ import MemoryStorageComparisonStudio from "./MemoryStorageComparisonStudio";
 import Module1_8Quiz from "./Module1_8Quiz";
 
 export default function Module1_8Content() {
+  const [selectedMemType, setSelectedMemType] = useState<string>("semantic");
+  const [showQuiz, setShowQuiz] = useState<boolean>(false);
+
+  const memoryTypes = [
+    {
+      id: "working",
+      title: "1. Working RAM",
+      tagline: "In-Context Window",
+      desc: "Fast, volatile scratchpad containing active multi-turn dialog and intermediate tool outputs.",
+      icon: Cpu,
+      color: "text-sky-600 dark:text-sky-400",
+      bg: "bg-sky-50 dark:bg-sky-500/10",
+      border: "border-sky-200 dark:border-sky-500/30",
+      badge: "Sub-millisecond",
+      codeSnippet: `# In-Context Working Memory (RAM)
+messages = [
+    {"role": "system", "content": "You are a cloud DevOps agent."},
+    {"role": "user", "content": "Deploy v2.4 to staging."},
+    {"role": "tool", "content": "Deployment started: job_881"}
+]`,
+    },
+    {
+      id: "semantic",
+      title: "2. Semantic",
+      tagline: "Facts & Preferences",
+      desc: "Stores durable user facts, domain terminology, and preferences ('User prefers Python over Go').",
+      icon: Brain,
+      color: "text-purple-600 dark:text-purple-400",
+      bg: "bg-purple-50 dark:bg-purple-500/10",
+      border: "border-purple-200 dark:border-purple-500/30",
+      badge: "Vector & Key-Value",
+      codeSnippet: `# Semantic Fact Memory
+memory_vault.save_fact(
+    user_id="usr_401",
+    fact="Preferred cloud is AWS; deploys strictly to us-east-1",
+    tags=["infra", "preferences"]
+)`,
+    },
+    {
+      id: "episodic",
+      title: "3. Episodic",
+      tagline: "Past Event History",
+      desc: "Autobiographical memory of historical runs, past incident resolutions, and multi-session interactions.",
+      icon: History,
+      color: "text-amber-600 dark:text-amber-400",
+      bg: "bg-amber-50 dark:bg-amber-500/10",
+      border: "border-amber-200 dark:border-amber-500/30",
+      badge: "Timestamped Events",
+      codeSnippet: `# Episodic Event Log
+db.insert_episode({
+    "timestamp": "2026-08-14T10:04:00Z",
+    "incident": "Redis connection pool exhaustion",
+    "resolution": "Increased max_connections to 500 in redis.conf"
+})`,
+    },
+    {
+      id: "procedural",
+      title: "4. Procedural",
+      tagline: "Rules & Checklists",
+      desc: "Explicit instructions, organizational policies, and execution playbooks that govern agent behavior.",
+      icon: HardDrive,
+      color: "text-teal-600 dark:text-teal-400",
+      bg: "bg-teal-50 dark:bg-teal-500/10",
+      border: "border-teal-200 dark:border-teal-500/30",
+      badge: "Execution Rules",
+      codeSnippet: `# Procedural Policy Check
+def audit_action_policy(action):
+    # Rule 1: Production database deletions strictly forbidden
+    if "DROP TABLE" in action.sql:
+        raise PolicyViolation("Procedural policy forbids DROP statements")`,
+    },
+  ];
+
+  const currentType =
+    memoryTypes.find((m) => m.id === selectedMemType) || memoryTypes[1];
+
   return (
-    <div className="space-y-12">
-      {/* SECTION 1: Friendly Welcome & The RAM vs SSD Analogy */}
-      <section className="rounded-2xl border border-teal-500/30 bg-gradient-to-br from-teal-500/10 via-slate-900/80 to-slate-950 p-6 md:p-8 relative overflow-hidden dark:from-teal-500/10 dark:via-slate-900/80 dark:to-slate-950 light:from-teal-50 light:via-white light:to-slate-50 light:border-teal-200">
-        <div className="relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 border border-teal-500/40 text-teal-300 dark:text-teal-300 light:text-teal-700 text-xs font-mono font-semibold mb-4">
-            <Brain className="w-3.5 h-3.5" />
-            <span>Module 1.8 • Foundations & Architecture</span>
+    <div className="space-y-10 max-w-5xl mx-auto pb-16">
+      {/* 🎯 TOP OBJECTIVE BANNER */}
+      <section className="rounded-2xl border border-teal-200 dark:border-teal-500/30 bg-teal-50/60 dark:bg-teal-500/5 p-4 sm:p-6 backdrop-blur-sm shadow-sm">
+        <div className="flex items-start gap-3.5">
+          <div className="p-2.5 rounded-xl bg-teal-600 text-white shrink-0 shadow-sm mt-0.5">
+            <Target className="w-5 h-5" />
           </div>
-
-          <h2 className="text-2xl md:text-3xl font-extrabold text-white dark:text-white light:text-slate-900 tracking-tight">
-            Hello and Welcome! Let's Master Agent Memory Systems
-          </h2>
-
-          <p className="mt-3 text-slate-300 dark:text-slate-300 light:text-slate-700 text-sm md:text-base leading-relaxed">
-            Have you ever chatted with an AI bot that seemed brilliant for 5 minutes, but the moment you opened a new tab the next morning, it treated you like a complete stranger?
-            <br /><br />
-            An AI without memory suffers from perpetual amnesia. Memory transforms a stateless predictive text engine into a trusted, personalized digital colleague that learns your coding habits, respects your enterprise rules, and remembers your preferences across months!
-          </p>
-
-          {/* Computer RAM vs SSD Analogy */}
-          <div className="mt-6 p-5 rounded-xl border border-teal-500/40 bg-teal-950/30 dark:bg-teal-950/30 light:bg-teal-50/80 flex flex-col md:flex-row gap-4 items-start">
-            <div className="w-12 h-12 rounded-xl bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400 flex-shrink-0">
-              <Sparkles className="w-6 h-6" />
-            </div>
-            <div>
-              <h4 className="font-bold text-white dark:text-white light:text-slate-900 text-base">
-                The Computer Analogy: Fast RAM vs. Durable NVMe SSD
-              </h4>
-              <p className="text-xs md:text-sm text-slate-300 dark:text-slate-300 light:text-slate-700 mt-1 leading-relaxed">
-                Your laptop relies on two distinct memory architectures:
-                <br />
-                • <strong>RAM (Short-Term Memory):</strong> Super-fast, holds currently open browser tabs and working code variables. But when you power down your computer, RAM vanishes instantly.
-                <br />
-                • <strong>NVMe SSD (Long-Term Memory):</strong> Permanent, retains your files, operating system, and documents even when the computer is shut down for months.
-              </p>
-              <p className="text-xs md:text-sm text-teal-300 dark:text-teal-300 light:text-teal-800 mt-2 font-medium">
-                Modern AI agents operate on this exact dual architecture: Short-Term Working Context (RAM) for the active conversation, and Long-Term Persistent Stores (SSD) that survive across sessions!
-              </p>
+          <div className="space-y-2 flex-1">
+            <h2 className="text-sm font-mono uppercase tracking-wider text-teal-800 dark:text-teal-400 font-bold">
+              🎯 By the end of this module, you will:
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
+                <span>Distinguish volatile short-term RAM from persistent long-term storage vaults</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
+                <span>Master the 3 long-term forms: Semantic (facts), Episodic (events), and Procedural (rules)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
+                <span>Implement Hybrid Writing: low-latency Hot Path caching + async background indexing</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
+                <span>Select optimal storage engines: Vector DBs vs PostgreSQL vs Redis caches</span>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* SECTION 2: Memory in Action — With vs. Without Memory */}
-      <section className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400">
-            <History className="w-4 h-4" />
-          </div>
-          <h3 className="text-xl md:text-2xl font-bold text-white dark:text-white light:text-slate-900">
-            Memory in Action: The Amnesia Contrast
-          </h3>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Without Memory */}
-          <div className="rounded-xl border border-rose-500/30 bg-rose-500/5 dark:bg-rose-500/5 light:bg-rose-50/50 p-5 space-y-3">
-            <span className="text-xs font-mono font-bold text-rose-400 uppercase tracking-wider block">
-              Without Memory (Stateless Amnesia)
-            </span>
-            <ul className="space-y-2 text-xs md:text-sm text-slate-300 dark:text-slate-300 light:text-slate-700">
-              <li className="flex items-start gap-2">
-                <span className="text-rose-400 font-bold">•</span>
-                <span>Treats every single turn and new session as a brand new interaction.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-rose-400 font-bold">•</span>
-                <span>Has zero context from previous conversations or past bugs resolved.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-rose-400 font-bold">•</span>
-                <span>Cannot learn user preferences or team coding standards.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-rose-400 font-bold">•</span>
-                <span>Forces users to tediously re-explain their requirements repeatedly.</span>
-              </li>
-            </ul>
-            <div className="p-3 rounded-lg bg-slate-950 font-mono text-xs text-rose-300">
-              User: "My name is Alice." ➔ Agent: "Nice to meet you!"<br />
-              User: "What is my name?" ➔ Agent: "I'm sorry, I don't know your name."
-            </div>
-          </div>
-
-          {/* With Memory */}
-          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 dark:bg-emerald-500/5 light:bg-emerald-50/50 p-5 space-y-3">
-            <span className="text-xs font-mono font-bold text-emerald-400 uppercase tracking-wider block">
-              With Memory (Cognitive Continuity)
-            </span>
-            <ul className="space-y-2 text-xs md:text-sm text-slate-300 dark:text-slate-300 light:text-slate-700">
-              <li className="flex items-start gap-2">
-                <span className="text-emerald-400 font-bold">•</span>
-                <span>References previous interactions and builds continuity over time.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-emerald-400 font-bold">•</span>
-                <span>Learns user preferences (e.g. prefers Python over JS, uses dark mode).</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-emerald-400 font-bold">•</span>
-                <span>Applies past troubleshooting successes to solve new similar errors.</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-emerald-400 font-bold">•</span>
-                <span>Tracks multi-day project progress across independent sessions.</span>
-              </li>
-            </ul>
-            <div className="p-3 rounded-lg bg-slate-950 font-mono text-xs text-emerald-300">
-              User: "My name is Alice." ➔ Agent: "Nice to meet you, Alice!"<br />
-              User: "What is my name?" ➔ Agent: "Your name is Alice."
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 3: Short-Term Memory vs. Long-Term Memory */}
-      <section className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400">
-            <Layers className="w-4 h-4" />
-          </div>
-          <h3 className="text-xl md:text-2xl font-bold text-white dark:text-white light:text-slate-900">
-            Short-Term Memory vs. Long-Term Memory
-          </h3>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Short-Term */}
-          <div className="p-5 rounded-xl border border-sky-500/30 bg-sky-500/5 dark:bg-sky-500/5 light:bg-sky-50/50 space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="font-bold text-base text-white dark:text-white light:text-slate-900 flex items-center gap-2">
-                <Cpu className="w-4 h-4 text-sky-400" />
-                <span>Short-Term Memory</span>
-              </h4>
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-sky-500/20 text-sky-300">
-                Session Scope
-              </span>
-            </div>
-            <p className="text-xs text-slate-300 dark:text-slate-300 light:text-slate-600 leading-relaxed">
-              Maintains immediate context within a single interaction. Cleared after the session ends.
-            </p>
-            <div className="space-y-1.5 text-xs font-mono text-slate-300 dark:text-slate-300 light:text-slate-700">
-              <div>• <strong>Conversation History:</strong> Recent user/assistant dialogue turns.</div>
-              <div>• <strong>Working State:</strong> Active plan, scratchpad, reasoning checkpoints.</div>
-              <div>• <strong>Context:</strong> Active project constraints & current domain focus.</div>
-              <div>• <strong>Tool Results:</strong> Raw outputs from recently executed APIs.</div>
-            </div>
-          </div>
-
-          {/* Long-Term */}
-          <div className="p-5 rounded-xl border border-teal-500/30 bg-teal-500/5 dark:bg-teal-500/5 light:bg-teal-50/50 space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="font-bold text-base text-white dark:text-white light:text-slate-900 flex items-center gap-2">
-                <Database className="w-4 h-4 text-teal-400" />
-                <span>Long-Term Memory</span>
-              </h4>
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-teal-500/20 text-teal-300">
-                Persistent Across Months
-              </span>
-            </div>
-            <p className="text-xs text-slate-300 dark:text-slate-300 light:text-slate-600 leading-relaxed">
-              Retains facts, user patterns, and domain experiences across multiple sessions indefinitely.
-            </p>
-            <div className="space-y-1.5 text-xs font-mono text-slate-300 dark:text-slate-300 light:text-slate-700">
-              <div>• <strong>User Profiles:</strong> Identity, roles, tech stacks, preferred tools.</div>
-              <div>• <strong>Learned Facts:</strong> System architecture decisions and domain rules.</div>
-              <div>• <strong>Historical Interactions:</strong> Previous troubleshooting logs and outcomes.</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 4: The 3 Classical Types of Long-Term Memory */}
-      <section className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400">
-            <Sparkles className="w-4 h-4" />
-          </div>
-          <h3 className="text-xl md:text-2xl font-bold text-white dark:text-white light:text-slate-900">
-            The 3 Types of Long-Term Memory
-          </h3>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Semantic Memory */}
-          <div className="p-5 rounded-xl border border-purple-500/30 bg-slate-900/60 dark:bg-slate-900/60 light:bg-white space-y-2">
-            <div className="flex items-center gap-2 text-purple-400 font-bold text-sm">
-              <Brain className="w-4 h-4" />
-              <span>1. Semantic Memory</span>
-            </div>
-            <span className="text-[11px] font-mono text-slate-400 block">Facts, Concepts & Preferences</span>
-            <p className="text-xs text-slate-300 dark:text-slate-300 light:text-slate-600 leading-relaxed">
-              Stores generalized factual knowledge about the world, the user, or the enterprise domain.
-            </p>
-            <div className="p-2.5 rounded bg-slate-950 font-mono text-[11px] text-purple-300">
-              Example: "User prefers Python over JavaScript and deploys on AWS ECS."
-            </div>
-          </div>
-
-          {/* Episodic Memory */}
-          <div className="p-5 rounded-xl border border-sky-500/30 bg-slate-900/60 dark:bg-slate-900/60 light:bg-white space-y-2">
-            <div className="flex items-center gap-2 text-sky-400 font-bold text-sm">
-              <Clock className="w-4 h-4" />
-              <span>2. Episodic Memory</span>
-            </div>
-            <span className="text-[11px] font-mono text-slate-400 block">Past Experiences & Events</span>
-            <p className="text-xs text-slate-300 dark:text-slate-300 light:text-slate-600 leading-relaxed">
-              Stores specific biographical episodes and past interactions bound to a time, place, and outcome.
-            </p>
-            <div className="p-2.5 rounded bg-slate-950 font-mono text-[11px] text-sky-300">
-              Example: "On Dec 15, 2024, user reported an authentication bug in auth.py."
-            </div>
-          </div>
-
-          {/* Procedural Memory */}
-          <div className="p-5 rounded-xl border border-emerald-500/30 bg-slate-900/60 dark:bg-slate-900/60 light:bg-white space-y-2">
-            <div className="flex items-center gap-2 text-emerald-400 font-bold text-sm">
-              <Zap className="w-4 h-4" />
-              <span>3. Procedural Memory</span>
-            </div>
-            <span className="text-[11px] font-mono text-slate-400 block">Instructions, Rules & Policies</span>
-            <p className="text-xs text-slate-300 dark:text-slate-300 light:text-slate-600 leading-relaxed">
-              Stores how actions must be executed: policies, checklist rules, and learned behavioral blueprints.
-            </p>
-            <div className="p-2.5 rounded bg-slate-950 font-mono text-[11px] text-emerald-300">
-              Example: "When user requests a PR review, check for SQL injection & linting first."
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 5: Interactive Visualizer */}
+      {/* SECTION 1: ELIMINATING AI AMNESIA */}
       <section className="space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400">
-            <Cpu className="w-4 h-4" />
-          </div>
-          <h3 className="text-xl md:text-2xl font-bold text-white dark:text-white light:text-slate-900">
-            Dual-Memory Architecture Explorer (Interactive)
-          </h3>
+        <div className="flex items-center gap-2">
+          <span className="px-2.5 py-0.5 rounded-full bg-teal-50 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/30 text-teal-700 dark:text-teal-400 font-mono text-xs font-bold">
+            Section 1 • Persistent Intelligence
+          </span>
+          <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1" />
         </div>
 
-        <p className="text-xs md:text-sm text-slate-300 dark:text-slate-300 light:text-slate-600 leading-relaxed">
-          Simulate an agent onboarding a user on Day 1, extracting key tech stack facts, and recalling them seamlessly 30 days later in a completely fresh session!
-        </p>
+        <div className="space-y-2">
+          <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            Memory Eliminates AI Amnesia
+          </h3>
+          <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base leading-relaxed">
+            Without memory, an LLM treats the user as a complete stranger every time a new browser session opens. It forgets your coding preferences, your company architecture, and the bug you debugged together yesterday.
+          </p>
+          <p className="text-slate-600 dark:text-slate-300 text-sm sm:text-base leading-relaxed">
+            <strong className="text-teal-700 dark:text-teal-400 font-semibold">Memory Systems</strong> transform stateless autocomplete models into personalized digital partners that retain context, learn preferences, and recall past resolutions across months.
+          </p>
+        </div>
 
-        {/* Embedded Visualizer */}
+        {/* Visual Analogy: Laptop RAM vs NVMe SSD */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-1">
+          <div className="p-4 rounded-xl border border-sky-200 dark:border-sky-500/30 bg-sky-50/50 dark:bg-sky-950/10 space-y-2">
+            <span className="text-xs font-mono font-bold uppercase text-sky-700 dark:text-sky-400 block">
+              ⚡ Ultra-Fast RAM (In-Context Scratchpad)
+            </span>
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              Lives directly in the model&apos;s context window. Instantaneous to read during generation, but volatile: erased the moment the session terminates. Limited by context length and token costs.
+            </p>
+          </div>
+
+          <div className="p-4 rounded-xl border border-teal-200 dark:border-teal-500/30 bg-teal-50/50 dark:bg-teal-950/10 space-y-2">
+            <span className="text-xs font-mono font-bold uppercase text-teal-700 dark:text-teal-400 block">
+              💾 Durable NVMe SSD (Persistent Knowledge Vault)
+            </span>
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              Stored outside the model in vector databases (Pinecone, Chroma) and relational tables (PostgreSQL). Survives session restarts, scalable to millions of records, and queried via semantic retrieval.
+            </p>
+          </div>
+        </div>
+
+        {/* ✍️ HANDWRITTEN INSTRUCTOR NOTE */}
+        <div className="p-3.5 sm:p-4 rounded-xl bg-amber-50/90 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/30 shadow-sm sm:-rotate-0.5 transition-transform">
+          <div className="flex items-start gap-2.5">
+            <span className="text-lg">✍️</span>
+            <div className="space-y-0.5">
+              <span className="text-xs font-bold text-amber-950 dark:text-amber-300 font-mono uppercase tracking-wider block">
+                Instructor Note • Never Stuff Everything into Context
+              </span>
+              <p className="text-xs sm:text-sm text-amber-950 dark:text-amber-200 font-handwriting leading-snug">
+                &quot;Just because modern models support 1 million tokens doesn&apos;t mean you should stuff 50 past chat sessions into every prompt. It explodes inference latency and causes &apos;lost in the middle&apos; attention degradation. Retrieve only the top-3 relevant memories!&quot;
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 2: THE 4 CORE MEMORY TYPES (INTERACTIVE GRID) */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2">
+          <span className="px-2.5 py-0.5 rounded-full bg-teal-50 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/30 text-teal-700 dark:text-teal-400 font-mono text-xs font-bold">
+            Section 2 • Memory Taxonomy
+          </span>
+          <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1" />
+        </div>
+
+        <div className="space-y-1">
+          <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            The 4 Memory Subsystems
+          </h3>
+          <p className="text-slate-600 dark:text-slate-300 text-xs sm:text-sm">
+            Select a memory subsystem below to inspect its data structure and retrieval pattern:
+          </p>
+        </div>
+
+        {/* 2x2 MOBILE / 4-COL DESKTOP SYMMETRICAL CARDS */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3.5">
+          {memoryTypes.map((m) => {
+            const Icon = m.icon;
+            const isSelected = selectedMemType === m.id;
+
+            return (
+              <button
+                key={m.id}
+                onClick={() => setSelectedMemType(m.id)}
+                className={`p-3 sm:p-4 rounded-xl border text-left transition-all relative flex flex-col justify-between min-h-[145px] sm:min-h-[160px] touch-manipulation active:scale-95 ${
+                  isSelected
+                    ? "bg-white dark:bg-slate-900 border-teal-500 ring-2 ring-teal-500/20 shadow-md"
+                    : "bg-white dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-sm"
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className={`p-2 rounded-lg ${m.bg} ${m.color}`}>
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    {isSelected && (
+                      <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
+                    )}
+                  </div>
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-tight">
+                    {m.title}
+                  </h4>
+                  <p className="text-[10px] sm:text-xs font-mono text-teal-700 dark:text-teal-400 mt-0.5">
+                    {m.tagline}
+                  </p>
+                </div>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed mt-2">
+                  {m.desc}
+                </p>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Dynamic Deep-Dive Inspection Box */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentType.id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+            className="p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-sm space-y-3"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-mono font-bold uppercase tracking-wider text-teal-700 dark:text-teal-400">
+                  Subsystem: {currentType.title}
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                  {currentType.badge}
+                </span>
+              </div>
+              <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                Code Interface
+              </span>
+            </div>
+
+            <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+              {currentType.desc}
+            </p>
+
+            <div className="p-3 rounded-lg bg-slate-950 border border-slate-800 text-xs font-mono text-slate-200 overflow-x-auto">
+              <pre className="text-[11px] sm:text-xs text-emerald-400 leading-relaxed">
+                <code>{currentType.codeSnippet}</code>
+              </pre>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* 💡 HANDWRITTEN MENTAL MODEL NOTE */}
+        <div className="p-3.5 sm:p-4 rounded-xl bg-teal-50/90 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/30 shadow-sm">
+          <div className="flex items-start gap-2.5">
+            <span className="text-lg">💡</span>
+            <div className="space-y-0.5">
+              <span className="text-xs font-bold text-teal-950 dark:text-teal-300 font-mono uppercase tracking-wider block">
+                Mental Model • Human Memory
+              </span>
+              <p className="text-xs sm:text-sm text-teal-950 dark:text-teal-200 font-handwriting leading-snug">
+                &quot;Semantic memory is knowing Paris is the capital of France. Episodic memory is remembering the croissant you ate near the Eiffel Tower last summer. Procedural memory is knowing how to ride a bicycle without thinking!&quot;
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 3: THE HYBRID MEMORY PIPELINE */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2">
+          <span className="px-2.5 py-0.5 rounded-full bg-teal-50 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/30 text-teal-700 dark:text-teal-400 font-mono text-xs font-bold">
+            Section 3 • Production Architecture
+          </span>
+          <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1" />
+        </div>
+
+        <div className="space-y-1">
+          <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            The Hybrid Writing Architecture
+          </h3>
+          <p className="text-slate-600 dark:text-slate-300 text-xs sm:text-sm leading-relaxed">
+            How do enterprise agents update memory without slowing down real-time conversational responses?
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/40 space-y-2 shadow-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-mono font-bold text-slate-900 dark:text-white">
+                1. Synchronous Hot Path
+              </span>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-500/30">
+                &lt; 5ms Latency
+              </span>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+              When a user explicitly says &quot;Call me Alice&quot;, write directly to Redis/KV cache. Instantaneous recall for the immediate next turn without delaying token streaming.
+            </p>
+          </div>
+
+          <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/40 space-y-2 shadow-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-mono font-bold text-slate-900 dark:text-white">
+                2. Asynchronous Background Consolidation
+              </span>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-teal-50 dark:bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-500/30">
+                Background Worker
+              </span>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+              Deep fact extraction, entity linking, and embedding generation run in a background worker (Celery/BullMQ) after the response is sent, keeping user latency zero.
+            </p>
+          </div>
+        </div>
+
+        {/* 📌 CORE RULE NOTE */}
+        <div className="p-3.5 sm:p-4 rounded-xl bg-sky-50/90 dark:bg-sky-500/10 border border-sky-200 dark:border-sky-500/30 shadow-sm">
+          <div className="flex items-start gap-2.5">
+            <span className="text-lg">📌</span>
+            <div className="space-y-0.5">
+              <span className="text-xs font-bold text-sky-950 dark:text-sky-300 font-mono uppercase tracking-wider block">
+                The Memory Pruning Rule
+              </span>
+              <p className="text-xs sm:text-sm text-sky-950 dark:text-sky-200 font-handwriting leading-snug">
+                &quot;Memory is only as good as its retrieval accuracy. Implement decay rates: recent and frequently accessed memories receive higher relevance scores, while obsolete facts are consolidated or purged!&quot;
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 4: IN-CONTEXT SIMULATION (AgentMemoryArchitectureVisualizer) */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2">
+          <span className="px-2.5 py-0.5 rounded-full bg-teal-50 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/30 text-teal-700 dark:text-teal-400 font-mono text-xs font-bold">
+            Section 4 • Interactive Simulator
+          </span>
+          <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1" />
+        </div>
+
         <AgentMemoryArchitectureVisualizer />
       </section>
 
-      {/* SECTION 6: Memory Writing Strategies & Storage Engines */}
-      <section className="space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-teal-500/20 border border-teal-500/40 flex items-center justify-center text-teal-400">
-            <Database className="w-4 h-4" />
-          </div>
-          <h3 className="text-xl md:text-2xl font-bold text-white dark:text-white light:text-slate-900">
-            Writing Strategies & Storage Options
-          </h3>
-        </div>
-
-        {/* Writing Strategies Comparison Table */}
-        <div className="rounded-xl border border-slate-800 dark:border-slate-800 light:border-slate-200 overflow-hidden bg-slate-900/60 dark:bg-slate-900/60 light:bg-white">
-          <div className="p-4 border-b border-slate-800 dark:border-slate-800 light:border-slate-200">
-            <h4 className="text-sm font-bold text-white dark:text-white light:text-slate-900">
-              Writing Strategies: Hot Path (Synchronous) vs. Background (Asynchronous)
-            </h4>
-          </div>
-
-          <div className="overflow-x-auto text-xs">
-            <table className="w-full text-left font-mono">
-              <thead className="bg-slate-950/60 dark:bg-slate-950/60 light:bg-slate-100 text-slate-400 border-b border-slate-800">
-                <tr>
-                  <th className="p-3">Aspect</th>
-                  <th className="p-3 text-amber-400">Hot Path (Synchronous)</th>
-                  <th className="p-3 text-teal-400">Background (Asynchronous)</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800 dark:divide-slate-800 light:divide-slate-200 text-slate-300 dark:text-slate-300 light:text-slate-700">
-                <tr>
-                  <td className="p-3 font-bold text-white dark:text-white light:text-slate-900">When</td>
-                  <td className="p-3">During active user interaction</td>
-                  <td className="p-3">After response is delivered</td>
-                </tr>
-                <tr>
-                  <td className="p-3 font-bold text-white dark:text-white light:text-slate-900">Timing</td>
-                  <td className="p-3 text-rose-400">Real-time, blocks response</td>
-                  <td className="p-3 text-emerald-400">Separate worker process, 0 latency</td>
-                </tr>
-                <tr>
-                  <td className="p-3 font-bold text-white dark:text-white light:text-slate-900">Pros</td>
-                  <td className="p-3">Immediate availability, fully synchronized</td>
-                  <td className="p-3">No latency impact, scalable batch processing</td>
-                </tr>
-                <tr>
-                  <td className="p-3 font-bold text-white dark:text-white light:text-slate-900">Cons</td>
-                  <td className="p-3">Adds response latency, agent multitasking load</td>
-                  <td className="p-3">Delayed availability by a few seconds</td>
-                </tr>
-                <tr>
-                  <td className="p-3 font-bold text-white dark:text-white light:text-slate-900">Best For</td>
-                  <td className="p-3">Explicit commands ("Call me Dr. Smith")</td>
-                  <td className="p-3">Deep entity extraction & episodic summaries</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Embedded Storage Comparison Studio */}
-        <MemoryStorageComparisonStudio />
-      </section>
-
-      {/* SECTION 7: The Complete Hybrid Memory Flow */}
+      {/* SECTION 5: HANDS-ON STORAGE STUDIO (MemoryStorageComparisonStudio) */}
       <section className="space-y-4">
-        <div className="rounded-xl border border-teal-500/40 bg-gradient-to-r from-teal-500/10 via-slate-900/60 to-transparent p-5 text-xs md:text-sm text-slate-300 dark:text-slate-300 light:text-slate-700 leading-relaxed space-y-3">
-          <strong className="text-teal-300 dark:text-teal-300 light:text-teal-700 block text-base">
-            The Complete Hybrid Memory Lifecycle
-          </strong>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1 font-mono text-xs">
-            <div className="p-3 rounded-lg border border-slate-800 dark:border-slate-800 light:border-slate-200 bg-slate-950/60 dark:bg-slate-950/60 light:bg-slate-50 space-y-1">
-              <span className="font-bold text-sky-400 block mb-1">1. Reading (Context Preparation):</span>
-              <div>• Ingest recent short-term messages from current session.</div>
-              <div>• Query long-term vector store for top semantic matches.</div>
-              <div>• Merge into system prompt ➔ LLM generates response.</div>
-            </div>
-            <div className="p-3 rounded-lg border border-slate-800 dark:border-slate-800 light:border-slate-200 bg-slate-950/60 dark:bg-slate-950/60 light:bg-slate-50 space-y-1">
-              <span className="font-bold text-teal-400 block mb-1">2. Writing (Memory Update):</span>
-              <div>• Immediately append turn to short-term session history.</div>
-              <div>• Evaluate importance of facts revealed in user prompt.</div>
-              <div>• Asynchronously extract and upsert to long-term vault!</div>
+        <div className="flex items-center gap-2">
+          <span className="px-2.5 py-0.5 rounded-full bg-teal-50 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/30 text-teal-700 dark:text-teal-400 font-mono text-xs font-bold">
+            Section 5 • Hands-On Storage Laboratory
+          </span>
+          <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1" />
+        </div>
+
+        <MemoryStorageComparisonStudio />
+
+        {/* 📝 PRO-TIP NOTE */}
+        <div className="p-3.5 sm:p-4 rounded-xl bg-amber-50/90 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/30 shadow-sm">
+          <div className="flex items-start gap-2.5">
+            <span className="text-lg">📝</span>
+            <div className="space-y-0.5">
+              <span className="text-xs font-bold text-amber-950 dark:text-amber-300 font-mono uppercase tracking-wider block">
+                Production Pro-Tip • Metadata Filtering
+              </span>
+              <p className="text-xs sm:text-sm text-amber-950 dark:text-amber-200 font-handwriting leading-snug">
+                &quot;Pure vector similarity search can retrieve memories from other users or outdated projects. Always attach structured metadata (`user_id`, `project_id`, `timestamp`) and filter by metadata before running cosine similarity!&quot;
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* SECTION 8: Concept Check Quiz */}
-      <section>
-        <Module1_8Quiz />
+      {/* SECTION 6: COMMON MISCONCEPTIONS (TRAPS) */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2">
+          <span className="px-2.5 py-0.5 rounded-full bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 text-rose-700 dark:text-rose-400 font-mono text-xs font-bold">
+            Section 6 • Production Traps
+          </span>
+          <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1" />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          <div className="p-4 rounded-xl border border-rose-200 dark:border-rose-500/30 bg-rose-50/50 dark:bg-rose-950/10 space-y-2">
+            <div className="flex items-center gap-2 text-rose-700 dark:text-rose-400 font-bold text-xs font-mono uppercase">
+              <AlertTriangle className="w-4 h-4" />
+              TRAP #1: The Context Window Bloat Trap
+            </div>
+            <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+              Injecting 20 retrieved memories into every prompt blows up context costs and causes attention dilution where the model misses the main user instruction.
+            </p>
+            <p className="text-xs text-rose-800 dark:text-rose-300 font-semibold pt-1">
+              Fix: Strict `top_k=3` memory injection with high similarity score thresholds (&gt; 0.82).
+            </p>
+          </div>
+
+          <div className="p-4 rounded-xl border border-amber-200 dark:border-amber-500/30 bg-amber-50/50 dark:bg-amber-950/10 space-y-2">
+            <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-bold text-xs font-mono uppercase">
+              <AlertTriangle className="w-4 h-4" />
+              TRAP #2: Outdated Memory Contradictions
+            </div>
+            <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+              User previously used React, but now switched to Vue. If both memories exist in the vector store, the agent hallucinates conflicting tech stacks.
+            </p>
+            <p className="text-xs text-amber-800 dark:text-amber-300 font-semibold pt-1">
+              Fix: Implement memory invalidation and upsert logic. Newer statements overwrite contradictory prior facts.
+            </p>
+          </div>
+        </div>
       </section>
 
-      {/* SECTION 9: Teacher Summary & Bridge to Module 1.9 */}
-      <section className="rounded-2xl border border-teal-500/40 bg-gradient-to-r from-teal-500/10 via-slate-900/70 to-slate-950 p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 dark:from-teal-500/10 dark:via-slate-900/70 dark:to-slate-950 light:from-teal-50 light:via-white light:to-slate-50 light:border-teal-200">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-teal-400 font-mono text-xs uppercase tracking-wider font-bold">
-            <BookOpen className="w-4 h-4" />
-            <span>Teacher Summary • Module 1.8 Complete!</span>
-          </div>
-          <h4 className="text-lg md:text-xl font-bold text-white dark:text-white light:text-slate-900">
-            You now understand how AI Agents remember across time and space!
+      {/* SECTION 7: KEY TAKEAWAYS & KNOWLEDGE CHECK */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2">
+          <span className="px-2.5 py-0.5 rounded-full bg-teal-50 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/30 text-teal-700 dark:text-teal-400 font-mono text-xs font-bold">
+            Section 7 • Key Takeaways &amp; Quiz
+          </span>
+          <div className="h-px bg-slate-200 dark:bg-slate-800 flex-1" />
+        </div>
+
+        <div className="p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 space-y-3">
+          <h4 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono">
+            Summary Checklist
           </h4>
-          <p className="text-xs md:text-sm text-slate-300 dark:text-slate-300 light:text-slate-700 max-w-2xl leading-relaxed">
-            We covered Short-Term RAM vs Long-Term SSD persistence, the 3 types of memory (Semantic, Episodic, and Procedural), the Hybrid Hot-Path vs Background writing strategy, and the 4 storage engines.
-            <br />
-            Next up: <strong>Module 1.9: Comparing Single-Agent and Multi-Agent Architectures</strong>, where we explore when a single agent is enough versus when you must build a team!
-          </p>
+          <div className="space-y-2 text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+            <div className="flex items-start gap-2">
+              <Check className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0 mt-0.5" />
+              <span>
+                <strong>Dual architecture is standard:</strong> Fast volatile RAM in the context window paired with persistent external storage (vector DB + SQL) for multi-session recall.
+              </span>
+            </div>
+            <div className="flex items-start gap-2">
+              <Check className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0 mt-0.5" />
+              <span>
+                <strong>Three long-term forms:</strong> Semantic (facts &amp; preferences), Episodic (time-stamped experiences), and Procedural (rules &amp; constraints).
+              </span>
+            </div>
+            <div className="flex items-start gap-2">
+              <Check className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0 mt-0.5" />
+              <span>
+                <strong>Hybrid write pipeline protects UX:</strong> Fast key-value updates on the synchronous hot path; deep indexing and summarization in asynchronous background jobs.
+              </span>
+            </div>
+          </div>
         </div>
 
-        <Link
-          href="/learn/level-1/module-1-9"
-          className="flex items-center gap-2 px-6 py-3 rounded-xl bg-teal-400 hover:bg-teal-300 text-slate-950 font-bold text-xs md:text-sm transition-all shadow-lg hover:shadow-teal-500/20 whitespace-nowrap flex-shrink-0 cursor-pointer"
-        >
-          <span>Next: Module 1.9</span>
-          <ArrowRight className="w-4 h-4" />
-        </Link>
+        {/* Expandable Quiz Container */}
+        <div className="pt-2">
+          {!showQuiz ? (
+            <button
+              onClick={() => setShowQuiz(true)}
+              className="w-full py-3.5 px-4 rounded-xl border border-teal-200 dark:border-teal-500/30 bg-teal-50/60 dark:bg-teal-500/10 hover:bg-teal-100/60 dark:hover:bg-teal-500/20 text-teal-800 dark:text-teal-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow-sm touch-manipulation active:scale-[0.99]"
+            >
+              <HelpCircle className="w-4 h-4" />
+              <span>Take Knowledge Check (3 Questions)</span>
+            </button>
+          ) : (
+            <Module1_8Quiz />
+          )}
+        </div>
+      </section>
+
+      {/* SECTION 8: BRIDGE TO MODULE 1.9 */}
+      <section className="pt-4">
+        <div className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-gradient-to-r from-teal-50/70 via-slate-50 to-sky-50/70 dark:from-teal-950/20 dark:via-slate-900/40 dark:to-sky-950/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+          <div className="space-y-1">
+            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-teal-700 dark:text-teal-400">
+              Next Step in Level 1
+            </span>
+            <h4 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+              Module 1.9: Single-Agent vs Multi-Agent Architectures
+            </h4>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Analyze when to stick with a solitary powerhouse agent vs spinning up multi-agent swarms.
+            </p>
+          </div>
+
+          <Link
+            href="/learn/level-1/module-1-9"
+            className="px-5 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs flex items-center gap-2 transition shadow-sm shrink-0 touch-manipulation active:scale-95"
+          >
+            <span>Proceed to 1.9</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
       </section>
     </div>
   );

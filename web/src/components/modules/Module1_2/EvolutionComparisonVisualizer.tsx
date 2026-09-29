@@ -94,24 +94,24 @@ export default function EvolutionComparisonVisualizer() {
   const active = PARADIGMS.find((p) => p.id === selectedId) || PARADIGMS[2];
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-950 p-5 md:p-7 shadow-2xl relative overflow-hidden">
+    <div className="rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 sm:p-7 shadow-xs relative overflow-hidden transition-colors">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-slate-800">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-200 dark:border-slate-800">
         <div>
-          <span className="text-xs font-mono font-bold text-teal-400 px-2.5 py-0.5 rounded-full bg-teal-500/10 border border-teal-500/30">
+          <span className="text-[10px] sm:text-xs font-mono font-bold text-teal-700 dark:text-teal-400 px-2.5 py-0.5 rounded-full bg-teal-50 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/30">
             Interactive Decision Matrix
           </span>
-          <h3 className="text-xl font-bold text-white mt-1">
+          <h3 className="text-base sm:text-xl font-bold text-slate-900 dark:text-white mt-1">
             The Evolution of LLM Applications
           </h3>
         </div>
-        <span className="text-xs font-mono text-slate-500">
-          Click a paradigm to inspect
+        <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+          Tap a paradigm to inspect
         </span>
       </div>
 
-      {/* 4 Stage Progression Selector */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 my-6">
+      {/* 4 Stage Progression Selector (2x2 Mobile, 4-Col Desktop) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-2.5 my-4 sm:my-6">
         {PARADIGMS.map((item, idx) => {
           const isSelected = item.id === selectedId;
 
@@ -119,20 +119,20 @@ export default function EvolutionComparisonVisualizer() {
             <button
               key={item.id}
               onClick={() => setSelectedId(item.id)}
-              className={`p-3.5 rounded-xl border text-left transition-all relative ${
+              className={`p-3 sm:p-3.5 rounded-xl border text-left transition-all relative cursor-pointer active:scale-95 touch-manipulation ${
                 isSelected
-                  ? `${item.bgGlow} ${item.borderGlow} shadow-lg shadow-slate-950 scale-[1.02]`
-                  : "bg-slate-900/40 border-slate-850 hover:bg-slate-900 hover:border-slate-700"
+                  ? `${item.bgGlow} ${item.borderGlow} ring-2 ring-teal-500/30 shadow-xs scale-[1.01]`
+                  : "bg-slate-50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
               }`}
             >
-              <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 mb-1">
+              <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 dark:text-slate-400 mb-1">
                 <span>Stage {idx + 1}</span>
-                {isSelected && <span className="text-teal-400 font-bold">ACTIVE</span>}
+                {isSelected && <span className="text-teal-600 dark:text-teal-400 font-bold">ACTIVE</span>}
               </div>
-              <h4 className="text-sm font-bold text-white leading-tight">
+              <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-tight">
                 {item.name}
               </h4>
-              <p className="text-[11px] text-slate-400 mt-1 line-clamp-1">
+              <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-1">
                 {item.subtitle}
               </p>
             </button>
@@ -144,49 +144,49 @@ export default function EvolutionComparisonVisualizer() {
       <AnimatePresence mode="wait">
         <motion.div
           key={active.id}
-          initial={{ opacity: 0, y: 8 }}
+          initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
+          exit={{ opacity: 0, y: -6 }}
           transition={{ duration: 0.2 }}
-          className={`rounded-xl border ${active.borderGlow} ${active.bgGlow} p-5 space-y-4`}
+          className={`rounded-2xl border ${active.borderGlow} ${active.bgGlow} p-4 sm:p-5 space-y-3.5 sm:space-y-4`}
         >
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-800">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
             <div>
-              <span className="text-xs font-mono text-slate-400 uppercase tracking-wider">
+              <span className="text-[10px] sm:text-xs font-mono text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 {active.badge}
               </span>
-              <h4 className="text-lg font-bold text-white flex items-center gap-2">
+              <h4 className="text-sm sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 {active.name}
               </h4>
             </div>
 
-            <div className="text-xs font-mono text-slate-300 bg-slate-900/80 px-3 py-1.5 rounded-lg border border-slate-800 self-start sm:self-center">
+            <div className="text-[11px] sm:text-xs font-mono text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-900/80 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 self-start sm:self-center shadow-2xs">
               {active.latencyCost}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs md:text-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3 text-xs sm:text-sm">
             {/* Best For Box */}
-            <div className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-850">
-              <span className="text-xs font-bold text-teal-400 uppercase tracking-wider block font-mono mb-1">
+            <div className="p-3 sm:p-3.5 rounded-xl bg-white dark:bg-slate-950/70 border border-slate-200 dark:border-slate-850 shadow-2xs">
+              <span className="text-[11px] font-bold text-teal-700 dark:text-teal-400 uppercase tracking-wider block font-mono mb-1">
                 🎯 Best Use Cases:
               </span>
-              <p className="text-slate-300 leading-relaxed">{active.bestFor}</p>
+              <p className="text-slate-700 dark:text-slate-300 leading-relaxed text-xs sm:text-sm">{active.bestFor}</p>
             </div>
 
             {/* Analogy Box */}
-            <div className="p-3.5 rounded-xl bg-slate-950/70 border border-slate-850">
-              <span className="text-xs font-bold text-amber-300 uppercase tracking-wider block font-mono mb-1">
+            <div className="p-3 sm:p-3.5 rounded-xl bg-white dark:bg-slate-950/70 border border-slate-200 dark:border-slate-850 shadow-2xs">
+              <span className="text-[11px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider block font-mono mb-1">
                 💡 Real-World Analogy:
               </span>
-              <p className="text-slate-300 leading-relaxed">{active.analogy}</p>
+              <p className="text-slate-700 dark:text-slate-300 leading-relaxed text-xs sm:text-sm">{active.analogy}</p>
             </div>
           </div>
 
           {/* Example Demonstration */}
-          <div className="p-3 rounded-xl bg-slate-950 border border-slate-850 font-mono text-xs">
-            <span className="text-sky-400 font-bold block mb-1">Practical Example Flow:</span>
-            <code className="text-slate-300 block">{active.example}</code>
+          <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs">
+            <span className="text-sky-400 font-bold block mb-1 text-[11px]">Practical Example Flow:</span>
+            <code className="text-slate-200 block text-xs break-words">{active.example}</code>
           </div>
         </motion.div>
       </AnimatePresence>

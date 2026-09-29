@@ -107,37 +107,37 @@ export default function Module1_2Quiz() {
   const score = calculateScore();
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-950 p-5 md:p-8 shadow-2xl">
+    <div className="rounded-2xl sm:rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6 shadow-xs">
       {/* Quiz Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-6 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 sm:pb-5 border-b border-slate-200 dark:border-slate-800">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-teal-400 px-2.5 py-0.5 rounded-full bg-teal-500/10 border border-teal-500/30">
+            <span className="text-[10px] sm:text-xs font-mono font-bold uppercase tracking-wider text-teal-700 dark:text-teal-400 px-2.5 py-0.5 rounded-full bg-teal-50 dark:bg-teal-500/10 border border-teal-200 dark:border-teal-500/30">
               Interactive Checkpoint
             </span>
-            <span className="text-xs font-mono text-slate-500">
+            <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
               {answeredCount}/{QUESTIONS.length} Answered
             </span>
           </div>
-          <h3 className="text-xl md:text-2xl font-bold text-white mt-1">
+          <h3 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-white mt-1">
             Module 1.2 Knowledge Check
           </h3>
-          <p className="text-xs md:text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
             Test your understanding of prompts, chains, autonomous agents, and context engineering.
           </p>
         </div>
 
         {submitted && (
-          <div className="flex items-center gap-3">
-            <div className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-mono">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-mono">
               Score:{" "}
-              <strong className={score === QUESTIONS.length ? "text-emerald-400" : "text-amber-400"}>
+              <strong className={score === QUESTIONS.length ? "text-emerald-600 dark:text-emerald-400 font-bold" : "text-amber-600 dark:text-amber-400 font-bold"}>
                 {score} / {QUESTIONS.length}
               </strong>
             </div>
             <button
               onClick={handleReset}
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+              className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition cursor-pointer active:scale-95"
               title="Retake Quiz"
             >
               <RotateCcw className="w-4 h-4" />
@@ -147,35 +147,34 @@ export default function Module1_2Quiz() {
       </div>
 
       {/* Questions List */}
-      <div className="space-y-6 mt-6">
+      <div className="space-y-4 sm:space-y-6">
         {QUESTIONS.map((q, qIndex) => {
-          const isAnswered = selectedAnswers[q.id] !== undefined;
           const selectedOption = selectedAnswers[q.id];
           const isCorrect = selectedOption === q.correctIndex;
 
           return (
             <div
               key={q.id}
-              className={`p-4 md:p-5 rounded-xl border transition-all ${
+              className={`p-3.5 sm:p-5 rounded-xl sm:rounded-2xl border transition-all ${
                 submitted
                   ? isCorrect
-                    ? "bg-emerald-950/20 border-emerald-500/40"
-                    : "bg-red-950/20 border-red-500/40"
-                  : "bg-slate-900/40 border-slate-800 hover:border-slate-750"
+                    ? "bg-emerald-50/60 dark:bg-emerald-950/20 border-emerald-300 dark:border-emerald-500/40"
+                    : "bg-red-50/60 dark:bg-red-950/20 border-red-300 dark:border-red-500/40"
+                  : "bg-slate-50/70 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800"
               }`}
             >
               {/* Question Title */}
-              <div className="flex items-start gap-3">
-                <span className="w-6 h-6 rounded-lg bg-slate-800 text-teal-400 font-mono text-xs flex items-center justify-center shrink-0 mt-0.5">
+              <div className="flex items-start gap-2.5 sm:gap-3">
+                <span className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-teal-100 dark:bg-teal-500/20 text-teal-700 dark:text-teal-400 font-mono text-xs flex items-center justify-center shrink-0 mt-0.5 font-bold">
                   Q{qIndex + 1}
                 </span>
                 <div className="flex-1">
-                  <h4 className="text-sm md:text-base font-bold text-white">
+                  <h4 className="text-xs sm:text-base font-bold text-slate-900 dark:text-white leading-snug">
                     {q.question}
                   </h4>
                   {q.contextHint && (
-                    <p className="text-xs text-slate-400 mt-1 italic flex items-center gap-1">
-                      <HelpCircle className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                    <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1 italic flex items-center gap-1">
+                      <HelpCircle className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                       {q.contextHint}
                     </p>
                   )}
@@ -183,21 +182,21 @@ export default function Module1_2Quiz() {
               </div>
 
               {/* Options */}
-              <div className="grid grid-cols-1 gap-2 mt-4">
+              <div className="grid grid-cols-1 gap-2 mt-3 sm:mt-4">
                 {q.options.map((opt, optIdx) => {
                   const isThisSelected = selectedOption === optIdx;
-                  let optStyle = "bg-slate-950/70 border-slate-800 text-slate-300 hover:bg-slate-900 hover:border-slate-700";
+                  let optStyle = "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100/60 dark:hover:bg-slate-900 hover:border-slate-300 dark:hover:border-slate-700";
 
                   if (submitted) {
                     if (optIdx === q.correctIndex) {
-                      optStyle = "bg-emerald-950/70 border-emerald-500 text-emerald-200 font-medium";
+                      optStyle = "bg-emerald-50 dark:bg-emerald-950/70 border-emerald-500 text-emerald-950 dark:text-emerald-200 font-medium";
                     } else if (isThisSelected && !isCorrect) {
-                      optStyle = "bg-red-950/70 border-red-500 text-red-200";
+                      optStyle = "bg-red-50 dark:bg-red-950/70 border-red-500 text-red-950 dark:text-red-200";
                     } else {
-                      optStyle = "bg-slate-950/40 border-slate-850 text-slate-500 opacity-60";
+                      optStyle = "bg-slate-50 dark:bg-slate-950/40 border-slate-200 dark:border-slate-850 text-slate-400 dark:text-slate-500 opacity-60";
                     }
                   } else if (isThisSelected) {
-                    optStyle = "bg-teal-500/15 border-teal-500 text-teal-200 font-medium shadow-sm";
+                    optStyle = "bg-teal-50 dark:bg-teal-500/15 border-teal-500 text-teal-950 dark:text-teal-200 font-medium shadow-xs";
                   }
 
                   return (
@@ -205,9 +204,9 @@ export default function Module1_2Quiz() {
                       key={optIdx}
                       disabled={submitted}
                       onClick={() => handleSelect(q.id, optIdx)}
-                      className={`p-3 rounded-lg border text-left text-xs md:text-sm flex items-start gap-2.5 transition-all ${optStyle}`}
+                      className={`p-2.5 sm:p-3 rounded-xl border text-left text-xs sm:text-sm flex items-start gap-2.5 transition-all cursor-pointer active:scale-[0.99] touch-manipulation ${optStyle}`}
                     >
-                      <span className="w-5 h-5 rounded-full border border-current shrink-0 flex items-center justify-center text-[10px] font-mono mt-0.5">
+                      <span className="w-5 h-5 rounded-md bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shrink-0 flex items-center justify-center text-[10px] font-mono mt-0.5 font-bold text-slate-700 dark:text-slate-300">
                         {String.fromCharCode(65 + optIdx)}
                       </span>
                       <span className="flex-1 leading-snug">{opt}</span>
@@ -219,16 +218,16 @@ export default function Module1_2Quiz() {
               {/* Post-Submit Explanation */}
               {submitted && (
                 <div
-                  className={`mt-4 p-3 rounded-lg text-xs leading-relaxed font-mono flex items-start gap-2 ${
+                  className={`mt-3 sm:mt-4 p-3 rounded-xl text-xs leading-relaxed font-mono flex items-start gap-2 ${
                     isCorrect
-                      ? "bg-emerald-950/40 border border-emerald-500/30 text-emerald-300"
-                      : "bg-red-950/40 border border-red-500/30 text-red-300"
+                      ? "bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-500/30 text-emerald-900 dark:text-emerald-300"
+                      : "bg-red-50 dark:bg-red-950/40 border border-red-300 dark:border-red-500/30 text-red-900 dark:text-red-300"
                   }`}
                 >
                   {isCorrect ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
                   ) : (
-                    <XCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                    <XCircle className="w-4 h-4 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
                   )}
                   <div>
                     <span className="font-bold block mb-1">
@@ -245,18 +244,18 @@ export default function Module1_2Quiz() {
 
       {/* Submit Button Bar */}
       {!submitted && (
-        <div className="mt-6 pt-5 border-t border-slate-800 flex justify-end">
+        <div className="pt-2 sm:pt-3">
           <button
             onClick={handleSubmit}
             disabled={!allAnswered}
-            className={`px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all ${
+            className={`w-full py-3 rounded-xl font-bold text-xs sm:text-sm tracking-wide transition flex items-center justify-center gap-2 active:scale-[0.99] touch-manipulation ${
               allAnswered
-                ? "bg-teal-500 hover:bg-teal-400 text-slate-950 shadow-lg shadow-teal-500/20"
-                : "bg-slate-800 text-slate-500 cursor-not-allowed"
+                ? "bg-teal-600 hover:bg-teal-500 text-white shadow-md shadow-teal-600/20 cursor-pointer"
+                : "bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed"
             }`}
           >
             <Award className="w-4 h-4" />
-            Submit Answers ({answeredCount}/{QUESTIONS.length})
+            <span>Check My Answers ({answeredCount}/{QUESTIONS.length})</span>
           </button>
         </div>
       )}
